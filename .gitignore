@@ -1,0 +1,27 @@
+# Secrets — never commit
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+
+# Node / Hardhat
+node_modules/
+contracts/artifacts/
+contracts/cache/
+contracts/types/
+contracts/coverage/
+contracts/deployments/localhost.json
+contracts/deployments/default.json
+
+# Frontend build
+frontend/dist/
+
+# OS / editors
+.DS_Store
+.vscode/
+.idea/
