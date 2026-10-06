@@ -1,176 +1,247 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { TARGET_BUYERS } from '../constants/mockData';
-import { KeyRound, FileText, X, CheckCircle2 } from 'lucide-react';
+import { CadastreDatabaseService } from '../services/databaseService';
+import { 
+  Building2, 
+  KeyRound, 
+  FileText, 
+  Search, 
+  CheckCircle2, 
+  ShieldAlert, 
+  ArrowRight,
+  X,
+  ExternalLink,
+  Layers,
+  MapPin
+} from 'lucide-react';
 
 export function CitizenPropertiesPage() {
-  const { parcels, generateSellToken, sellTokens } = useAuth();
-  const [selectedBuyer, setSelectedBuyer] = useState(TARGET_BUYERS[0].id);
+  const { parcels, allParcels, currentUser, generateSellToken, sellTokens } = useAuth();
+  const navigate = useNavigate();
+  const targetBuyers = CadastreDatabaseService.getTargetBuyers();
+
+  const [filterMode, setFilterMode] = useState('MINE'); // 'MINE' | 'ALL'
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   const [modalParcel, setModalParcel] = useState(null);
-  const [actionType, setActionType] = useState('token');
+  const [actionType, setActionType] = useState('token'); // 'token' | 'deed'
+  const [selectedBuyer, setSelectedBuyer] = useState(targetBuyers[0]?.id || 'USR-BUY-001');
   const [issuedToken, setIssuedToken] = useState(null);
 
-  const handleGenerateClick = (parcel) => {
+  const displayList = filterMode === 'MINE' ? parcels : allParcels;
+
+  const filtered = displayList.filter((p) => {
+    const matchesSearch = 
+      p.id.toLowerCase().includes(search.toLowerCase()) ||
+      p.currentOwner?.toLowerCase().includes(search.toLowerCase()) ||
+      p.surveyNumber?.toLowerCase().includes(search.toLowerCase());
+
+    const matchesStatus = statusFilter === 'ALL' || p.titleStatus === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
+  const handleIssueTokenClick = (parcel) => {
     setModalParcel(parcel);
     setActionType('token');
     setIssuedToken(null);
   };
 
-  const handleDeedClick = (parcel) => {
+  const handleViewDeedClick = (parcel) => {
     setModalParcel(parcel);
     setActionType('deed');
   };
 
   const confirmGenerateToken = () => {
-    const buyerObj = TARGET_BUYERS.find((b) => b.id === selectedBuyer) || TARGET_BUYERS[0];
-    const tok = generateSellToken(modalParcel.id, buyerObj.id, buyerObj.name);
+    const b = targetBuyers.find(x => x.id === selectedBuyer) || targetBuyers[0];
+    const tok = generateSellToken(modalParcel.id, b.id, b.name);
     setIssuedToken(tok);
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-6">
       
-      {/* 1. Header Bar */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">
-            My Registered Properties & Transfer Authorization
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+            My Registered Properties
           </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Review cadastral titles, consent to conveyance petitions, and issue single-use cryptographic Sell Tokens.
+          <p className="text-xs text-slate-500 mt-1">
+            Browse owned titles, Record of Rights (RoR), and generate cryptographic Sell Tokens.
           </p>
         </div>
 
-        <Link
-          to="/citizen/tokens"
-          className="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-medium text-slate-700 dark:text-slate-200 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 transition-colors whitespace-nowrap self-start sm:self-auto cursor-pointer"
+        <button
+          type="button"
+          onClick={() => navigate('/citizen/transactions?tab=tokens')}
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200/80 shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
         >
-          <KeyRound className="w-3.5 h-3.5 text-orange-500 dark:text-orange-400" />
-          <span>View All Sell Tokens ({sellTokens.length})</span>
-        </Link>
+          <KeyRound className="w-3.5 h-3.5 text-orange-500" />
+          <span>Active Sell Tokens ({sellTokens.length})</span>
+        </button>
       </div>
 
-      {/* 2. Target Buyer Bar */}
-      <div className="glass-panel rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs border border-slate-200/80 dark:border-white/10">
-        <div className="flex items-center gap-2 text-slate-800 dark:text-slate-200 font-medium">
-          <KeyRound className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-          <span>Target Buyer for Sell Token Issuance:</span>
-        </div>
+      {/* Filters and Search Bar */}
+      <div className="bg-white rounded-2xl p-4 border border-slate-100 shadow-[0_2px_10px_-3px_rgba(0,0,0,0.03)] flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+        
+        {/* Toggle Pills */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex rounded-xl bg-slate-100 p-0.5 border border-slate-200/60 font-semibold">
+            <button
+              type="button"
+              onClick={() => setFilterMode('MINE')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filterMode === 'MINE'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              My Parcels ({parcels.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterMode('ALL')}
+              className={`px-3 py-1.5 rounded-lg transition-all cursor-pointer ${
+                filterMode === 'ALL'
+                  ? 'bg-white text-slate-900 shadow-xs'
+                  : 'text-slate-500 hover:text-slate-900'
+              }`}
+            >
+              All Registry ({allParcels.length})
+            </button>
+          </div>
 
-        <div className="sm:w-72">
           <select
-            value={selectedBuyer}
-            onChange={(e) => setSelectedBuyer(e.target.value)}
-            className="w-full px-3 py-2 text-xs font-medium rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-medium focus:outline-none"
           >
-            {TARGET_BUYERS.map((b) => (
-              <option key={b.id} value={b.id}>
-                {b.name} ({b.id})
-              </option>
-            ))}
+            <option value="ALL">All Statuses</option>
+            <option value="VERIFIED">VERIFIED</option>
+            <option value="VERIFIED_WITH_ENCUMBRANCE">ENCUMBERED</option>
+            <option value="DISPUTED">DISPUTED</option>
+            <option value="FROZEN">FROZEN</option>
+            <option value="REVIEW">REVIEW</option>
           </select>
         </div>
+
+        {/* Search */}
+        <div className="relative md:w-72">
+          <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by ULPIN, owner, survey..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-8 pr-3 py-1.5 text-xs rounded-xl border border-slate-200 bg-white text-slate-800 placeholder-slate-400 focus:outline-none focus:border-sky-500 font-medium"
+          />
+        </div>
       </div>
 
-      {/* 3. Parcel Property Cards List */}
-      <div className="space-y-2.5">
-        {parcels.map((p) => {
-          const isFlagged = p.status === 'FROZEN' || p.status === 'SUCCESSION PENDING';
+      {/* Parcels Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {filtered.length === 0 ? (
+          <div className="col-span-2 bg-white rounded-3xl p-12 text-center text-xs text-slate-500 border border-slate-100 shadow-sm">
+            No parcels match your search query.
+          </div>
+        ) : (
+          filtered.map((p) => {
+            const isFrozen = p.frozen || p.titleStatus === 'FROZEN';
 
-          return (
-            <div
-              key={p.id}
-              className="glass-panel rounded-xl p-4 border border-slate-200/80 dark:border-white/10 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs"
-            >
-              {/* Left Property Metadata */}
-              <div className="space-y-1">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono font-semibold text-slate-900 dark:text-white">
-                    {p.title}
-                  </span>
+            return (
+              <div
+                key={p.id}
+                className="bg-white rounded-3xl p-5 border border-slate-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.03)] space-y-3.5 text-xs hover:border-slate-200 transition-all"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono font-bold text-slate-900 text-sm">
+                        {p.id}
+                      </span>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          p.statusVariant === 'success'
+                            ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60'
+                            : p.statusVariant === 'warning'
+                            ? 'bg-amber-50 text-amber-700 border border-amber-200/60'
+                            : 'bg-rose-50 text-rose-700 border border-rose-200/60'
+                        }`}
+                      >
+                        {p.status}
+                      </span>
+                    </div>
 
-                  {/* Status Badge */}
-                  <span
-                    className={`px-2 py-0.5 rounded text-[10px] font-medium border ${
-                      p.status === 'VERIFIED'
-                        ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
-                        : p.status === 'DISPUTED'
-                        ? 'bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/30'
-                        : p.status === 'FROZEN'
-                        ? 'bg-red-500/10 text-red-700 dark:text-red-400 border-red-500/30'
-                        : p.status.includes('ENCUMBRANCE')
-                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/30'
-                        : 'bg-yellow-500/10 text-yellow-700 dark:text-yellow-400 border-yellow-500/30'
-                    }`}
-                  >
-                    • {p.status}
-                  </span>
+                    <div className="text-[11px] text-slate-500 mt-1">
+                      Survey #{p.surveyNumber} • Registered Owner: <strong className="text-slate-800">{p.currentOwner}</strong>
+                    </div>
+                  </div>
 
-                  <span className="text-slate-500 dark:text-slate-400">
-                    Health: <strong className="text-slate-800 dark:text-slate-200 font-mono">{p.health}</strong>
-                  </span>
+                  <div className="text-right">
+                    <span className="font-mono font-bold text-slate-900 text-sm block">
+                      {p.areaSqm?.toLocaleString()} m²
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-medium">
+                      {p.registrationOffice}
+                    </span>
+                  </div>
                 </div>
 
-                <div className="text-slate-500 dark:text-slate-400 flex items-center gap-3 flex-wrap text-[11px]">
-                  <span>Survey: <strong className="text-slate-700 dark:text-slate-300 font-mono">{p.surveyNumber}</strong></span>
-                  <span>Area: <strong className="text-slate-700 dark:text-slate-300 font-mono">{p.areaSqm.toLocaleString()} m²</strong></span>
-                  {p.tenure && <span>Tenure: <strong className="text-slate-700 dark:text-slate-300">{p.tenure}</strong></span>}
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-shrink-0 mt-2 md:mt-0">
-                <button
-                  type="button"
-                  onClick={() => handleDeedClick(p)}
-                  className="flex-1 sm:flex-initial px-3 py-1.5 rounded-lg text-slate-700 dark:text-slate-300 bg-white dark:bg-white/5 hover:bg-slate-100 dark:hover:bg-white/10 border border-slate-200 dark:border-white/10 transition-colors cursor-pointer text-center"
-                >
-                  Full Deed Record →
-                </button>
-
-                <button
-                  type="button"
-                  disabled={isFlagged}
-                  onClick={() => handleGenerateClick(p)}
-                  className={`flex-1 sm:flex-initial px-3 py-1.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-1.5 cursor-pointer text-center ${
-                    isFlagged
-                      ? 'bg-slate-100 dark:bg-white/5 text-slate-400 dark:text-slate-500 cursor-not-allowed border border-slate-200 dark:border-white/5'
-                      : 'bg-sky-600 hover:bg-sky-500 text-white shadow-xs'
-                  }`}
-                >
-                  <KeyRound className="w-3.5 h-3.5" />
-                  <span>Generate Sell Token</span>
-                </button>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* MODAL */}
-      {modalParcel && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="glass-panel rounded-xl max-w-lg w-full p-5 sm:p-6 shadow-xl border border-slate-200 dark:border-white/10">
-            
-            <div className="flex items-center justify-between pb-3 border-b border-slate-200 dark:border-white/10">
-              <h3 className="font-semibold text-slate-900 dark:text-white text-sm flex items-center gap-2">
-                {actionType === 'token' ? (
-                  <>
-                    <KeyRound className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                    Issue Single-Use Cryptographic Sell Token
-                  </>
-                ) : (
-                  <>
-                    <FileText className="w-4 h-4 text-sky-600 dark:text-sky-400" />
-                    Full Cadastral Deed Record
-                  </>
+                {/* Encumbrance / Dispute badges */}
+                {p.encumbranceDetails && (
+                  <div className="p-2.5 rounded-xl bg-amber-50/70 border border-amber-100 text-[11px] text-amber-800">
+                    ⚠️ <strong>Active Encumbrance:</strong> {p.encumbranceDetails}
+                  </div>
                 )}
+                {p.disputeDetails && (
+                  <div className="p-2.5 rounded-xl bg-rose-50/70 border border-rose-100 text-[11px] text-rose-800">
+                    🚫 <strong>Active Dispute:</strong> {p.disputeDetails}
+                  </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                  <button
+                    type="button"
+                    onClick={() => handleViewDeedClick(p)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-slate-700 bg-slate-100 hover:bg-slate-200 font-semibold transition-colors cursor-pointer"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>View Record of Rights</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    disabled={isFrozen}
+                    onClick={() => handleIssueTokenClick(p)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-semibold text-white bg-[#2563eb] hover:bg-blue-700 transition-colors shadow-xs disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                  >
+                    <KeyRound className="w-3.5 h-3.5" />
+                    <span>Issue Sell Token</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+
+      {/* Modal View */}
+      {modalParcel && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/40 backdrop-blur-xs">
+          <div className="bg-white max-w-lg w-full rounded-3xl p-6 shadow-2xl border border-slate-100 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold text-slate-900 text-sm">
+                {actionType === 'token'
+                  ? `Generate Sell Token • ${modalParcel.id}`
+                  : `Record of Rights • ${modalParcel.id}`}
               </h3>
               <button
+                type="button"
                 onClick={() => setModalParcel(null)}
-                className="text-slate-400 hover:text-slate-700 dark:hover:text-white p-1 cursor-pointer"
+                className="text-slate-400 hover:text-slate-700 cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -178,106 +249,93 @@ export function CitizenPropertiesPage() {
 
             {actionType === 'token' ? (
               !issuedToken ? (
-                <div className="py-4 space-y-3.5 text-xs">
-                  <div className="p-3 bg-slate-50 dark:bg-white/[0.03] rounded-lg border border-slate-200 dark:border-white/5 space-y-1">
-                    <div className="text-slate-900 dark:text-white"><strong>Selected Title:</strong> {modalParcel.id}</div>
-                    <div className="text-slate-500 dark:text-slate-400">Survey: {modalParcel.surveyNumber} • Area: {modalParcel.areaSqm} m²</div>
-                  </div>
-
-                  <div>
-                    <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                      Recipient Buyer:
-                    </label>
-                    <div className="p-2.5 bg-sky-500/10 border border-sky-500/20 rounded-lg text-sky-800 dark:text-sky-200 font-medium">
-                      {TARGET_BUYERS.find((b) => b.id === selectedBuyer)?.name} ({selectedBuyer})
-                    </div>
-                  </div>
-
-                  <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
-                    By confirming, you cryptographically sign this sell authorization. The buyer will receive a 48-hour window to submit an on-chain transfer petition.
+                <div className="space-y-3 text-xs">
+                  <p className="text-slate-600">
+                    Authorize a prospective buyer to submit a transfer petition for parcel <strong>{modalParcel.id}</strong>.
                   </p>
-
-                  <div className="pt-2 flex justify-end gap-2">
-                    <button
-                      onClick={() => setModalParcel(null)}
-                      className="px-3.5 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 cursor-pointer"
+                  <div>
+                    <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">
+                      Target Buyer
+                    </label>
+                    <select
+                      value={selectedBuyer}
+                      onChange={(e) => setSelectedBuyer(e.target.value)}
+                      className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-800 text-xs focus:outline-none focus:border-sky-500 font-medium"
                     >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={confirmGenerateToken}
-                      className="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium flex items-center gap-1.5 cursor-pointer"
-                    >
-                      <KeyRound className="w-3.5 h-3.5" />
-                      Sign & Issue Token
-                    </button>
+                      {targetBuyers.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.name} ({b.id})
+                        </option>
+                      ))}
+                    </select>
                   </div>
+                  <button
+                    type="button"
+                    onClick={confirmGenerateToken}
+                    className="w-full py-2.5 rounded-xl font-bold text-white bg-[#2563eb] hover:bg-blue-700 shadow-xs cursor-pointer"
+                  >
+                    Generate HMAC-SHA256 Token
+                  </button>
                 </div>
               ) : (
-                <div className="py-4 space-y-3 text-center text-xs">
-                  <CheckCircle2 className="w-8 h-8 text-emerald-500 dark:text-emerald-400 mx-auto" />
-                  <h4 className="font-semibold text-slate-900 dark:text-white text-sm">Sell Token Generated!</h4>
-                  <div className="p-3 bg-slate-50 dark:bg-black/40 rounded-lg text-left font-mono space-y-1 text-[11px] border border-slate-200 dark:border-white/5">
-                    <div><strong className="text-slate-500 dark:text-slate-400">Token ID:</strong> <span className="text-emerald-600 dark:text-emerald-400">{issuedToken.tokenId}</span></div>
-                    <div><strong className="text-slate-500 dark:text-slate-400">Target Buyer:</strong> <span className="text-slate-800 dark:text-slate-200">{issuedToken.buyerName}</span></div>
-                    <div><strong className="text-slate-500 dark:text-slate-400">Signature:</strong> <span className="text-sky-600 dark:text-sky-400">{issuedToken.signature}</span></div>
-                    <div><strong className="text-slate-500 dark:text-slate-400">Status:</strong> <span className="text-amber-600 dark:text-amber-400">Active (Expires in 48h)</span></div>
+                <div className="space-y-3 text-xs">
+                  <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200/80 text-emerald-800 space-y-2">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Sell Token Generated Successfully</span>
+                    </div>
+                    <div className="font-mono text-xs break-all bg-white p-2.5 rounded-xl border border-emerald-200 text-slate-900 font-semibold">
+                      {issuedToken.tokenId}
+                    </div>
                   </div>
-                  <div className="pt-2">
-                    <button
-                      onClick={() => setModalParcel(null)}
-                      className="px-4 py-2 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-medium cursor-pointer"
-                    >
-                      Done
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setModalParcel(null)}
+                    className="w-full py-2 rounded-xl font-semibold bg-slate-100 text-slate-700 cursor-pointer"
+                  >
+                    Close
+                  </button>
                 </div>
               )
             ) : (
-              <div className="py-4 space-y-3 text-xs">
-                <div className="grid grid-cols-2 gap-2.5 p-3 bg-slate-50 dark:bg-white/[0.03] rounded-lg border border-slate-200 dark:border-white/5">
+              <div className="space-y-3 text-xs max-h-[65vh] overflow-y-auto pr-1">
+                <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-2xl border border-slate-100 font-mono text-[11px]">
                   <div>
-                    <span className="text-slate-500 dark:text-slate-400 text-[11px]">Tenure</span>
-                    <div className="font-medium text-slate-900 dark:text-white mt-0.5">{modalParcel.tenure || 'SOLE'}</div>
+                    <span className="text-slate-400 font-sans block">Current Owner:</span>
+                    <span className="text-slate-900 font-bold">{modalParcel.currentOwner}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 dark:text-slate-400 text-[11px]">Health Score</span>
-                    <div className="font-mono text-slate-900 dark:text-white mt-0.5">{modalParcel.healthScore} / 100</div>
+                    <span className="text-slate-400 font-sans block">Registered Area:</span>
+                    <span className="text-slate-900 font-bold">{modalParcel.areaSqm} m²</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 dark:text-slate-400 text-[11px]">Primary Titleholder</span>
-                    <div className="font-medium text-slate-900 dark:text-white mt-0.5">{modalParcel.primaryOwner}</div>
+                    <span className="text-slate-400 font-sans block">Survey Number:</span>
+                    <span className="text-slate-900 font-bold">{modalParcel.surveyNumber}</span>
                   </div>
                   <div>
-                    <span className="text-slate-500 dark:text-slate-400 text-[11px]">Area</span>
-                    <div className="font-mono text-slate-900 dark:text-white mt-0.5">{modalParcel.areaSqm} m²</div>
+                    <span className="text-slate-400 font-sans block">Sub-Registrar:</span>
+                    <span className="text-slate-900 font-bold">{modalParcel.registrationOffice}</span>
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-[11px] font-mono text-slate-500 dark:text-slate-400">Deed Hash:</span>
-                  <div className="p-2.5 rounded bg-slate-900 text-emerald-400 font-mono text-[11px] break-all border border-slate-800">
-                    {modalParcel.deedHash}
+                  <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-1">
+                    Conveyance Chain ({modalParcel.transferHistory?.length || 0})
+                  </span>
+                  <div className="space-y-1">
+                    {(modalParcel.transferHistory || []).map((h, idx) => (
+                      <div key={idx} className="p-2.5 rounded-xl bg-slate-50 border border-slate-100 text-[11px]">
+                        <div className="flex items-center justify-between text-slate-900 font-medium">
+                          <span>{h.from} ➔ {h.to}</span>
+                          <span className="font-mono text-[10px] text-slate-400">{h.date}</span>
+                        </div>
+                        <div className="font-mono text-[10px] text-slate-500 truncate">Doc Hash: {h.doc_hash}</div>
+                      </div>
+                    ))}
                   </div>
-                </div>
-
-                {modalParcel.encumbranceDetails && (
-                  <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-700 dark:text-amber-300">
-                    <strong>Encumbrance Notice:</strong> {modalParcel.encumbranceDetails}
-                  </div>
-                )}
-
-                <div className="pt-2 flex justify-end">
-                  <button
-                    onClick={() => setModalParcel(null)}
-                    className="px-3.5 py-1.5 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 dark:hover:bg-white/10 text-slate-700 dark:text-slate-300 font-medium cursor-pointer"
-                  >
-                    Close Record
-                  </button>
                 </div>
               </div>
             )}
-
           </div>
         </div>
       )}

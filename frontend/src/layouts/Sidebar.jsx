@@ -1,78 +1,127 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
-  LayoutDashboard, 
-  Building2, 
-  Users2, 
-  ShoppingBag, 
-  ArrowLeftRight, 
-  KeyRound, 
-  GitFork, 
-  ShieldAlert, 
-  Bell, 
-  UserCheck,
-  PhoneCall
+  Home, 
+  FileText, 
+  FolderSync, 
+  Map, 
+  Headphones, 
+  ExternalLink,
+  ShieldCheck,
+  CheckCircle2
 } from 'lucide-react';
-
-const MENU_ITEMS = [
-  { label: 'Dashboard', path: '/citizen/dashboard', icon: LayoutDashboard },
-  { label: 'My Properties', path: '/citizen/properties', icon: Building2 },
-  { label: 'Associated (Nominee)', path: '/citizen/nominees', icon: Users2 },
-  { label: 'Purchases & Deeds', path: '/citizen/deeds', icon: ShoppingBag },
-  { label: 'Transfers & Petitions', path: '/citizen/transfers', icon: ArrowLeftRight },
-  { label: 'Sell Tokens', path: '/citizen/tokens', icon: KeyRound },
-  { label: 'Succession & Heirs', path: '/citizen/succession', icon: GitFork },
-  { label: 'Key Recovery', path: '/citizen/recovery', icon: ShieldAlert },
-  { label: 'Notifications', path: '/citizen/notifications', icon: Bell },
-  { label: 'Profile & Identity', path: '/citizen/profile', icon: UserCheck },
-];
+import { useAuth } from '../hooks/useAuth';
 
 export function Sidebar() {
+  const { userTransfers } = useAuth();
+
+  const navItems = [
+    { label: 'Dashboard', path: '/citizen/dashboard', icon: Home },
+    { label: 'My Properties', path: '/citizen/properties', icon: FileText },
+    { 
+      label: 'Transactions', 
+      path: '/citizen/transactions', 
+      icon: FolderSync,
+      badge: userTransfers.length > 0 ? userTransfers.length : null
+    },
+    { label: 'Parcel Explorer', path: '/citizen/map', icon: Map },
+  ];
+
   return (
-    <aside className="hidden md:block w-56 lg:w-60 flex-shrink-0">
-      <div className="glass-sidebar rounded-2xl p-3.5 sticky top-20 lg:top-24 max-h-[calc(100vh-6rem)] overflow-y-auto">
-        <div className="px-3 py-2 text-[10px] font-semibold tracking-wider text-slate-500 dark:text-slate-400 uppercase">
-          Citizen Menu
+    <aside className="w-full md:w-64 md:h-screen md:sticky md:top-0 z-30 flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/70 backdrop-blur-xl border-r border-white/60 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] md:overflow-y-auto no-scrollbar transition-all">
+      <div>
+        {/* Brand Header */}
+        <div className="flex items-center gap-3 px-2 mb-8">
+          <div className="w-10 h-10 rounded-2xl bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_2px_10px_-2px_rgba(14,165,233,0.15)] flex items-center justify-center p-2">
+            <svg viewBox="0 0 32 32" fill="none" className="w-full h-full text-sky-500">
+              <path d="M16 4L4 10L16 16L28 10L16 4Z" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M4 16L16 22L28 16" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M4 22L16 28L28 22" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+          <div>
+            <div className="text-base font-bold text-slate-900 tracking-tight leading-none flex items-center gap-1.5">
+              <span>TitleLock</span>
+            </div>
+            <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase mt-1 block">
+              Citizen Portal
+            </span>
+          </div>
         </div>
 
-        <nav className="mt-1 space-y-0.5">
-          {MENU_ITEMS.map((item) => {
+        {/* Section Title */}
+        <div className="px-3 mb-2.5">
+          <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase font-sans">
+            Land Records & Titles
+          </span>
+        </div>
+
+        {/* Nav Links */}
+        <nav className="space-y-1">
+          {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all cursor-pointer ${
+                  `group relative flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
                     isActive
-                      ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/20 shadow-xs'
-                      : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/5'
+                      ? 'bg-white/90 text-slate-900 shadow-[0_4px_16px_-2px_rgba(0,0,0,0.06)] border border-white/90 backdrop-blur-md'
+                      : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
                   }`
                 }
               >
                 {({ isActive }) => (
                   <>
-                    <Icon className={`w-4 h-4 ${isActive ? 'text-sky-600 dark:text-sky-400' : 'text-slate-500 dark:text-slate-400'}`} />
-                    <span className="truncate">{item.label}</span>
+                    <div className="flex items-center gap-3">
+                      {/* Active Left Pill Indicator */}
+                      {isActive && (
+                        <span className="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-[#f97316]" />
+                      )}
+                      <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-slate-800' : 'text-slate-400 group-hover:text-slate-700'}`} />
+                      <span>{item.label}</span>
+                    </div>
+
+                    {item.badge && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-slate-100/80 text-slate-600 font-semibold border border-slate-200/50">
+                        {item.badge}
+                      </span>
+                    )}
                   </>
                 )}
               </NavLink>
             );
           })}
         </nav>
+      </div>
 
-        {/* Assistance box */}
-        <div className="mt-5 p-3.5 rounded-xl glass-panel-subtle text-xs text-slate-500 dark:text-slate-400">
-          <div className="flex items-center gap-2 text-slate-900 dark:text-slate-200 font-medium text-xs mb-1">
-            <PhoneCall className="w-3.5 h-3.5 text-sky-500 dark:text-sky-400" />
-            <span>Assistance & Support</span>
+      {/* Citizen Support Card at bottom */}
+      <div className="mt-8 space-y-4">
+        <div className="rounded-3xl p-4 bg-gradient-to-br from-sky-50/70 via-blue-50/40 to-indigo-50/50 backdrop-blur-lg border border-sky-100/70 shadow-[0_4px_16px_-4px_rgba(14,165,233,0.06)] space-y-3">
+          <div className="w-8 h-8 rounded-xl bg-white/90 shadow-xs flex items-center justify-center text-sky-600">
+            <Headphones className="w-4 h-4" />
           </div>
-          <p className="text-[11px] text-slate-600 dark:text-slate-400">
-            Helpline: <strong className="text-slate-900 dark:text-slate-200 font-mono">1800-111-TITLE</strong>
-          </p>
-          <p className="text-[10px] text-slate-500 dark:text-slate-500 mt-0.5">
-            09:30 - 18:00 IST
-          </p>
+          <div>
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
+              Citizen Support
+            </div>
+            <div className="text-xs text-slate-700 mt-0.5">
+              Land records assistance
+            </div>
+          </div>
+          <a
+            href="tel:1800111848"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-white bg-[#2563eb] hover:bg-blue-700 transition-colors shadow-xs"
+          >
+            <span>Contact support</span>
+            <ExternalLink className="w-3 h-3" />
+          </a>
+        </div>
+
+        <div className="flex items-center gap-1.5 px-2 text-[11px] text-slate-400">
+          <CheckCircle2 className="w-3.5 h-3.5 text-slate-400" />
+          <span>Citizen-first. Always.</span>
         </div>
       </div>
     </aside>

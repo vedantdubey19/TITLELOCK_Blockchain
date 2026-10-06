@@ -1,293 +1,604 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { DEMO_USERS } from '../constants/mockData';
-import { Shield, Mail, User, Key, Eye, EyeOff, CheckCircle, ArrowRight, ShieldCheck } from 'lucide-react';
+import { CadastreDatabaseService } from '../services/databaseService';
+import { 
+  Shield, 
+  Mail, 
+  Lock, 
+  User, 
+  Phone, 
+  MapPin, 
+  Building2, 
+  ArrowRight, 
+  Database, 
+  UserPlus, 
+  LogIn, 
+  Award,
+  CheckCircle2,
+  Sparkles,
+  Layers,
+  Fingerprint,
+  Users
+} from 'lucide-react';
 
 export function CitizenLoginPage() {
-  const { login, loginAsDemo } = useAuth();
+  const { login, signup, showToast } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // Mode: 'signin' | 'signup'
   const [tab, setTab] = useState('signin');
-  const [authMethod, setAuthMethod] = useState('email');
 
-  const [identifier, setIdentifier] = useState('rajesh@demo.local');
-  const [password, setPassword] = useState('Demo@001');
-  const [showPassword, setShowPassword] = useState(false);
+  // Role Type: 'citizen' | 'registrar'
+  const [roleType, setRoleType] = useState(() => {
+    return location.pathname.includes('/registrar') ? 'registrar' : 'citizen';
+  });
+
+  // Keep roleType in sync with route if user navigated directly
+  useEffect(() => {
+    if (location.pathname.includes('/registrar')) {
+      setRoleType('registrar');
+      setIdentifier('registrar.noida@titlelock.gov.in');
+      setPassword('Registrar@001');
+    } else {
+      setRoleType('citizen');
+      setIdentifier('rajesh.kumar@titlelock.gov.in');
+      setPassword('Demo@001');
+    }
+  }, [location.pathname]);
+
+  // Sign In Form State
+  const [identifier, setIdentifier] = useState(() => {
+    return location.pathname.includes('/registrar') 
+      ? 'registrar.noida@titlelock.gov.in' 
+      : 'rajesh.kumar@titlelock.gov.in';
+  });
+  const [password, setPassword] = useState(() => {
+    return location.pathname.includes('/registrar') ? 'Registrar@001' : 'Demo@001';
+  });
+
+  // Sign Up Form State
+  const [signupName, setSignupName] = useState('');
+  const [signupEmail, setSignupEmail] = useState('');
+  const [signupPhone, setSignupPhone] = useState('');
+  const [signupPassword, setSignupPassword] = useState('');
+  const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
+  const [signupJurisdiction, setSignupJurisdiction] = useState('Gautam Buddha Nagar / Noida, UP');
+  const [registrarCode, setRegistrarCode] = useState('');
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  // Demo accounts catalog for both roles
+  const citizenDemoAccounts = [
+    {
+      name: 'Rajesh Kumar',
+      email: 'rajesh.kumar@titlelock.gov.in',
+      pass: 'Demo@001',
+      desc: 'Primary Titleholder (8 properties, UP-0012)',
+      badge: 'Owner'
+    },
+    {
+      name: 'Radha Sharma',
+      email: 'radha.sharma@titlelock.gov.in',
+      pass: 'Demo@001',
+      desc: 'Multiple Titleholder (UP-0041 & UP-0053 Frozen)',
+      badge: 'Owner'
+    },
+    {
+      name: 'Meena Gupta',
+      email: 'meena.gupta@titlelock.gov.in',
+      pass: 'Demo@002',
+      desc: 'Bank Lien Encumbrance (UP-0019) & Joint (UP-0020)',
+      badge: 'Lien/Joint'
+    },
+    {
+      name: 'Jyoti Bhati',
+      email: 'jyoti.bhati@titlelock.gov.in',
+      pass: 'Demo@003',
+      desc: 'Owner (UP-0049) & Nominee for UP-0012',
+      badge: 'Nominee'
+    },
+    {
+      name: 'Geeta Goel',
+      email: 'geeta.goel@titlelock.gov.in',
+      pass: 'Demo@004',
+      desc: 'Prospective Buyer with active deed petition',
+      badge: 'Buyer'
+    }
+  ];
+
+  const registrarDemoAccounts = [
+    {
+      name: 'Virendra Swarup',
+      email: 'registrar.noida@titlelock.gov.in',
+      pass: 'Registrar@001',
+      desc: 'Sub-Registrar Officer • Tehsil Dadri / Noida-I',
+      badge: 'Sub-Registrar'
+    },
+    {
+      name: 'Dr. Anand Prakash',
+      email: 'subregistrar.dadri@titlelock.gov.in',
+      pass: 'Registrar@002',
+      desc: 'District Registrar & Statutory Deed Adjudicator',
+      badge: 'District Reg.'
+    }
+  ];
+
+  // Helper to quickly apply demo credentials
+  const handleApplyDemoAccount = (acc) => {
+    setIdentifier(acc.email);
+    setPassword(acc.pass);
+    setError('');
+    showToast(`Loaded credentials for ${acc.name} (${acc.badge})`, 'info');
+  };
+
+  // Switch between citizen and registrar modes
+  const handleSelectRole = (newRole) => {
+    setRoleType(newRole);
+    setError('');
+    if (newRole === 'registrar') {
+      navigate('/registrar/login', { replace: true });
+      if (tab === 'signin') {
+        setIdentifier('registrar.noida@titlelock.gov.in');
+        setPassword('Registrar@001');
+      } else {
+        setSignupJurisdiction('Sub-Registrar Noida-I, UP');
+      }
+    } else {
+      navigate('/citizen/login', { replace: true });
+      if (tab === 'signin') {
+        setIdentifier('rajesh.kumar@titlelock.gov.in');
+        setPassword('Demo@001');
+      } else {
+        setSignupJurisdiction('Gautam Buddha Nagar / Noida, UP');
+      }
+    }
+  };
+
+  // Sign In Handler with strict role enforcement
+  const handleSignIn = (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
+    const expectedRole = roleType === 'registrar' ? 'REGISTRAR' : 'CITIZEN';
+
     setTimeout(() => {
-      const res = login(identifier, password);
+      const res = login(identifier, password, expectedRole);
       setLoading(false);
       if (res.success) {
-        navigate('/citizen/dashboard');
+        if (roleType === 'registrar' || res.user?.role === 'REGISTRAR' || res.user?.activeRole === 'REGISTRAR') {
+          navigate('/registrar/dashboard');
+        } else {
+          navigate('/citizen/dashboard');
+        }
       } else {
         setError(res.message);
       }
-    }, 300);
+    }, 250);
   };
 
-  const handleUseFixture = (fixture) => {
-    setIdentifier(fixture.email);
-    setPassword(fixture.password);
-    loginAsDemo(fixture);
-    navigate('/citizen/dashboard');
+  // Sign Up Handler
+  const handleSignUp = (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!signupName.trim()) {
+      setError('Please enter your full legal name');
+      return;
+    }
+    if (!signupEmail.trim()) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    if (signupPassword.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    if (signupPassword !== signupConfirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (roleType === 'registrar' && registrarCode !== 'REG-GOV-2026') {
+      setError('Official authorization code required for Sub-Registrar accounts. (Hint: Use REG-GOV-2026)');
+      return;
+    }
+
+    setLoading(true);
+
+    setTimeout(() => {
+      const newUserData = {
+        name: signupName,
+        email: signupEmail,
+        phone: signupPhone || '+91 98765 43210',
+        password: signupPassword,
+        role: roleType === 'registrar' ? 'REGISTRAR' : 'CITIZEN',
+        activeRole: roleType === 'registrar' ? 'REGISTRAR' : 'OWNER',
+        jurisdiction: signupJurisdiction,
+        description: roleType === 'registrar' 
+          ? `Sub-Registrar Authority • ${signupJurisdiction}`
+          : 'Verified Citizen Titleholder under Section 5 Cadastre'
+      };
+
+      const res = signup(newUserData);
+      setLoading(false);
+      if (res.success) {
+        if (roleType === 'registrar') {
+          navigate('/registrar/dashboard');
+        } else {
+          navigate('/citizen/dashboard');
+        }
+      } else {
+        setError(res.message);
+      }
+    }, 350);
   };
 
   return (
-    <div className="min-h-screen bg-mesh-subtle flex flex-col justify-center items-center p-4 sm:p-6 text-slate-900 dark:text-slate-100 transition-colors">
+    <div className="min-h-screen bg-mesh-subtle flex flex-col justify-center items-center p-4 sm:p-6 text-slate-900 transition-colors">
       
       {/* Institutional Top Indicator */}
-      <div className="w-full max-w-md mx-auto mb-5 text-center">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 dark:bg-slate-900/90 border border-slate-200 dark:border-white/10 text-slate-700 dark:text-slate-300 text-xs font-mono shadow-xs backdrop-blur-md">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 dark:bg-emerald-400" />
-          <span>TitleLock Cadastre Ledger • Section 5 Node</span>
+      <div className="w-full max-w-lg mx-auto mb-5 text-center">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 text-slate-700 text-xs font-mono shadow-xs backdrop-blur-md">
+          <Database className="w-3.5 h-3.5 text-[#0b6b4e]" />
+          <span>TitleLock Cadastre Ledger • Section 5 State Registry Protocol</span>
         </div>
       </div>
 
-      {/* Main Professional Glass Card */}
-      <div className="w-full max-w-md glass-panel rounded-2xl p-6 sm:p-7 shadow-xl">
+      {/* Main Glassmorphic Card */}
+      <div className="w-full max-w-lg bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08),0_4px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100/90 space-y-6">
         
         {/* Header */}
-        <div className="text-center mb-6">
-          <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-white/10 mx-auto flex items-center justify-center text-sky-600 dark:text-sky-400 mb-3 shadow-xs">
-            <Shield className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+        <div className="text-center">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 mx-auto flex items-center justify-center text-[#0b6b4e] mb-3 shadow-xs">
+            {roleType === 'registrar' ? (
+              <Building2 className="w-6 h-6 text-[#0b6b4e]" />
+            ) : (
+              <Shield className="w-6 h-6 text-[#0b6b4e]" />
+            )}
           </div>
-          <h1 className="text-lg sm:text-xl font-semibold text-slate-900 dark:text-white tracking-tight">
-            Department of Land Records
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+            {roleType === 'registrar' ? 'Sub-Registrar Portal' : 'Department of Land Records & Titles'}
           </h1>
-          <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">
-            Government of India • Citizen Titleholder Portal
+          <p className="text-xs text-slate-500 mt-1">
+            {roleType === 'registrar' 
+              ? 'Official Statutory Conveyance & Deed Execution Console'
+              : 'Government of India • Citizen Landholder Portal'}
           </p>
         </div>
 
-        {/* Tab switch */}
-        <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-slate-900/80 rounded-xl mb-5 border border-slate-200 dark:border-white/5">
+        {/* Tab switch: Sign In vs Sign Up */}
+        <div className="grid grid-cols-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80">
           <button
             type="button"
-            onClick={() => setTab('signin')}
-            className={`py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
+            onClick={() => {
+              setTab('signin');
+              setError('');
+            }}
+            className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               tab === 'signin'
-                ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Sign In
+            <LogIn className="w-3.5 h-3.5" />
+            <span>Sign In</span>
           </button>
           <button
             type="button"
-            onClick={() => setTab('register')}
-            className={`py-1.5 text-xs font-medium rounded-lg transition-colors cursor-pointer ${
-              tab === 'register'
-                ? 'bg-white dark:bg-white/10 text-slate-900 dark:text-white shadow-xs font-semibold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'
+            onClick={() => {
+              setTab('signup');
+              setError('');
+            }}
+            className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+              tab === 'signup'
+                ? 'bg-white text-slate-900 shadow-xs'
+                : 'text-slate-600 hover:text-slate-900'
             }`}
           >
-            Register (Sign Up)
+            <UserPlus className="w-3.5 h-3.5" />
+            <span>Create Account</span>
           </button>
         </div>
 
-        {tab === 'signin' ? (
-          <div>
-            {/* Auth Method Selector */}
-            <div className="mb-4">
-              <label className="block text-[11px] font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider mb-1.5">
-                Authentication Method
-              </label>
-              <div className="grid grid-cols-3 gap-2">
-                <button
-                  type="button"
-                  onClick={() => setAuthMethod('email')}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                    authMethod === 'email'
-                      ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-300 dark:border-sky-500/40 text-sky-700 dark:text-sky-300 shadow-xs'
-                      : 'bg-white/60 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                  }`}
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  <span>Email</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setAuthMethod('username')}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                    authMethod === 'username'
-                      ? 'bg-sky-50 dark:bg-sky-500/15 border-sky-300 dark:border-sky-500/40 text-sky-700 dark:text-sky-300 shadow-xs'
-                      : 'bg-white/60 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                  }`}
-                >
-                  <User className="w-3.5 h-3.5" />
-                  <span>Username</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAuthMethod('digilocker');
-                    setIdentifier('digi-verified-8890');
-                  }}
-                  className={`flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-medium border transition-colors cursor-pointer ${
-                    authMethod === 'digilocker'
-                      ? 'bg-emerald-50 dark:bg-emerald-500/15 border-emerald-300 dark:border-emerald-500/40 text-emerald-700 dark:text-emerald-300 shadow-xs'
-                      : 'bg-white/60 dark:bg-white/[0.02] border-slate-200 dark:border-white/5 text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-white/[0.05]'
-                  }`}
-                >
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  <span>DigiLocker</span>
-                </button>
-              </div>
-            </div>
-
-            {error && (
-              <div className="mb-4 p-2.5 rounded-lg bg-rose-50 dark:bg-rose-500/15 border border-rose-200 dark:border-rose-500/30 text-rose-700 dark:text-rose-300 text-xs">
-                {error}
-              </div>
-            )}
-
-            {/* Login Form */}
-            <form onSubmit={handleSubmit} className="space-y-3.5">
-              <div>
-                <label className="block text-xs font-medium text-slate-700 dark:text-slate-300 mb-1">
-                  {authMethod === 'email'
-                    ? 'Registered Email Address'
-                    : authMethod === 'username'
-                    ? 'Citizen Username / Portal ID'
-                    : 'DigiLocker Linked Identifier'}
-                </label>
-                <input
-                  type={authMethod === 'email' ? 'email' : 'text'}
-                  value={identifier}
-                  onChange={(e) => setIdentifier(e.target.value)}
-                  placeholder={authMethod === 'email' ? 'rajesh@demo.local' : 'rajesh_kumar'}
-                  required
-                  className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-sky-500 dark:focus:border-sky-400 transition-colors shadow-xs"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="text-xs font-medium text-slate-700 dark:text-slate-300">
-                    Password
-                  </label>
-                  <span className="text-[11px] text-slate-500 dark:text-slate-400 font-mono">
-                    Demo: Demo@001
-                  </span>
-                </div>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 text-xs sm:text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-sky-500 dark:focus:border-sky-400 transition-colors pr-9 shadow-xs"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 cursor-pointer"
-                  >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
-              </div>
-
-              {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full py-2.5 px-4 rounded-lg font-medium text-xs sm:text-sm text-white bg-sky-600 hover:bg-sky-500 active:bg-sky-700 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-              >
-                {loading ? (
-                  <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <>
-                    <span>Sign In to Citizen Portal</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div className="space-y-3.5 text-xs">
-            <div className="p-3 rounded-lg bg-sky-50 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 text-sky-800 dark:text-sky-200 leading-relaxed font-normal">
-              Citizen credentials are linked to state cadastre records via Aadhaar / DigiLocker e-KYC.
-            </div>
-            <div>
-              <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Aadhaar / National ID (12-Digit)
-              </label>
-              <input
-                type="text"
-                placeholder="XXXX-XXXX-9021"
-                className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-sky-500 transition-colors shadow-xs"
-              />
-            </div>
-            <div>
-              <label className="block font-medium text-slate-700 dark:text-slate-300 mb-1">
-                Land Parcel ULPIN
-              </label>
-              <input
-                type="text"
-                placeholder="UP-0001-CLEAN"
-                className="w-full px-3.5 py-2 rounded-lg border border-slate-300 dark:border-white/10 bg-white/90 dark:bg-slate-900/60 text-xs text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:border-sky-500 transition-colors shadow-xs"
-              />
-            </div>
-            <button
-              type="button"
-              onClick={() => handleUseFixture(DEMO_USERS[0])}
-              className="w-full py-2.5 px-4 rounded-lg font-medium text-xs text-white bg-emerald-600 hover:bg-emerald-500 transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-sm"
-            >
-              <CheckCircle className="w-4 h-4" />
-              <span>Verify & Auto-Provision Account</span>
-            </button>
+        {/* Error Alert */}
+        {error && (
+          <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-600 flex-shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
-        {/* Demo Directory Test Fixtures */}
-        <div className="mt-6 pt-5 border-t border-slate-200 dark:border-white/5">
-          <div className="flex items-center justify-between text-xs mb-2.5">
-            <span className="text-slate-600 dark:text-slate-400 font-semibold text-[11px] uppercase tracking-wider">
-              Demo Directory Fixtures
-            </span>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400">Auto-fill</span>
-          </div>
+        {/* TAB 1: SIGN IN */}
+        {tab === 'signin' && (
+          <form onSubmit={handleSignIn} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                {roleType === 'registrar' ? 'Officer Email or Staff ID' : 'Citizen Email or Username'}
+              </label>
+              <div className="relative">
+                <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  required
+                  placeholder={roleType === 'registrar' ? 'registrar.noida@titlelock.gov.in' : 'rajesh.kumar@titlelock.gov.in'}
+                  className="w-full pl-10 pr-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e] focus:ring-1 focus:ring-[#0b6b4e]"
+                />
+              </div>
+            </div>
 
-          <div className="space-y-2">
-            {DEMO_USERS.map((usr) => (
-              <div
-                key={usr.id}
-                className="p-2.5 rounded-lg bg-slate-50/80 dark:bg-white/[0.02] hover:bg-slate-100 dark:hover:bg-white/[0.05] border border-slate-200 dark:border-white/5 hover:border-slate-300 dark:hover:border-white/10 transition-colors flex items-center justify-between"
-              >
-                <div className="text-left pr-2 text-xs">
-                  <div className="font-mono text-slate-800 dark:text-slate-200 font-medium">
-                    {usr.email}
+            <div>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
+                Access Key (Password)
+              </label>
+              <div className="relative">
+                <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e] focus:ring-1 focus:ring-[#0b6b4e]"
+                />
+              </div>
+            </div>
+
+            {/* Demo IDs Quick Selector */}
+            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
+                  <Users className="w-3.5 h-3.5 text-[#0b6b4e]" />
+                  <span>Demo {roleType === 'registrar' ? 'Sub-Registrar' : 'Citizen'} Accounts (Click to Fill)</span>
+                </div>
+                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                  Instant Test
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 gap-1.5 pt-1">
+                {(roleType === 'registrar' ? registrarDemoAccounts : citizenDemoAccounts).map((acc) => {
+                  const isCurrent = identifier === acc.email;
+                  return (
+                    <button
+                      key={acc.email}
+                      type="button"
+                      onClick={() => handleApplyDemoAccount(acc)}
+                      className={`w-full text-left p-2 rounded-xl transition-all border flex items-center justify-between cursor-pointer ${
+                        isCurrent
+                          ? 'bg-emerald-50/90 border-[#0b6b4e] text-emerald-950 shadow-xs'
+                          : 'bg-white hover:bg-slate-100/80 border-slate-200/90 text-slate-700'
+                      }`}
+                    >
+                      <div className="min-w-0 pr-2">
+                        <div className="text-[11px] font-bold truncate flex items-center gap-1.5">
+                          <span>{acc.name}</span>
+                          <span className="text-[9px] font-mono font-normal text-slate-500 truncate">({acc.email})</span>
+                        </div>
+                        <div className="text-[10px] text-slate-500 truncate">{acc.desc}</div>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
+                          isCurrent 
+                            ? 'bg-[#0b6b4e] text-white' 
+                            : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {acc.badge}
+                        </span>
+                        {isCurrent && (
+                          <CheckCircle2 className="w-3.5 h-3.5 text-[#0b6b4e]" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 rounded-2xl text-xs font-bold text-white bg-[#0b6b4e] hover:bg-[#08523c] transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
+            >
+              {loading 
+                ? 'Authenticating Identity...' 
+                : (roleType === 'registrar' ? 'Sign In to Registrar Gateway' : 'Sign In with Cadastre ID')}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        )}
+
+        {/* TAB 2: SIGN UP */}
+        {tab === 'signup' && (
+          <form onSubmit={handleSignUp} className="space-y-3.5">
+            <div>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                Full Legal Name
+              </label>
+              <div className="relative">
+                <User className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={signupName}
+                  onChange={(e) => setSignupName(e.target.value)}
+                  required
+                  placeholder={roleType === 'registrar' ? 'e.g. Virendra Swarup' : 'e.g. Ramesh Chandra Verma'}
+                  className="w-full pl-10 pr-3.5 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  Email Address
+                </label>
+                <div className="relative">
+                  <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="email"
+                    value={signupEmail}
+                    onChange={(e) => setSignupEmail(e.target.value)}
+                    required
+                    placeholder="name@titlelock.gov.in"
+                    className="w-full pl-10 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  Mobile Number
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="tel"
+                    value={signupPhone}
+                    onChange={(e) => setSignupPhone(e.target.value)}
+                    placeholder="+91 98..."
+                    className="w-full pl-10 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                {roleType === 'registrar' ? 'Sub-Registrar Jurisdiction' : 'Land District / Tehsil'}
+              </label>
+              <div className="relative">
+                <MapPin className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={signupJurisdiction}
+                  onChange={(e) => setSignupJurisdiction(e.target.value)}
+                  placeholder="e.g. Gautam Buddha Nagar / Noida, UP"
+                  className="w-full pl-10 pr-3.5 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
+                />
+              </div>
+            </div>
+
+            {roleType === 'registrar' && (
+              <div>
+                <label className="block text-[11px] font-bold text-amber-700 uppercase tracking-wider mb-1 flex items-center justify-between">
+                  <span>Officer Verification Code</span>
+                  <span className="text-[10px] text-slate-400 font-normal">Gov Authorization</span>
+                </label>
+                <div className="relative">
+                  <Award className="w-4 h-4 text-amber-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="text"
+                    value={registrarCode}
+                    onChange={(e) => setRegistrarCode(e.target.value)}
+                    placeholder="Enter official authorization (e.g. REG-GOV-2026)"
+                    className="w-full pl-10 pr-3.5 py-2 text-xs font-mono font-bold rounded-xl border border-amber-300 bg-amber-50/50 text-slate-900 focus:outline-none focus:border-amber-600"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="password"
+                    value={signupPassword}
+                    onChange={(e) => setSignupPassword(e.target.value)}
+                    required
+                    placeholder="At least 6 chars"
+                    className="w-full pl-10 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
+                  Confirm Password
+                </label>
+                <div className="relative">
+                  <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <input
+                    type="password"
+                    value={signupConfirmPassword}
+                    onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                    required
+                    placeholder="Repeat password"
+                    className="w-full pl-10 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-2.5 rounded-2xl text-xs font-bold text-white bg-[#0b6b4e] hover:bg-[#08523c] transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 pt-2.5"
+            >
+              {loading 
+                ? 'Registering Cryptographic Identity...' 
+                : (roleType === 'registrar' ? 'Create Sub-Registrar Authority Account' : 'Complete Citizen Registration')}
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </form>
+        )}
+
+        {/* BOTTOM SECTION: Option for Citizen vs Registrar */}
+        <div className="pt-4 border-t border-slate-100 space-y-3">
+          <div className="text-center text-xs text-slate-500">
+            {roleType === 'citizen' ? (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center gap-2 text-left">
+                  <div className="w-7 h-7 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center flex-shrink-0">
+                    <Building2 className="w-3.5 h-3.5" />
                   </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                    {usr.description}
+                  <div>
+                    <div className="font-bold text-slate-900 text-[11px]">Are you a Sub-Registrar Officer?</div>
+                    <div className="text-[10px] text-slate-500">Access statutory conveyance review console</div>
                   </div>
                 </div>
                 <button
                   type="button"
-                  onClick={() => handleUseFixture(usr)}
-                  className="px-2.5 py-1 rounded text-xs font-semibold text-sky-700 dark:text-sky-400 bg-sky-100 hover:bg-sky-200 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 border border-sky-300 dark:border-sky-500/20 transition-colors cursor-pointer"
+                  onClick={() => handleSelectRole('registrar')}
+                  className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold hover:bg-slate-100 transition-colors cursor-pointer text-[11px] whitespace-nowrap shadow-xs"
                 >
-                  Use
+                  {tab === 'signin' ? 'Sign In as Registrar ➔' : 'Sign Up as Registrar ➔'}
                 </button>
               </div>
-            ))}
+            ) : (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-2.5 p-3 rounded-2xl bg-emerald-50/70 border border-emerald-100">
+                <div className="flex items-center gap-2 text-left">
+                  <div className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center flex-shrink-0">
+                    <Shield className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-900 text-[11px]">Citizen Landholder?</div>
+                    <div className="text-[10px] text-slate-600">Access citizen titleholdings, RoR & sell tokens</div>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => handleSelectRole('citizen')}
+                  className="px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-800 font-bold hover:bg-slate-100 transition-colors cursor-pointer text-[11px] whitespace-nowrap shadow-xs"
+                >
+                  {tab === 'signin' ? 'Sign In as Citizen ➔' : 'Sign Up as Citizen ➔'}
+                </button>
+              </div>
+            )}
           </div>
         </div>
+
       </div>
 
-      <div className="mt-5 text-center text-[11px] text-slate-500 dark:text-slate-400 max-w-sm">
-        Protected with 256-bit cryptographic land ledger attestations.
-      </div>
     </div>
   );
 }
