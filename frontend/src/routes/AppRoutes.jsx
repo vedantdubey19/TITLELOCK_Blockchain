@@ -18,6 +18,7 @@ import CitizenTransfersPage from '../pages/CitizenTransfersPage';
 import CitizenDeedsPage from '../pages/CitizenDeedsPage';
 import CitizenProfilePage from '../pages/CitizenProfilePage';
 import CitizenSettingsPage from '../pages/CitizenSettingsPage';
+import HomePage from '../pages/HomePage';
 
 // Registrar Pages
 import RegistrarDashboardPage from '../pages/RegistrarDashboardPage';
@@ -30,8 +31,8 @@ import RegistrarCredentialsPage from '../pages/RegistrarCredentialsPage';
 export function AppRoutes() {
   return (
     <Routes>
-      {/* Root redirect to citizen dashboard */}
-      <Route path="/" element={<Navigate to="/citizen/dashboard" replace />} />
+      {/* Main Landing Page with 3D Globe & City Map */}
+      <Route path="/" element={<HomePage />} />
 
       {/* Unified Authentication Screen (Citizen & Registrar Sign In & Sign Up) */}
       <Route path="/citizen/login" element={<CitizenLoginPage />} />

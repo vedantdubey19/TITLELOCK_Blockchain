@@ -172,8 +172,10 @@ export function CadastralLiveMap({
 
     const tileLayer = L.tileLayer(provider.url, {
       maxZoom: provider.maxZoom,
+      maxNativeZoom: provider.maxNativeZoom || 18,
       subdomains: provider.subdomains || ['a', 'b', 'c'],
-      crossOrigin: true
+      crossOrigin: 'anonymous',
+      errorTileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
     }).addTo(map);
 
     tileLayerRef.current = tileLayer;
@@ -212,8 +214,10 @@ export function CadastralLiveMap({
 
     const newTileLayer = L.tileLayer(provider.url, {
       maxZoom: provider.maxZoom,
+      maxNativeZoom: provider.maxNativeZoom || 18,
       subdomains: provider.subdomains || ['a', 'b', 'c'],
-      crossOrigin: true
+      crossOrigin: 'anonymous',
+      errorTileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
     }).addTo(mapInstanceRef.current);
 
     tileLayerRef.current = newTileLayer;
@@ -243,29 +247,71 @@ export function CadastralLiveMap({
 
     const activeColors = getParcelStatusColors(activeParcel);
 
-    // 1. Draw Active Parcel Polygon with glowing colored outline matching status
+    // Elevation height offset in degrees (~6-9 meters physical elevation in GPS space)
+    const ELEVATION_LAT = 0.000050;
+    const ELEVATION_LNG = -0.000042;
+
+    // 1. Draw Active Parcel 3D Extrusion
     if (currentParcelLatLngs.length > 2) {
-      const activePolygon = L.polygon(currentParcelLatLngs, {
-        color: activeColors.stroke,
+      const activeRoofLatLngs = currentParcelLatLngs.map(([lat, lng]) => [lat + ELEVATION_LAT, lng + ELEVATION_LNG]);
+      const activeShadowLatLngs = currentParcelLatLngs.map(([lat, lng]) => [lat - 0.000035, lng + 0.000035]);
+
+      // Active Ground Shadow
+      const activeShadow = L.polygon(activeShadowLatLngs, {
+        color: 'transparent',
+        fillColor: '#000000',
+        fillOpacity: 0.55,
+        interactive: false
+      }).addTo(map);
+      polygonLayersRef.current.push(activeShadow);
+
+      // Active 3D Walls
+      for (let i = 0; i < currentParcelLatLngs.length; i++) {
+        const next = (i + 1) % currentParcelLatLngs.length;
+        const wallQuad = [
+          currentParcelLatLngs[i],
+          currentParcelLatLngs[next],
+          activeRoofLatLngs[next],
+          activeRoofLatLngs[i]
+        ];
+        const wall = L.polygon(wallQuad, {
+          color: '#38bdf8',
+          weight: 1,
+          fillColor: '#0284c7',
+          fillOpacity: 0.8,
+          interactive: false
+        }).addTo(map);
+        polygonLayersRef.current.push(wall);
+      }
+
+      // Active Roof Slab
+      const activePolygon = L.polygon(activeRoofLatLngs, {
+        color: '#ffffff',
         weight: 3.5,
-        opacity: 0.95,
+        opacity: 1,
         fillColor: activeColors.fill,
-        fillOpacity: 0.35,
+        fillOpacity: 0.7,
         className: 'cadastre-active-polygon'
       }).addTo(map);
 
       activePolygon.bindTooltip(
-        `<strong>${activeParcel?.id || 'UP-0001'}</strong><br/>${activeParcel?.areaSqm ? activeParcel.areaSqm.toLocaleString() : '2,390'} m² • ${activeParcel?.status || 'VERIFIED'}`,
+        `<div style="font-family: inherit; font-size: 11px;">
+           <div style="font-weight: 700; color: #0284c7;">${activeParcel?.id || 'UP-0001'}</div>
+           <div>${activeParcel?.currentOwner || 'Certified Titleholder'}</div>
+           <div style="color: #64748b; font-size: 10px;">
+             ${activeParcel?.areaSqm ? activeParcel.areaSqm.toLocaleString() : '2,390'} m² • <span style="font-weight:600; color:${activeColors.stroke}">${activeParcel?.status || 'VERIFIED'}</span>
+           </div>
+         </div>`,
         { permanent: false, direction: 'top', className: 'cadastre-tooltip' }
       );
 
       polygonLayersRef.current.push(activePolygon);
 
-      // Add center glowing pin marker with matching status color
-      const centerCircle = L.circleMarker(centerLatLng, {
+      // Add center glowing 3D pin marker with matching status color
+      const centerCircle = L.circleMarker([centerLatLng[0] + ELEVATION_LAT, centerLatLng[1] + ELEVATION_LNG], {
         radius: 6,
         color: '#ffffff',
-        weight: 2,
+        weight: 2.5,
         fillColor: activeColors.stroke,
         fillOpacity: 1
       }).addTo(map);
@@ -273,23 +319,59 @@ export function CadastralLiveMap({
       markerLayerRef.current = centerCircle;
     }
 
-    // 2. Render Neighboring parcels from registry with their individual status colors
+    // 2. Render Neighboring parcels from registry with 3D volumetric extrusion
     if (parcels && parcels.length > 0) {
       parcels.forEach((p) => {
         if (p.id === activeParcel?.id || !p.boundary || p.boundary.length < 3) return;
-        const neighborLatLngs = p.boundary.map(([lng, lat]) => [lat, lng]);
+        const groundLatLngs = p.boundary.map(([lng, lat]) => [lat, lng]);
+        const roofLatLngs = groundLatLngs.map(([lat, lng]) => [lat + ELEVATION_LAT, lng + ELEVATION_LNG]);
         const pColors = getParcelStatusColors(p);
 
-        const poly = L.polygon(neighborLatLngs, {
-          color: pColors.stroke,
-          weight: 2,
-          opacity: 0.75,
+        // Ground shadow
+        const shadowPoly = L.polygon(
+          groundLatLngs.map(([lat, lng]) => [lat - 0.000030, lng + 0.000030]),
+          { color: 'transparent', fillColor: '#000000', fillOpacity: 0.32, interactive: false }
+        ).addTo(map);
+        polygonLayersRef.current.push(shadowPoly);
+
+        // 3D Extruded Walls
+        const wallBase = p.frozen ? '#dc2626' : (p.titleStatus === 'DISPUTED' ? '#d97706' : '#059669');
+        for (let i = 0; i < groundLatLngs.length; i++) {
+          const next = (i + 1) % groundLatLngs.length;
+          const wallQuad = [
+            groundLatLngs[i],
+            groundLatLngs[next],
+            roofLatLngs[next],
+            roofLatLngs[i]
+          ];
+          const wall = L.polygon(wallQuad, {
+            color: 'rgba(0,0,0,0.3)',
+            weight: 1,
+            fillColor: wallBase,
+            fillOpacity: 0.55,
+            interactive: false
+          }).addTo(map);
+          polygonLayersRef.current.push(wall);
+        }
+
+        // Roof Slab
+        const poly = L.polygon(roofLatLngs, {
+          color: p.frozen ? '#fca5a5' : (p.titleStatus === 'DISPUTED' ? '#fde68a' : '#a7f3d0'),
+          weight: 1.8,
+          opacity: 0.95,
           fillColor: pColors.fill,
-          fillOpacity: 0.18
+          fillOpacity: 0.48,
+          className: 'cadastre-plot-polygon'
         }).addTo(map);
 
         poly.bindTooltip(
-          `<strong>${p.id}</strong><br/>${p.currentOwner || 'Registered Titleholder'} • ${p.status || 'VERIFIED'}`,
+          `<div style="font-family: inherit; font-size: 11px;">
+             <div style="font-weight: 700; color: #0284c7;">${p.id}</div>
+             <div>${p.currentOwner || 'Registered Titleholder'}</div>
+             <div style="color: #64748b; font-size: 10px;">
+               ${p.areaSqm?.toLocaleString()} m² • <span style="font-weight:600; color:${pColors.stroke}">${p.titleStatus || p.status || 'VERIFIED'}</span>
+             </div>
+           </div>`,
           { permanent: false, direction: 'center', className: 'cadastre-tooltip' }
         );
 
