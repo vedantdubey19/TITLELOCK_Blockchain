@@ -18,7 +18,7 @@ export function CitizenLayout() {
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8fafc] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 antialiased selection:bg-sky-500/20 overflow-hidden">
+    <div className="h-screen w-full bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-sky-500/20 overflow-hidden">
       {/* Pinned Glassmorphic Left Sidebar */}
       <Sidebar />
 

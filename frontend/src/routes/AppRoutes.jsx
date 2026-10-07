@@ -9,6 +9,7 @@ import CitizenDashboardPage from '../pages/CitizenDashboardPage';
 import CitizenPropertiesPage from '../pages/CitizenPropertiesPage';
 import CitizenTransactionsPage from '../pages/CitizenTransactionsPage';
 import CitizenPublicMapPage from '../pages/CitizenPublicMapPage';
+import CitizenFullscreenMapPage from '../pages/CitizenFullscreenMapPage';
 import CitizenNomineesPage from '../pages/CitizenNomineesPage';
 import CitizenTokensPage from '../pages/CitizenTokensPage';
 import CitizenRecoveryPage from '../pages/CitizenRecoveryPage';
@@ -35,6 +36,9 @@ export function AppRoutes() {
       {/* Unified Authentication Screen (Citizen & Registrar Sign In & Sign Up) */}
       <Route path="/citizen/login" element={<CitizenLoginPage />} />
       <Route path="/registrar/login" element={<CitizenLoginPage />} />
+
+      {/* Dedicated Fullscreen Map Route without Layout shell */}
+      <Route path="/citizen/map/fullscreen" element={<CitizenFullscreenMapPage />} />
 
       {/* Citizen Authenticated Portal */}
       <Route path="/citizen" element={<CitizenLayout />}>

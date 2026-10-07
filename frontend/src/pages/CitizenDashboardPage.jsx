@@ -23,6 +23,7 @@ import {
   X
 } from 'lucide-react';
 import { CadastreDatabaseService } from '../services/databaseService';
+import { CadastralLiveMap } from '../components/common/CadastralLiveMap';
 
 export function CitizenDashboardPage() {
   const { currentUser, parcels, userTransfers, allParcels, generateSellToken, showToast } = useAuth();
@@ -227,77 +228,14 @@ export function CitizenDashboardPage() {
               </button>
             </div>
 
-            {/* Interactive Satellite Viewport */}
-            <div className="relative rounded-3xl overflow-hidden border border-slate-100 shadow-[0_2px_12px_-4px_rgba(0,0,0,0.04)] h-96 sm:h-[410px] w-full bg-slate-900 group">
-              <img 
-                src={aerialMapImg} 
-                alt="Cadastral plot aerial satellite imagery" 
-                className="w-full h-full object-cover object-center"
-              />
-
-              {/* Glowing Green Cadastral Boundary Polygon matching reference screenshot */}
-              <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-48 h-64 sm:w-56 sm:h-72 rounded-2xl border-2 border-emerald-400 bg-emerald-500/10 shadow-[0_0_35px_rgba(52,211,153,0.35)] relative transform -rotate-1">
-                  {/* Center marker */}
-                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-emerald-400 shadow-sm" />
-                </div>
-              </div>
-
-              {/* Top Right Fullscreen Trigger */}
-              <button
-                type="button"
-                onClick={() => navigate('/citizen/map')}
-                title="Fullscreen Map"
-                className="absolute top-4 right-4 w-9 h-9 rounded-2xl bg-white/95 hover:bg-white text-slate-700 shadow-md flex items-center justify-center cursor-pointer transition-transform active:scale-95"
-              >
-                <Maximize2 className="w-4 h-4" />
-              </button>
-
-              {/* Bottom Left Parcel Pill matching screenshot: • UP-0001 (1,200 m²) */}
-              <div className="absolute bottom-4 left-4 z-10">
-                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/75 backdrop-blur-md border border-white/20 text-white text-xs font-medium shadow-lg">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                  <span className="font-mono font-bold">{activeParcel?.id?.slice(0, 7) || 'UP-0001'}</span>
-                  <span className="text-slate-300 font-normal">({activeParcel?.areaSqm?.toLocaleString() || '1,200'} m²)</span>
-                </div>
-              </div>
-
-              {/* Floating toolbar pill at bottom-center matching screenshot */}
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 rounded-full px-4 py-1.5 bg-black/70 backdrop-blur-md border border-white/20 text-white flex items-center gap-4 shadow-lg text-xs">
-                <button 
-                  type="button"
-                  onClick={() => setSelectedMapTool('crosshair')}
-                  className={`p-1 rounded-full transition-colors cursor-pointer ${selectedMapTool === 'crosshair' ? 'text-emerald-400' : 'text-slate-300 hover:text-white'}`}
-                  title="Center parcel"
-                >
-                  <Crosshair className="w-4 h-4" />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setSelectedMapTool('type')}
-                  className={`p-1 rounded-full transition-colors cursor-pointer ${selectedMapTool === 'type' ? 'text-emerald-400' : 'text-slate-300 hover:text-white'}`}
-                  title="Toggle labels"
-                >
-                  <Type className="w-4 h-4" />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setSelectedMapTool('edit')}
-                  className={`p-1 rounded-full transition-colors cursor-pointer ${selectedMapTool === 'edit' ? 'text-emerald-400' : 'text-slate-300 hover:text-white'}`}
-                  title="Measure boundary"
-                >
-                  <Pencil className="w-3.5 h-3.5" />
-                </button>
-                <button 
-                  type="button"
-                  onClick={() => setSelectedMapTool('message')}
-                  className={`p-1 rounded-full transition-colors cursor-pointer ${selectedMapTool === 'message' ? 'text-emerald-400' : 'text-slate-300 hover:text-white'}`}
-                  title="Survey notes"
-                >
-                  <MessageSquare className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
+            {/* Interactive 3D Real Satellite / Cadastral Viewport (100% Free - Real Imagery) */}
+            <CadastralLiveMap
+              parcels={registeredParcelsList}
+              activeParcel={activeParcel}
+              onSelectParcel={(p) => setActiveParcel(p)}
+              onOpenLargerMap={() => navigate('/citizen/map')}
+              height="410px"
+            />
           </div>
 
           {/* 2. Registered Parcels Section (Aligned right below Parcel Explorer) */}

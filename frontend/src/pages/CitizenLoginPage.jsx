@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { CadastreDatabaseService } from '../services/databaseService';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { 
   Shield, 
   Mail, 
@@ -238,32 +239,33 @@ export function CitizenLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-mesh-subtle flex flex-col justify-center items-center p-4 sm:p-6 text-slate-900 transition-colors">
+    <div className="min-h-screen bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col justify-center items-center p-4 sm:p-6 text-slate-900 dark:text-slate-100 transition-colors">
       
-      {/* Institutional Top Indicator */}
-      <div className="w-full max-w-lg mx-auto mb-5 text-center">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 border border-slate-200/90 text-slate-700 text-xs font-mono shadow-xs backdrop-blur-md">
-          <Database className="w-3.5 h-3.5 text-[#0b6b4e]" />
-          <span>TitleLock Cadastre Ledger • Section 5 State Registry Protocol</span>
+      {/* Institutional Top Indicator & Theme Switcher */}
+      <div className="w-full max-w-lg mx-auto mb-5 flex items-center justify-between gap-3">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-mono shadow-xs backdrop-blur-md">
+          <Database className="w-3.5 h-3.5 text-[#0b6b4e] dark:text-emerald-400" />
+          <span className="truncate">TitleLock Cadastre Ledger • Section 5 Protocol</span>
         </div>
+        <ThemeToggle size="sm" />
       </div>
 
       {/* Main Glassmorphic Card */}
-      <div className="w-full max-w-lg bg-white/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08),0_4px_20px_-2px_rgba(0,0,0,0.04)] border border-slate-100/90 space-y-6">
+      <div className="w-full max-w-lg bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl rounded-3xl p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.08),0_4px_20px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] border border-slate-100/90 dark:border-white/10 space-y-6">
         
         {/* Header */}
         <div className="text-center">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-50 border border-emerald-100 mx-auto flex items-center justify-center text-[#0b6b4e] mb-3 shadow-xs">
+          <div className="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/80 border border-emerald-100 dark:border-emerald-800/50 mx-auto flex items-center justify-center text-[#0b6b4e] dark:text-emerald-400 mb-3 shadow-xs">
             {roleType === 'registrar' ? (
-              <Building2 className="w-6 h-6 text-[#0b6b4e]" />
+              <Building2 className="w-6 h-6 text-[#0b6b4e] dark:text-emerald-400" />
             ) : (
-              <Shield className="w-6 h-6 text-[#0b6b4e]" />
+              <Shield className="w-6 h-6 text-[#0b6b4e] dark:text-emerald-400" />
             )}
           </div>
-          <h1 className="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">
+          <h1 className="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">
             {roleType === 'registrar' ? 'Sub-Registrar Portal' : 'Department of Land Records & Titles'}
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             {roleType === 'registrar' 
               ? 'Official Statutory Conveyance & Deed Execution Console'
               : 'Government of India • Citizen Landholder Portal'}
@@ -271,7 +273,7 @@ export function CitizenLoginPage() {
         </div>
 
         {/* Tab switch: Sign In vs Sign Up */}
-        <div className="grid grid-cols-2 p-1.5 bg-slate-100/90 rounded-2xl border border-slate-200/80">
+        <div className="grid grid-cols-2 p-1.5 bg-slate-100/90 dark:bg-slate-800/90 rounded-2xl border border-slate-200/80 dark:border-white/10">
           <button
             type="button"
             onClick={() => {
@@ -280,8 +282,8 @@ export function CitizenLoginPage() {
             }}
             className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
               tab === 'signin'
-                ? 'bg-white text-slate-900 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+                ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
             }`}
           >
             <LogIn className="w-3.5 h-3.5" />

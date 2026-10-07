@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Outlet, NavLink, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { useTheme } from '../hooks/useTheme';
+import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { 
   Building2, 
   LayoutDashboard, 
@@ -21,7 +23,9 @@ import {
   ExternalLink,
   Search,
   Bell,
-  X
+  X,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 export function RegistrarLayout() {
@@ -104,21 +108,21 @@ export function RegistrarLayout() {
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8fafc] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 antialiased selection:bg-emerald-500/20 overflow-hidden">
+    <div className="h-screen w-full bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 overflow-hidden">
       
       {/* Pinned Glassmorphic Left Sidebar (Matching Citizen Portal Style) */}
-      <aside className="w-full md:w-64 md:h-screen md:sticky md:top-0 z-30 flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/70 backdrop-blur-xl border-r border-white/60 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] md:overflow-y-auto no-scrollbar transition-all">
+      <aside className="w-full md:w-64 md:h-screen md:sticky md:top-0 z-30 flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-r border-white/60 dark:border-white/10 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_-4px_rgba(0,0,0,0.3)] md:overflow-y-auto no-scrollbar transition-all">
         <div>
           {/* Brand Header */}
           <div className="flex items-center gap-3 px-2 mb-8">
-            <div className="w-10 h-10 rounded-2xl bg-white/90 backdrop-blur-md border border-white/80 shadow-[0_2px_10px_-2px_rgba(11,107,78,0.18)] flex items-center justify-center p-2">
-              <Building2 className="w-5 h-5 text-[#0b6b4e]" />
+            <div className="w-10 h-10 rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_2px_10px_-2px_rgba(11,107,78,0.18)] flex items-center justify-center p-2">
+              <Building2 className="w-5 h-5 text-[#0b6b4e] dark:text-emerald-400" />
             </div>
             <div>
-              <div className="text-base font-bold text-slate-900 tracking-tight leading-none flex items-center gap-1.5">
+              <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1.5">
                 <span>TitleLock</span>
               </div>
-              <span className="text-[10px] font-semibold tracking-wider text-[#0b6b4e] uppercase mt-1 block">
+              <span className="text-[10px] font-semibold tracking-wider text-[#0b6b4e] dark:text-emerald-400 uppercase mt-1 block">
                 Sub-Registrar
               </span>
             </div>
@@ -126,7 +130,7 @@ export function RegistrarLayout() {
 
           {/* Section Title */}
           <div className="px-3 mb-2.5">
-            <span className="text-[11px] font-bold text-slate-400 tracking-wider uppercase font-sans">
+            <span className="text-[11px] font-bold text-slate-400 dark:text-slate-500 tracking-wider uppercase font-sans">
               Statutory Adjudication
             </span>
           </div>
@@ -194,14 +198,14 @@ export function RegistrarLayout() {
       <div className="flex-1 min-w-0 h-full flex flex-col overflow-y-auto overflow-x-hidden">
         
         {/* Pinned Top Glass Navbar (Matching Citizen Navbar Style & Theme) */}
-        <header className="sticky top-0 z-40 w-full bg-white/70 backdrop-blur-xl border-b border-white/60 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.02)] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+        <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
           
           {/* Left Info / State Tag */}
           <div className="flex items-center gap-3">
-            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 border border-slate-200/60 shadow-xs">
+            <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span className="text-xs font-semibold text-slate-700">Tehsil Dadri / Noida-I Office</span>
-              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-emerald-100 text-emerald-800 font-bold">
+              <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Tehsil Dadri / Noida-I Office</span>
+              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 font-bold">
                 ONLINE
               </span>
             </div>
@@ -210,24 +214,27 @@ export function RegistrarLayout() {
             <button
               type="button"
               onClick={() => navigate('/citizen/map')}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/90 border border-slate-200/90 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-white/90 dark:bg-slate-800/90 border border-slate-200/90 dark:border-white/10 text-slate-700 dark:text-slate-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs cursor-pointer"
             >
-              <Compass className="w-3.5 h-3.5 text-sky-600" />
+              <Compass className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
               <span className="hidden md:inline">3D Cadastral Map</span>
             </button>
           </div>
 
           {/* Right Actions & Officer Profile */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             
+            {/* Theme Appearance Mode Toggle */}
+            <ThemeToggle />
+
             {/* Reset Demo State button */}
             <button
               type="button"
               onClick={resetDemoState}
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-semibold text-slate-600 bg-white/80 border border-slate-200/60 hover:bg-slate-50 transition-colors shadow-xs cursor-pointer"
+              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs cursor-pointer"
               title="Reset sample registry data to defaults"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
+              <RotateCcw className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
               <span>Reset State</span>
             </button>
 
@@ -236,22 +243,22 @@ export function RegistrarLayout() {
               <button
                 type="button"
                 onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-2.5 rounded-2xl bg-white/80 border border-white/80 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
+                className="relative p-2.5 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-white/80 dark:border-white/10 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
                 title="Statutory Notifications"
               >
                 <Bell className="w-4 h-4" />
                 {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white" />
+                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
                 )}
               </button>
 
               {isNotificationsOpen && (
-                <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl bg-white/95 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-slate-900">Registrar Statutory Alerts</span>
+                      <span className="font-bold text-xs text-slate-900 dark:text-white">Registrar Statutory Alerts</span>
                       {unreadCount > 0 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-700">
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-400">
                           {unreadCount} new
                         </span>
                       )}
@@ -259,20 +266,20 @@ export function RegistrarLayout() {
                     <button
                       type="button"
                       onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
-                      className="text-[11px] font-semibold text-[#0b6b4e] hover:underline cursor-pointer"
+                      className="text-[11px] font-semibold text-[#0b6b4e] dark:text-emerald-400 hover:underline cursor-pointer"
                     >
                       Mark all read
                     </button>
                   </div>
 
-                  <div className="divide-y divide-slate-100 max-h-72 overflow-y-auto no-scrollbar">
+                  <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-72 overflow-y-auto no-scrollbar">
                     {notifications.map((n) => (
                       <div key={n.id} className="py-2.5 space-y-1">
                         <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-bold text-slate-900">{n.title}</span>
-                          <span className="text-[10px] text-slate-400">{n.date}</span>
+                          <span className="font-bold text-slate-900 dark:text-white">{n.title}</span>
+                          <span className="text-[10px] text-slate-400 dark:text-slate-500">{n.date}</span>
                         </div>
-                        <p className="text-[11px] text-slate-600 leading-relaxed">{n.message}</p>
+                        <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">{n.message}</p>
                       </div>
                     ))}
                   </div>
@@ -285,30 +292,30 @@ export function RegistrarLayout() {
               <button
                 type="button"
                 onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-white/80 border border-white/80 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] hover:bg-white transition-all cursor-pointer"
+                className="flex items-center gap-2.5 p-1.5 pr-3 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-white/80 dark:border-white/10 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] hover:bg-white dark:hover:bg-slate-700/80 transition-all cursor-pointer"
               >
-                <div className="w-8 h-8 rounded-xl bg-emerald-50 text-[#0b6b4e] font-bold text-xs flex items-center justify-center border border-emerald-100 flex-shrink-0">
+                <div className="w-8 h-8 rounded-xl bg-emerald-50 dark:bg-emerald-950/80 text-[#0b6b4e] dark:text-emerald-400 font-bold text-xs flex items-center justify-center border border-emerald-100 dark:border-emerald-800/50 flex-shrink-0">
                   SR
                 </div>
                 <div className="hidden sm:block text-left">
-                  <div className="text-xs font-bold text-slate-900 leading-tight">
+                  <div className="text-xs font-bold text-slate-900 dark:text-white leading-tight">
                     {currentUser?.name || 'Sub-Registrar'}
                   </div>
-                  <div className="text-[10px] font-medium text-slate-400 leading-tight">
+                  <div className="text-[10px] font-medium text-slate-400 dark:text-slate-500 leading-tight">
                     {currentUser?.jurisdiction?.split('/')[0] || 'Sub-Registrar Officer'}
                   </div>
                 </div>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500 ml-0.5" />
               </button>
 
               {/* Profile Menu Popup */}
               {isDropdownOpen && (
-                <div className="absolute right-0 mt-3 w-64 rounded-3xl bg-white/95 backdrop-blur-2xl border border-white/80 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="p-3 border-b border-slate-100 mb-1">
-                    <div className="text-xs font-bold text-slate-900">{currentUser?.name}</div>
-                    <div className="text-[10px] text-slate-400 truncate">{currentUser?.email}</div>
-                    <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 text-emerald-800">
-                      <ShieldCheck className="w-3 h-3 text-emerald-700" />
+                <div className="absolute right-0 mt-3 w-64 rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] p-2 z-50 animate-in fade-in zoom-in-95 duration-150">
+                  <div className="p-3 border-b border-slate-100 dark:border-white/10 mb-1">
+                    <div className="text-xs font-bold text-slate-900 dark:text-white">{currentUser?.name}</div>
+                    <div className="text-[10px] text-slate-400 dark:text-slate-500 truncate">{currentUser?.email}</div>
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300">
+                      <ShieldCheck className="w-3 h-3 text-emerald-700 dark:text-emerald-400" />
                       <span>OFFICIAL SUB-REGISTRAR</span>
                     </div>
                   </div>
@@ -316,9 +323,9 @@ export function RegistrarLayout() {
                   <NavLink
                     to="/registrar/credentials"
                     onClick={() => setIsDropdownOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-semibold text-slate-700 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                   >
-                    <UserCheck className="w-4 h-4 text-slate-400" />
+                    <UserCheck className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                     <span>Officer Credentials</span>
                   </NavLink>
 
@@ -328,9 +335,9 @@ export function RegistrarLayout() {
                       setIsDropdownOpen(false);
                       setShowLogoutConfirm(true);
                     }}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer text-left"
+                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-2xl text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors cursor-pointer text-left"
                   >
-                    <LogOut className="w-4 h-4 text-rose-500" />
+                    <LogOut className="w-4 h-4 text-rose-500 dark:text-rose-400" />
                     <span>Sign Out</span>
                   </button>
                 </div>
