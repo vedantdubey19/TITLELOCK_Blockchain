@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
-import { CadastreDatabaseService } from '../services/databaseService';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 import { 
   Shield, 
@@ -16,53 +15,40 @@ import {
   UserPlus, 
   LogIn, 
   Award,
-  CheckCircle2,
-  Sparkles,
-  Layers,
-  Fingerprint,
-  Users
 } from 'lucide-react';
 
+function AadhaarField({ value, onChange }) {
+  return (
+    <label className="block text-xs text-slate-600 dark:text-slate-300">
+      Aadhaar number
+      <input type="password" inputMode="numeric" autoComplete="off" required pattern="[2-9][0-9]{11}"
+        maxLength={12} value={value} onChange={(e) => onChange(e.target.value.replace(/\D/g, ''))}
+        placeholder="12-digit Aadhaar number" title="Enter 12 digits starting with 2–9"
+        className="mt-1 w-full rounded-xl border border-slate-200 bg-white p-2.5 text-slate-800" />
+      <span className="mt-1 block text-[11px]">Self-declared account information; not verified with UIDAI.</span>
+    </label>
+  );
+}
+
 export function CitizenLoginPage() {
-  const { login, signup, showToast } = useAuth();
+  const { login, signup, verifyOTP, authLoading, authError } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
   // Mode: 'signin' | 'signup'
   const [tab, setTab] = useState('signin');
 
-  // Role Type: 'citizen' | 'registrar'
-  const [roleType, setRoleType] = useState(() => {
-    return location.pathname.includes('/registrar') ? 'registrar' : 'citizen';
-  });
+  const roleType = location.pathname.includes('/registrar') ? 'registrar' : 'citizen';
 
-  // Keep roleType in sync with route if user navigated directly
-  useEffect(() => {
-    if (location.pathname.includes('/registrar')) {
-      setRoleType('registrar');
-      setIdentifier('registrar.noida@titlelock.gov.in');
-      setPassword('Registrar@001');
-    } else {
-      setRoleType('citizen');
-      setIdentifier('rajesh.kumar@titlelock.gov.in');
-      setPassword('Demo@001');
-    }
-  }, [location.pathname]);
-
-  // Sign In Form State
-  const [identifier, setIdentifier] = useState(() => {
-    return location.pathname.includes('/registrar') 
-      ? 'registrar.noida@titlelock.gov.in' 
-      : 'rajesh.kumar@titlelock.gov.in';
-  });
-  const [password, setPassword] = useState(() => {
-    return location.pathname.includes('/registrar') ? 'Registrar@001' : 'Demo@001';
-  });
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [aadhaar, setAadhaar] = useState('');
 
   // Sign Up Form State
   const [signupName, setSignupName] = useState('');
   const [signupEmail, setSignupEmail] = useState('');
   const [signupPhone, setSignupPhone] = useState('');
+  const [phoneLinkConfirmed, setPhoneLinkConfirmed] = useState(false);
   const [signupPassword, setSignupPassword] = useState('');
   const [signupConfirmPassword, setSignupConfirmPassword] = useState('');
   const [signupJurisdiction, setSignupJurisdiction] = useState('Gautam Buddha Nagar / Noida, UP');
@@ -70,172 +56,97 @@ export function CitizenLoginPage() {
 
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [challenge, setChallenge] = useState(null);
+  const [emailCode, setEmailCode] = useState('');
+  const [smsCode, setSmsCode] = useState('');
+  const [notice, setNotice] = useState('');
 
-  // Demo accounts catalog for both roles
-  const citizenDemoAccounts = [
-    {
-      name: 'Rajesh Kumar',
-      email: 'rajesh.kumar@titlelock.gov.in',
-      pass: 'Demo@001',
-      desc: 'Primary Titleholder (8 properties, UP-0012)',
-      badge: 'Owner'
-    },
-    {
-      name: 'Radha Sharma',
-      email: 'radha.sharma@titlelock.gov.in',
-      pass: 'Demo@001',
-      desc: 'Multiple Titleholder (UP-0041 & UP-0053 Frozen)',
-      badge: 'Owner'
-    },
-    {
-      name: 'Meena Gupta',
-      email: 'meena.gupta@titlelock.gov.in',
-      pass: 'Demo@002',
-      desc: 'Bank Lien Encumbrance (UP-0019) & Joint (UP-0020)',
-      badge: 'Lien/Joint'
-    },
-    {
-      name: 'Jyoti Bhati',
-      email: 'jyoti.bhati@titlelock.gov.in',
-      pass: 'Demo@003',
-      desc: 'Owner (UP-0049) & Nominee for UP-0012',
-      badge: 'Nominee'
-    },
-    {
-      name: 'Geeta Goel',
-      email: 'geeta.goel@titlelock.gov.in',
-      pass: 'Demo@004',
-      desc: 'Prospective Buyer with active deed petition',
-      badge: 'Buyer'
-    }
-  ];
-
-  const registrarDemoAccounts = [
-    {
-      name: 'Virendra Swarup',
-      email: 'registrar.noida@titlelock.gov.in',
-      pass: 'Registrar@001',
-      desc: 'Sub-Registrar Officer • Tehsil Dadri / Noida-I',
-      badge: 'Sub-Registrar'
-    },
-    {
-      name: 'Dr. Anand Prakash',
-      email: 'subregistrar.dadri@titlelock.gov.in',
-      pass: 'Registrar@002',
-      desc: 'District Registrar & Statutory Deed Adjudicator',
-      badge: 'District Reg.'
-    }
-  ];
-
-  // Helper to quickly apply demo credentials
-  const handleApplyDemoAccount = (acc) => {
-    setIdentifier(acc.email);
-    setPassword(acc.pass);
-    setError('');
-    showToast(`Loaded credentials for ${acc.name} (${acc.badge})`, 'info');
-  };
-
-  // Switch between citizen and registrar modes
   const handleSelectRole = (newRole) => {
-    setRoleType(newRole);
+    setIdentifier('');
+    setPassword('');
+    setAadhaar('');
     setError('');
-    if (newRole === 'registrar') {
-      navigate('/registrar/login', { replace: true });
-      if (tab === 'signin') {
-        setIdentifier('registrar.noida@titlelock.gov.in');
-        setPassword('Registrar@001');
-      } else {
-        setSignupJurisdiction('Sub-Registrar Noida-I, UP');
-      }
-    } else {
-      navigate('/citizen/login', { replace: true });
-      if (tab === 'signin') {
-        setIdentifier('rajesh.kumar@titlelock.gov.in');
-        setPassword('Demo@001');
-      } else {
-        setSignupJurisdiction('Gautam Buddha Nagar / Noida, UP');
-      }
-    }
+    setPhoneLinkConfirmed(false);
+    setChallenge(null);
+    setEmailCode('');
+    setSmsCode('');
+    setNotice('');
+    navigate(newRole === 'registrar' ? '/registrar/login' : '/citizen/login', { replace: true });
   };
 
-  // Sign In Handler with strict role enforcement
-  const handleSignIn = (e) => {
+  const handleSignIn = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
-
-    const expectedRole = roleType === 'registrar' ? 'REGISTRAR' : 'CITIZEN';
-
-    setTimeout(() => {
-      const res = login(identifier, password, expectedRole);
-      setLoading(false);
-      if (res.success) {
-        if (roleType === 'registrar' || res.user?.role === 'REGISTRAR' || res.user?.activeRole === 'REGISTRAR') {
-          navigate('/registrar/dashboard');
-        } else {
-          navigate('/citizen/dashboard');
-        }
-      } else {
-        setError(res.message);
-      }
-    }, 250);
+    const result = await login(identifier, password, roleType === 'registrar' ? 'REGISTRAR' : 'CITIZEN');
+    setLoading(false);
+    if (result.otp_required) {
+      setChallenge(result);
+      setPassword('');
+      return;
+    }
+    if (result.success) {
+      setPassword('');
+      setAadhaar('');
+      navigate(result.user.role === 'REGISTRAR' ? '/registrar/dashboard' : '/citizen/dashboard');
+    } else {
+      setError(result.message);
+    }
   };
 
-  // Sign Up Handler
-  const handleSignUp = (e) => {
+  const handleSignUp = async (e) => {
     e.preventDefault();
     setError('');
-
-    if (!signupName.trim()) {
-      setError('Please enter your full legal name');
+    if (!phoneLinkConfirmed || !/^(?:\+91[ -]?)?[6-9][0-9]{9}$/.test(signupPhone.trim())) {
+      setError('Enter a valid Indian mobile number and confirm its ID linkage.');
       return;
     }
-    if (!signupEmail.trim()) {
-      setError('Please enter a valid email address');
-      return;
-    }
-    if (signupPassword.length < 6) {
-      setError('Password must be at least 6 characters');
+    if (signupPassword.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
     if (signupPassword !== signupConfirmPassword) {
       setError('Passwords do not match');
       return;
     }
-
-    if (roleType === 'registrar' && registrarCode !== 'REG-GOV-2026') {
-      setError('Official authorization code required for Sub-Registrar accounts. (Hint: Use REG-GOV-2026)');
+    setLoading(true);
+    const result = await signup({
+      name: signupName, email: signupEmail, phone: signupPhone,
+      password: signupPassword, jurisdiction: signupJurisdiction,
+      role: roleType === 'registrar' ? 'REGISTRAR' : 'CITIZEN',
+      registrarCode: roleType === 'registrar' ? registrarCode : '',
+      ...(roleType === 'citizen' ? { aadhaar } : {}),
+    });
+    setLoading(false);
+    if (result.login_required) {
+      setTab('signin');
+      setIdentifier(signupEmail);
+      setSignupPassword('');
+      setSignupConfirmPassword('');
+      setAadhaar('');
+      setNotice(result.message);
       return;
     }
+    if (result.success) {
+      setSignupPassword('');
+      setSignupConfirmPassword('');
+      setRegistrarCode('');
+      setAadhaar('');
+      navigate(result.user.role === 'REGISTRAR' ? '/registrar/dashboard' : '/citizen/dashboard');
+    } else setError(result.message);
+  };
 
+  const handleVerifyOTP = async (e) => {
+    e.preventDefault();
     setLoading(true);
-
-    setTimeout(() => {
-      const newUserData = {
-        name: signupName,
-        email: signupEmail,
-        phone: signupPhone || '+91 98765 43210',
-        password: signupPassword,
-        role: roleType === 'registrar' ? 'REGISTRAR' : 'CITIZEN',
-        activeRole: roleType === 'registrar' ? 'REGISTRAR' : 'OWNER',
-        jurisdiction: signupJurisdiction,
-        description: roleType === 'registrar' 
-          ? `Sub-Registrar Authority • ${signupJurisdiction}`
-          : 'Verified Citizen Titleholder under Section 5 Cadastre'
-      };
-
-      const res = signup(newUserData);
-      setLoading(false);
-      if (res.success) {
-        if (roleType === 'registrar') {
-          navigate('/registrar/dashboard');
-        } else {
-          navigate('/citizen/dashboard');
-        }
-      } else {
-        setError(res.message);
-      }
-    }, 350);
+    setError('');
+    const result = await verifyOTP({ challenge_id: challenge.challenge_id, email_code: emailCode, sms_code: smsCode });
+    setLoading(false);
+    if (result.success) {
+      setEmailCode('');
+      setSmsCode('');
+      navigate(result.user.role === 'REGISTRAR' ? '/registrar/dashboard' : '/citizen/dashboard');
+    } else setError(result.message);
   };
 
   return (
@@ -278,6 +189,7 @@ export function CitizenLoginPage() {
             type="button"
             onClick={() => {
               setTab('signin');
+              setChallenge(null);
               setError('');
             }}
             className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -293,6 +205,7 @@ export function CitizenLoginPage() {
             type="button"
             onClick={() => {
               setTab('signup');
+              setChallenge(null);
               setError('');
             }}
             className={`py-2 text-xs font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
@@ -307,15 +220,16 @@ export function CitizenLoginPage() {
         </div>
 
         {/* Error Alert */}
-        {error && (
+        {notice && <p role="status" className="text-sm text-emerald-700">{notice}</p>}
+        {(error || authError) && (
           <div className="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-rose-600 flex-shrink-0" />
-            <span>{error}</span>
+            <span>{error || authError}</span>
           </div>
         )}
 
         {/* TAB 1: SIGN IN */}
-        {tab === 'signin' && (
+        {tab === 'signin' && !challenge && (
           <form onSubmit={handleSignIn} className="space-y-4">
             <div>
               <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1.5">
@@ -328,7 +242,7 @@ export function CitizenLoginPage() {
                   value={identifier}
                   onChange={(e) => setIdentifier(e.target.value)}
                   required
-                  placeholder={roleType === 'registrar' ? 'registrar.noida@titlelock.gov.in' : 'rajesh.kumar@titlelock.gov.in'}
+                  placeholder="Email or username"
                   className="w-full pl-10 pr-3.5 py-2.5 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e] focus:ring-1 focus:ring-[#0b6b4e]"
                 />
               </div>
@@ -351,60 +265,9 @@ export function CitizenLoginPage() {
               </div>
             </div>
 
-            {/* Demo IDs Quick Selector */}
-            <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-700">
-                  <Users className="w-3.5 h-3.5 text-[#0b6b4e]" />
-                  <span>Demo {roleType === 'registrar' ? 'Sub-Registrar' : 'Citizen'} Accounts (Click to Fill)</span>
-                </div>
-                <span className="text-[10px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                  Instant Test
-                </span>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-1.5 pt-1">
-                {(roleType === 'registrar' ? registrarDemoAccounts : citizenDemoAccounts).map((acc) => {
-                  const isCurrent = identifier === acc.email;
-                  return (
-                    <button
-                      key={acc.email}
-                      type="button"
-                      onClick={() => handleApplyDemoAccount(acc)}
-                      className={`w-full text-left p-2 rounded-xl transition-all border flex items-center justify-between cursor-pointer ${
-                        isCurrent
-                          ? 'bg-emerald-50/90 border-[#0b6b4e] text-emerald-950 shadow-xs'
-                          : 'bg-white hover:bg-slate-100/80 border-slate-200/90 text-slate-700'
-                      }`}
-                    >
-                      <div className="min-w-0 pr-2">
-                        <div className="text-[11px] font-bold truncate flex items-center gap-1.5">
-                          <span>{acc.name}</span>
-                          <span className="text-[9px] font-mono font-normal text-slate-500 truncate">({acc.email})</span>
-                        </div>
-                        <div className="text-[10px] text-slate-500 truncate">{acc.desc}</div>
-                      </div>
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
-                          isCurrent 
-                            ? 'bg-[#0b6b4e] text-white' 
-                            : 'bg-slate-100 text-slate-600'
-                        }`}>
-                          {acc.badge}
-                        </span>
-                        {isCurrent && (
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#0b6b4e]" />
-                        )}
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || authLoading}
               className="w-full py-2.5 rounded-2xl text-xs font-bold text-white bg-[#0b6b4e] hover:bg-[#08523c] transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60"
             >
               {loading 
@@ -416,8 +279,26 @@ export function CitizenLoginPage() {
         )}
 
         {/* TAB 2: SIGN UP */}
+        {tab === 'signin' && challenge && (
+          <form onSubmit={handleVerifyOTP} className="space-y-4">
+            <p className="text-sm text-slate-600 dark:text-slate-300">Enter the separate codes sent to {challenge.email_hint} and {challenge.phone_hint}. Codes expire in five minutes.</p>
+            <label className="block text-sm">Email code
+              <input aria-label="Email code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={emailCode}
+                onChange={(e) => setEmailCode(e.target.value.replace(/\D/g, ''))} className="block w-full rounded-xl border p-2 text-slate-800" />
+            </label>
+            <label className="block text-sm">SMS code
+              <input aria-label="SMS code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required value={smsCode}
+                onChange={(e) => setSmsCode(e.target.value.replace(/\D/g, ''))} className="block w-full rounded-xl border p-2 text-slate-800" />
+            </label>
+            <button disabled={loading} className="rounded-xl bg-emerald-800 px-4 py-2 text-white">{loading ? 'Verifying…' : 'Verify and sign in'}</button>
+            <button type="button" disabled={loading} onClick={() => { setChallenge(null); setEmailCode(''); setSmsCode(''); setError(''); }} className="block text-sm underline">
+              Restart login to request new codes
+            </button>
+          </form>
+        )}
         {tab === 'signup' && (
           <form onSubmit={handleSignUp} className="space-y-3.5">
+            {roleType === 'citizen' && <AadhaarField value={aadhaar} onChange={setAadhaar} />}
             <div>
               <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
                 Full Legal Name
@@ -455,7 +336,7 @@ export function CitizenLoginPage() {
 
               <div>
                 <label className="block text-[11px] font-bold text-slate-600 uppercase tracking-wider mb-1">
-                  Mobile Number
+                  {roleType === 'registrar' ? 'Government ID registered mobile' : 'Aadhaar-linked mobile'}
                 </label>
                 <div className="relative">
                   <Phone className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
@@ -463,11 +344,34 @@ export function CitizenLoginPage() {
                     type="tel"
                     value={signupPhone}
                     onChange={(e) => setSignupPhone(e.target.value)}
-                    placeholder="+91 98..."
+                    required
+                    inputMode="tel"
+                    autoComplete="tel"
+                    pattern="(\+91[ -]?)?[6-9][0-9]{9}"
+                    title="Enter a 10-digit Indian mobile number, optionally prefixed with +91."
+                    placeholder="9876543210 or +91 9876543210"
                     className="w-full pl-10 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
                   />
                 </div>
               </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="flex items-start gap-2 text-xs text-slate-600 dark:text-slate-300">
+                <input
+                  type="checkbox"
+                  checked={phoneLinkConfirmed}
+                  onChange={(e) => setPhoneLinkConfirmed(e.target.checked)}
+                  required
+                  className="mt-0.5"
+                />
+                <span>
+                  {roleType === 'registrar'
+                    ? 'I confirm this mobile number is registered with my government officer ID.'
+                    : 'I confirm this mobile number is linked to my Aadhaar.'}
+                </span>
+              </label>
+              <p className="text-[11px] text-slate-500">This is your declaration. TitleLock has not verified the ID linkage. Do not enter your Aadhaar or officer ID number here.</p>
             </div>
 
             <div>
@@ -498,7 +402,7 @@ export function CitizenLoginPage() {
                     type="text"
                     value={registrarCode}
                     onChange={(e) => setRegistrarCode(e.target.value)}
-                    placeholder="Enter official authorization (e.g. REG-GOV-2026)"
+                    placeholder="Enter your private officer authorization code"
                     className="w-full pl-10 pr-3.5 py-2 text-xs font-mono font-bold rounded-xl border border-amber-300 bg-amber-50/50 text-slate-900 focus:outline-none focus:border-amber-600"
                   />
                 </div>
@@ -517,7 +421,7 @@ export function CitizenLoginPage() {
                     value={signupPassword}
                     onChange={(e) => setSignupPassword(e.target.value)}
                     required
-                    placeholder="At least 6 chars"
+                    placeholder="At least 8 characters"
                     className="w-full pl-10 pr-3 py-2 text-xs font-medium rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:border-[#0b6b4e]"
                   />
                 </div>
@@ -543,7 +447,7 @@ export function CitizenLoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || authLoading}
               className="w-full py-2.5 rounded-2xl text-xs font-bold text-white bg-[#0b6b4e] hover:bg-[#08523c] transition-colors shadow-xs flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 pt-2.5"
             >
               {loading 

@@ -1,9 +1,5 @@
-import { generateDatabasePersonas } from '../services/databaseService';
 import propertiesData from '../data/properties.json';
 import pendingTransfersData from '../data/pending_transfers.json';
-
-// Authentic database citizen profiles
-export const DEMO_USERS = generateDatabasePersonas();
 
 // Authentic prospective buyers from pending transfer records
 export const TARGET_BUYERS = [

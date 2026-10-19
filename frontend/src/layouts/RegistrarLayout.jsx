@@ -29,53 +29,18 @@ import {
 } from 'lucide-react';
 
 export function RegistrarLayout() {
-  const { currentUser, logout, resetDemoState, toast } = useAuth();
+  const { currentUser, authLoading, logout, resetDemoState, toast } = useAuth();
   const navigate = useNavigate();
 
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownRef = useRef(null);
-  const notificationsRef = useRef(null);
-
-  // Statutory Registrar Notifications
-  const [notifications, setNotifications] = useState([
-    {
-      id: 'REG-NOTIF-01',
-      title: 'High-Velocity Transfer Injunction Flag',
-      message: 'Parcel UP-0041 triggered anti-flipping velocity freeze under Section 5 Cadastre rules.',
-      date: '10 mins ago',
-      type: 'warning',
-      read: false
-    },
-    {
-      id: 'REG-NOTIF-02',
-      title: 'Succession Petition Awaiting Adjudication',
-      message: 'Joint titleholder petition submitted for Tehsil Dadri sub-district registry review.',
-      date: '1 hour ago',
-      type: 'info',
-      read: false
-    },
-    {
-      id: 'REG-NOTIF-03',
-      title: 'State Land Records Gateway Sync Complete',
-      message: 'Bhulekh UP-DILRMP v3.2 anchor reconciliation completed for 12 cadastre parcels.',
-      date: 'Today',
-      type: 'success',
-      read: true
-    }
-  ]);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
 
   // Close menus on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-        setIsNotificationsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -87,17 +52,17 @@ export function RegistrarLayout() {
     { label: 'Transfer Petitions', path: '/registrar/petitions', icon: FileCheck2 },
     { label: 'Succession Desk', path: '/registrar/succession', icon: Users2 },
     { label: 'Risk Reviews', path: '/registrar/risk', icon: ShieldAlert },
-    { label: 'Immutable Audit Log', path: '/registrar/audit', icon: FileClock },
+    { label: 'Sale Activity', path: '/registrar/audit', icon: FileClock },
     { label: 'Officer Credentials', path: '/registrar/credentials', icon: UserCheck }
   ];
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     setShowLogoutConfirm(false);
-    logout();
-    navigate('/registrar/login');
+    if (await logout()) navigate('/registrar/login');
   };
 
   // If not logged in, redirect to login
+  if (authLoading) return <div role="status" className="p-8 text-center">Checking your session…</div>;
   if (!currentUser) {
     return <Navigate to="/registrar/login" replace />;
   }
@@ -111,7 +76,7 @@ export function RegistrarLayout() {
     <div className="h-screen w-full bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 overflow-hidden">
       
       {/* Pinned Glassmorphic Left Sidebar (Matching Citizen Portal Style) */}
-      <aside className="w-full md:w-64 md:h-screen md:sticky md:top-0 z-30 flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-r border-white/60 dark:border-white/10 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_-4px_rgba(0,0,0,0.3)] md:overflow-y-auto no-scrollbar transition-all">
+      <aside className="max-h-48 overflow-y-auto md:max-h-none w-full md:w-64 md:h-screen md:sticky md:top-0 z-30 flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-r border-white/60 dark:border-white/10 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_-4px_rgba(0,0,0,0.3)] md:overflow-y-auto no-scrollbar transition-all">
         <div>
           {/* Brand Header */}
           <div className="flex items-center gap-3 px-2 mb-8">
@@ -195,7 +160,7 @@ export function RegistrarLayout() {
       </aside>
 
       {/* Main Content Area with Fixed Top Navbar & Scrollable Body */}
-      <div className="flex-1 min-w-0 h-full flex flex-col overflow-y-auto overflow-x-hidden">
+      <div className="flex-1 min-h-0 min-w-0 h-full flex flex-col overflow-y-auto overflow-x-hidden">
         
         {/* Pinned Top Glass Navbar (Matching Citizen Navbar Style & Theme) */}
         <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
@@ -238,54 +203,9 @@ export function RegistrarLayout() {
               <span>Reset State</span>
             </button>
 
-            {/* Notifications Bell Dropdown */}
-            <div className="relative" ref={notificationsRef}>
-              <button
-                type="button"
-                onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}
-                className="relative p-2.5 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-white/80 dark:border-white/10 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.04)] text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition-colors cursor-pointer"
-                title="Statutory Notifications"
-              >
-                <Bell className="w-4 h-4" />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-white dark:ring-slate-900" />
-                )}
-              </button>
-
-              {isNotificationsOpen && (
-                <div className="absolute right-0 mt-3 w-80 sm:w-96 rounded-3xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl border border-white/80 dark:border-white/10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] dark:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.6)] p-4 z-50 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-xs text-slate-900 dark:text-white">Registrar Statutory Alerts</span>
-                      {unreadCount > 0 && (
-                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-950/80 text-rose-700 dark:text-rose-400">
-                          {unreadCount} new
-                        </span>
-                      )}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
-                      className="text-[11px] font-semibold text-[#0b6b4e] dark:text-emerald-400 hover:underline cursor-pointer"
-                    >
-                      Mark all read
-                    </button>
-                  </div>
-
-                  <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-72 overflow-y-auto no-scrollbar">
-                    {notifications.map((n) => (
-                      <div key={n.id} className="py-2.5 space-y-1">
-                        <div className="flex items-center justify-between text-[11px]">
-                          <span className="font-bold text-slate-900 dark:text-white">{n.title}</span>
-                          <span className="text-[10px] text-slate-400 dark:text-slate-500">{n.date}</span>
-                        </div>
-                        <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">{n.message}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+          <button type="button" onClick={() => navigate('/registrar/notifications')} title="Sale notifications" className="p-2 rounded-xl border bg-white dark:bg-slate-800">
+            <Bell className="w-4 h-4" />
+          </button>
 
             {/* Officer Profile Dropdown Button */}
             <div className="relative" ref={dropdownRef}>

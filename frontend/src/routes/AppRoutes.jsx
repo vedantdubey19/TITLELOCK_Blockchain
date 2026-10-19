@@ -71,6 +71,7 @@ export function AppRoutes() {
         <Route path="succession" element={<RegistrarSuccessionPage />} />
         <Route path="risk" element={<RegistrarRiskPage />} />
         <Route path="audit" element={<RegistrarAuditPage />} />
+        <Route path="notifications" element={<CitizenNotificationsPage />} />
         <Route path="credentials" element={<RegistrarCredentialsPage />} />
       </Route>
 

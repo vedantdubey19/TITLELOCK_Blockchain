@@ -1,19 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { DEMO_USERS, TARGET_BUYERS } from '../constants/mockData';
-import { CadastreDatabaseService } from '../services/databaseService';
+import { authService } from '../services/authService';
+import { CadastreDatabaseService, normalizeProperty } from '../services/databaseService';
 
 const AuthContext = createContext(null);
 
 export function AuthProvider({ children }) {
-  // Load active user or fallback to first database persona (Rajesh Kumar)
-  const [currentUser, setCurrentUser] = useState(() => {
-    return CadastreDatabaseService.getActiveUser();
-  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authError, setAuthError] = useState('');
+  const activeRoleView = currentUser?.activeRole || 'OWNER';
 
-  const [activeRoleView, setActiveRoleView] = useState(() => {
-    const user = CadastreDatabaseService.getActiveUser();
-    return user?.activeRole || 'OWNER';
-  });
+  useEffect(() => {
+    // Delete old browser accounts, including their plaintext demo passwords.
+    try {
+      localStorage.removeItem('titlelock_user');
+      localStorage.removeItem('titlelock_registered_users');
+    } catch { /* Authentication does not require browser storage. */ }
+    let cancelled = false;
+    authService.me().then((user) => {
+      if (!cancelled) setCurrentUser(user);
+    }).catch((error) => {
+      if (!cancelled && error.status !== 401) setAuthError(error.message);
+    }).finally(() => {
+      if (!cancelled) setAuthLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   // Global search input in top bar
   const [globalSearch, setGlobalSearch] = useState('');
@@ -37,13 +49,6 @@ export function AuthProvider({ children }) {
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
-    CadastreDatabaseService.setActiveUser(currentUser);
-    if (currentUser?.activeRole) {
-      setActiveRoleView(currentUser.activeRole);
-    }
-  }, [currentUser]);
-
-  useEffect(() => {
     CadastreDatabaseService.saveParcels(allParcels);
   }, [allParcels]);
 
@@ -62,124 +67,68 @@ export function AuthProvider({ children }) {
     }, 4500);
   };
 
-  const login = (emailOrUsername, password, expectedRole = null) => {
-    const demoUsers = CadastreDatabaseService.getDemoUsers();
-    const found = demoUsers.find(
-      (u) =>
-        (u.email.toLowerCase() === emailOrUsername.toLowerCase() ||
-         u.username.toLowerCase() === emailOrUsername.toLowerCase()) &&
-        u.password === password
-    );
-
-    if (found) {
-      const isUserRegistrar = found.role === 'REGISTRAR' || found.activeRole === 'REGISTRAR';
-      
-      // Strict Portal Segregation
-      if (expectedRole === 'REGISTRAR' && !isUserRegistrar) {
-        return {
-          success: false,
-          message: 'Access Denied: This is a Citizen account. Citizens are only permitted to sign in to the Citizen Landholder Portal.'
-        };
-      }
-
-      if (expectedRole === 'CITIZEN' && isUserRegistrar) {
-        return {
-          success: false,
-          message: 'Access Denied: This is a Sub-Registrar / Government Authority account. Registrars must sign in using the Registrar Gateway.'
-        };
-      }
-
-      setCurrentUser(found);
-      setActiveRoleView(found.activeRole || (isUserRegistrar ? 'REGISTRAR' : 'OWNER'));
-      showToast(`Welcome back, ${found.name}!`, 'success');
-      return { success: true, user: found };
+  const authenticate = async (action) => {
+    try {
+      const result = await action();
+      if (result.otp_required || result.login_required) return { ...result, success: true };
+      setCurrentUser(result.user);
+      setAuthError('');
+      showToast(`Welcome, ${result.user.name}`, 'success');
+      return { success: true, user: result.user };
+    } catch (error) {
+      return { success: false, message: error.message, code: error.code };
     }
-    return { success: false, message: 'Invalid credentials. Please verify your email and password, or select a demo account.' };
   };
 
-  const signup = (newUserData) => {
-    const demoUsers = CadastreDatabaseService.getDemoUsers();
-    const existing = demoUsers.find(
-      (u) =>
-        u.email.toLowerCase() === newUserData.email.toLowerCase() ||
-        (newUserData.username && u.username.toLowerCase() === newUserData.username.toLowerCase())
-    );
+  const login = (identifier, password, expectedRole) =>
+    authenticate(() => authService.login(identifier, password, expectedRole));
 
-    if (existing) {
-      return { success: false, message: 'An account with this email already exists. Please sign in.' };
+  const signup = (data) => authenticate(() => authService.signup(data));
+  const verifyOTP = (data) => authenticate(() => authService.verifyOTP(data));
+
+  const updateProfile = () => {
+    showToast('Profile editing will be available when its backend API is connected.', 'warning');
+  };
+
+  const logout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      if (error.status !== 401) {
+        showToast(error.message, 'warning');
+        return false;
+      }
     }
-
-    const isRegistrar = newUserData.role === 'REGISTRAR';
-
-    const createdUser = {
-      id: isRegistrar ? `REG-${Date.now().toString().slice(-4)}` : `USR-${Date.now().toString().slice(-4)}`,
-      name: newUserData.name,
-      email: newUserData.email,
-      username: newUserData.username || newUserData.email.split('@')[0],
-      password: newUserData.password,
-      role: isRegistrar ? 'REGISTRAR' : 'CITIZEN',
-      status: 'ACTIVE',
-      activeRole: isRegistrar ? 'REGISTRAR' : (newUserData.activeRole || 'OWNER'),
-      avatar: newUserData.avatar || (isRegistrar 
-        ? 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80'
-        : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80'),
-      wallet: `0x${Array.from({length: 40}, () => Math.floor(Math.random()*16).toString(16)).join('')}`,
-      description: newUserData.description || (isRegistrar 
-        ? `Sub-Registrar Officer • ${newUserData.jurisdiction || 'Tehsil Registry Office'}`
-        : 'Registered Citizen Titleholder with Section 5 biometric identity'),
-      jurisdiction: newUserData.jurisdiction || (isRegistrar ? 'Sub-Registrar Noida-I, UP' : 'Gautam Buddha Nagar / Noida, UP'),
-      phone: newUserData.phone || '+91 98765 43210'
-    };
-
-    CadastreDatabaseService.registerUser(createdUser);
-    setCurrentUser(createdUser);
-    setActiveRoleView(createdUser.activeRole);
-    showToast(`Account created successfully! Welcome, ${createdUser.name}`, 'success');
-    return { success: true, user: createdUser };
-  };
-
-  const loginAsDemo = (demoUser) => {
-    setCurrentUser(demoUser);
-    setActiveRoleView(demoUser.activeRole || 'OWNER');
-    showToast(`Logged in as ${demoUser.name} (${demoUser.activeRole})`, 'info');
-  };
-
-  const updateProfile = (updatedFields) => {
-    setCurrentUser((prev) => {
-      const updated = { ...prev, ...updatedFields };
-      CadastreDatabaseService.setActiveUser(updated);
-      return updated;
-    });
-    showToast('Profile information updated successfully', 'success');
-  };
-
-  const logout = () => {
     setCurrentUser(null);
-    showToast('Signed out of Citizen Portal', 'info');
+    showToast('Signed out successfully', 'info');
+    return true;
   };
 
   const resetDemoState = () => {
     CadastreDatabaseService.resetToDefaults();
-    const freshUsers = CadastreDatabaseService.getDemoUsers();
-    setCurrentUser(freshUsers[0]);
-    setActiveRoleView('OWNER');
     setAllParcels(CadastreDatabaseService.getParcels());
     setTransfers(CadastreDatabaseService.getTransfers());
     setSellTokens([]);
-    showToast('Cadastral database & session reset to initial state', 'warning');
+    showToast('Demo parcel data reset. Your database account is unchanged.', 'info');
   };
 
-  // Dynamically compute user's parcels
-  const userParcels = allParcels.filter((p) => {
-    if (!currentUser) return false;
-    const userName = currentUser.name?.toLowerCase();
-    const isPrimary = p.currentOwner?.toLowerCase() === userName ||
-                     p.primaryOwner?.toLowerCase() === userName;
-    const isOwnerInList = (p.owners || []).some(
-      (o) => o.name?.toLowerCase() === userName
-    );
-    return isPrimary || isOwnerInList;
-  });
+  const [propertyState, setPropertyState] = useState({ userId: null, parcels: [], loading: false, error: '', linked: false });
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== 'CITIZEN') return;
+    let cancelled = false;
+    setPropertyState({ userId: currentUser.id, parcels: [], loading: true, error: '', linked: false });
+    fetch('/api/properties/my', { credentials: 'same-origin' }).then(async (response) => {
+      const body = await response.json();
+      if (!response.ok) throw new Error(body.detail || 'Could not load properties');
+      if (!cancelled) setPropertyState({ userId: currentUser.id, parcels: body.properties.map(normalizeProperty), loading: false, error: '', linked: body.identity_linked });
+    }).catch((error) => {
+      if (!cancelled) setPropertyState({ userId: currentUser.id, parcels: [], loading: false, error: error.message, linked: false });
+    });
+    return () => { cancelled = true; };
+  }, [currentUser]);
+  const userParcels = propertyState.userId === currentUser?.id ? propertyState.parcels : [];
+  const propertiesLoading = !!currentUser && (propertyState.userId !== currentUser.id || propertyState.loading);
+  const propertiesError = propertyState.userId === currentUser?.id ? propertyState.error : '';
 
   // Dynamically compute user's nominee properties
   const userNomineeProperties = allParcels.filter((p) => {
@@ -198,20 +147,9 @@ export function AuthProvider({ children }) {
   });
 
   // Actions
-  const generateSellToken = (parcelId, buyerId, buyerName) => {
-    const newToken = {
-      tokenId: `TK-${Math.floor(100000 + Math.random() * 900000)}`,
-      parcelId,
-      buyerId,
-      buyerName,
-      createdDate: new Date().toISOString(),
-      expiresIn: '48 Hours',
-      signature: `0x${Array.from({length: 32}, () => Math.floor(Math.random()*16).toString(16)).join('')}`,
-      status: 'ACTIVE'
-    };
-    setSellTokens((prev) => [newToken, ...prev]);
-    showToast(`Sell Token ${newToken.tokenId} issued for ${buyerName}`, 'success');
-    return newToken;
+  const generateSellToken = () => {
+    showToast('Open Sell Tokens to approve an existing registrar sale request.', 'warning');
+    return null;
   };
 
   const revokeSellToken = (tokenId) => {
@@ -240,17 +178,20 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider
       value={{
         currentUser,
+        authLoading,
+        authError,
         login,
         signup,
-        loginAsDemo,
+        verifyOTP,
         logout,
         updateProfile,
         activeRoleView,
-        setActiveRoleView,
         globalSearch,
         setGlobalSearch,
         allParcels,
-        parcels: userParcels.length > 0 ? userParcels : allParcels.slice(0, 8),
+        parcels: userParcels,
+        propertiesLoading,
+        propertiesError,
         nomineeProperties: userNomineeProperties,
         transfers,
         userTransfers,

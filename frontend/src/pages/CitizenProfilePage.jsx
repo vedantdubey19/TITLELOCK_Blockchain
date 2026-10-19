@@ -36,7 +36,7 @@ export function CitizenProfilePage() {
     jurisdiction: user?.jurisdiction || 'Gautam Buddha Nagar / Noida, UP',
     residentialAddress: user?.residentialAddress || 'Plot 42, Sector 15-A, Noida, Gautam Buddha Nagar, Uttar Pradesh - 201301',
     description: user?.description || 'Verified Titleholder with registered cadastre parcels under Section 5 Registry Protocol',
-    aadharMasked: user?.aadharMasked || 'XXXX-XXXX-8921',
+    aadharMasked: user?.aadhaarLast4 ? `XXXX-XXXX-${user.aadhaarLast4}` : 'Not enrolled',
     panNumber: user?.panNumber || 'ABCDE1234F',
     primaryNomineeName: user?.primaryNomineeName || 'Aarav Kumar',
     nomineeRelation: user?.nomineeRelation || 'Son',

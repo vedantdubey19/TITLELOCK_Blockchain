@@ -5,7 +5,9 @@ import { Sidebar } from './Sidebar';
 import { useAuth } from '../hooks/useAuth';
 
 export function CitizenLayout() {
-  const { currentUser, toast } = useAuth();
+  const { currentUser, authLoading, toast } = useAuth();
+
+  if (authLoading) return <div role="status" className="p-8 text-center">Checking your session…</div>;
 
   // If user is logged in as a Registrar, redirect them to the Registrar Portal
   if (currentUser && (currentUser.role === 'REGISTRAR' || currentUser.activeRole === 'REGISTRAR')) {

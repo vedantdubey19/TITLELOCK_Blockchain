@@ -7,8 +7,6 @@ import propertiesData from '../data/properties.json';
 import pendingTransfersData from '../data/pending_transfers.json';
 
 export const DB_KEYS = {
-  USER: 'titlelock_user',
-  REGISTERED_USERS: 'titlelock_registered_users',
   PROPERTIES: 'titlelock_v2_properties',
   TRANSFERS: 'titlelock_v2_transfers',
   SELL_TOKENS: 'titlelock_v2_sell_tokens',
@@ -17,7 +15,7 @@ export const DB_KEYS = {
 };
 
 // Transform raw Database/properties.json to UI-friendly model while maintaining full fidelity
-function normalizeProperty(raw) {
+export function normalizeProperty(raw) {
   const isFrozen = Boolean(raw.frozen);
   let statusVariant = 'success';
   if (isFrozen || raw.title_status === 'FROZEN') statusVariant = 'danger';
@@ -101,145 +99,7 @@ function normalizeTransfer(raw) {
   };
 }
 
-// Build standard user personas with Rajesh Kumar as the primary matching the reference screenshot
-export function generateDatabasePersonas() {
-  const personas = [
-    {
-      id: 'USR-001',
-      name: 'Rajesh Kumar',
-      email: 'rajesh.kumar@titlelock.gov.in',
-      username: 'rajesh_kumar',
-      password: 'Demo@001',
-      role: 'CITIZEN',
-      status: 'ACTIVE',
-      activeRole: 'OWNER',
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      wallet: '0x742d35Cc6634C0532925a3b8448c454e4438f44c',
-      description: 'Verified Titleholder with 8 registered cadastre parcels',
-      jurisdiction: 'Gautam Buddha Nagar / Noida, UP'
-    },
-    {
-      id: 'USR-RADHA-01',
-      name: 'Radha Sharma',
-      email: 'radha.sharma@titlelock.gov.in',
-      username: 'radha_sharma',
-      password: 'Demo@001',
-      role: 'CITIZEN',
-      status: 'ACTIVE',
-      activeRole: 'OWNER',
-      avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&auto=format&fit=crop&q=80',
-      wallet: '0x742d35Cc6634C0532925a3b8448c454e4438f44c',
-      description: 'Multiple titleholder (UP-0041 & UP-0053 Frozen Velocity)',
-      jurisdiction: 'Noida-I / Greater Noida, UP'
-    },
-    {
-      id: 'USR-MEENA-02',
-      name: 'Meena Gupta',
-      email: 'meena.gupta@titlelock.gov.in',
-      username: 'meena_gupta',
-      password: 'Demo@002',
-      role: 'CITIZEN',
-      status: 'ACTIVE',
-      activeRole: 'OWNER',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-      wallet: '0x45B3...C821',
-      description: 'Owner with active Bank Lien encumbrance (UP-0019) & Joint (UP-0020)',
-      jurisdiction: 'Sub-Registrar Noida-I, UP'
-    },
-    {
-      id: 'USR-JYOTI-03',
-      name: 'Jyoti Bhati',
-      email: 'jyoti.bhati@titlelock.gov.in',
-      username: 'jyoti_bhati',
-      password: 'Demo@003',
-      role: 'CITIZEN',
-      status: 'ACTIVE',
-      activeRole: 'NOMINEE',
-      avatar: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150&auto=format&fit=crop&q=80',
-      wallet: '0x19Fa...33DA',
-      description: 'Sole owner (UP-0049) & registered Nominee for UP-0012',
-      jurisdiction: 'Sub-Registrar Noida-II, UP'
-    },
-    {
-      id: 'USR-GEETA-04',
-      name: 'Geeta Goel',
-      email: 'geeta.goel@titlelock.gov.in',
-      username: 'geeta_goel',
-      password: 'Demo@004',
-      role: 'CITIZEN',
-      status: 'ACTIVE',
-      activeRole: 'BUYER',
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      wallet: '0x88Ca...901B',
-      description: 'Registered prospective Buyer with active deed petition (REQ-01)',
-      jurisdiction: 'Gautam Buddha Nagar, UP'
-    },
-    // Registrar Accounts
-    {
-      id: 'REG-NOIDA-01',
-      name: 'Virendra Swarup (Sub-Registrar)',
-      email: 'registrar.noida@titlelock.gov.in',
-      username: 'registrar_noida',
-      password: 'Registrar@001',
-      role: 'REGISTRAR',
-      status: 'ACTIVE',
-      activeRole: 'REGISTRAR',
-      avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&auto=format&fit=crop&q=80',
-      wallet: '0x992B...A041',
-      description: 'Sub-Registrar Officer • Tehsil Dadri / Gautam Buddha Nagar-I',
-      jurisdiction: 'Sub-Registrar Noida-I / Gautam Buddha Nagar, UP'
-    },
-    {
-      id: 'REG-DADRI-02',
-      name: 'Dr. Anand Prakash (District Registrar)',
-      email: 'subregistrar.dadri@titlelock.gov.in',
-      username: 'subregistrar_dadri',
-      password: 'Registrar@002',
-      role: 'REGISTRAR',
-      status: 'ACTIVE',
-      activeRole: 'REGISTRAR',
-      avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&auto=format&fit=crop&q=80',
-      wallet: '0x71Ae...F829',
-      description: 'District Registrar & Statutory Deed Adjudicator',
-      jurisdiction: 'Dadri Sub-District Registry Office, UP'
-    }
-  ];
-  return personas;
-}
-
 export class CadastreDatabaseService {
-  /**
-   * Retrieve all seed database citizen personas + registered users
-   */
-  static getDemoUsers() {
-    const base = generateDatabasePersonas();
-    try {
-      const stored = localStorage.getItem(DB_KEYS.REGISTERED_USERS);
-      if (stored) {
-        const customUsers = JSON.parse(stored);
-        return [...customUsers, ...base];
-      }
-    } catch (e) {
-      // fallback to base
-    }
-    return base;
-  }
-
-  /**
-   * Register a new user (Citizen or Registrar) into local database
-   */
-  static registerUser(userData) {
-    try {
-      const stored = localStorage.getItem(DB_KEYS.REGISTERED_USERS);
-      const list = stored ? JSON.parse(stored) : [];
-      list.unshift(userData);
-      localStorage.setItem(DB_KEYS.REGISTERED_USERS, JSON.stringify(list));
-      return { success: true, user: userData };
-    } catch (e) {
-      return { success: false, message: 'Could not write to local storage' };
-    }
-  }
-
   /**
    * Get prospective buyers from pending transfer records
    */
@@ -256,31 +116,6 @@ export class CadastreDatabaseService {
       }
     });
     return Array.from(buyerMap.values()).slice(0, 15);
-  }
-
-  /**
-   * Get active user from local storage or fallback to Rajesh Kumar
-   */
-  static getActiveUser() {
-    try {
-      const data = localStorage.getItem(DB_KEYS.USER);
-      if (data) return JSON.parse(data);
-      const personas = generateDatabasePersonas();
-      return personas[0];
-    } catch {
-      return generateDatabasePersonas()[0];
-    }
-  }
-
-  /**
-   * Save user session to storage
-   */
-  static setActiveUser(user) {
-    if (user) {
-      localStorage.setItem(DB_KEYS.USER, JSON.stringify(user));
-    } else {
-      localStorage.removeItem(DB_KEYS.USER);
-    }
   }
 
   /**
@@ -385,8 +220,6 @@ export class CadastreDatabaseService {
    * Reset all state back to initial database seeds
    */
   static resetToDefaults() {
-    localStorage.removeItem(DB_KEYS.USER);
-    localStorage.removeItem(DB_KEYS.REGISTERED_USERS);
     localStorage.removeItem(DB_KEYS.PROPERTIES);
     localStorage.removeItem(DB_KEYS.TRANSFERS);
     localStorage.removeItem(DB_KEYS.SELL_TOKENS);

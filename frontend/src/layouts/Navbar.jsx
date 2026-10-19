@@ -22,53 +22,14 @@ export function Navbar() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownRef = useRef(null);
-  const notificationsRef = useRef(null);
-
-  // Active notifications list (from the statutory deed alerts)
-  const [notifications, setNotifications] = useState([
-    {
-      id: 'NOTIF-01',
-      title: 'Annual Cadastral Reconciliation Notice',
-      message: 'Sub-Registrar Noida-I confirmed automated audit clearance and boundary reconciliation for registered parcels under your ownership.',
-      date: 'Today, 11:30 AM',
-      type: 'success',
-      read: false
-    },
-    {
-      id: 'NOTIF-02',
-      title: 'Conveyance Petition Quorum Reminder',
-      message: 'Pending transfer filings on joint parcels require counter-signature from all registered titleholders before forwarding to the Sub-Registrar.',
-      date: '2026-09-28',
-      type: 'warning',
-      read: false
-    },
-    {
-      id: 'NOTIF-03',
-      title: 'Cryptographic Title Clearance Completed',
-      message: 'Record of Rights (RoR) for parcel UP-0001-CLEAN has been successfully anchored with SHA-256 state seal.',
-      date: '2026-09-24',
-      type: 'info',
-      read: true
-    }
-  ]);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
-
-  const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-  };
 
   // Close menus on outside click
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
-      }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target)) {
-        setIsNotificationsOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -80,10 +41,9 @@ export function Navbar() {
     setShowLogoutConfirm(true);
   };
 
-  const handleConfirmLogout = () => {
+  const handleConfirmLogout = async () => {
     setShowLogoutConfirm(false);
-    logout();
-    navigate('/citizen/login');
+    if (await logout()) navigate('/citizen/login');
   };
 
   const handleNavigateProfile = () => {
@@ -128,106 +88,9 @@ export function Navbar() {
             <RotateCcw className="w-4 h-4" />
           </button>
 
-          {/* Notification Bell with Attached Dropdown Popover */}
-          <div className="relative" ref={notificationsRef}>
-            <button
-              type="button"
-              onClick={() => {
-                setIsNotificationsOpen(prev => !prev);
-                setIsDropdownOpen(false);
-              }}
-              title="Statutory Deed Notifications"
-              className="relative text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors p-2 rounded-2xl bg-white/70 hover:bg-white dark:bg-slate-800/80 dark:hover:bg-slate-700/90 border border-white/80 dark:border-white/10 shadow-xs cursor-pointer backdrop-blur-md focus:outline-none"
-            >
-              <Bell className="w-4 h-4" />
-              {unreadCount > 0 && (
-                <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-orange-500 ring-2 ring-white dark:ring-slate-900" />
-              )}
-            </button>
-
-            {/* Notification Box directly beneath Bell Button */}
-            {isNotificationsOpen && (
-              <div className="absolute right-0 mt-2.5 w-80 sm:w-96 bg-white dark:bg-slate-900 rounded-3xl p-4 shadow-[0_20px_50px_-10px_rgba(0,0,0,0.22),0_8px_24px_-4px_rgba(0,0,0,0.08)] dark:shadow-[0_20px_50px_-10px_rgba(0,0,0,0.6)] border border-slate-200/90 dark:border-white/10 z-50 animate-in fade-in slide-in-from-top-2 duration-150 text-xs">
-                {/* Popover Header */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-white/10">
-                  <div className="flex items-center gap-2">
-                    <div className="w-7 h-7 rounded-xl bg-purple-50 dark:bg-purple-950/60 text-purple-600 dark:text-purple-400 flex items-center justify-center">
-                      <Bell className="w-3.5 h-3.5" />
-                    </div>
-                    <div>
-                      <span className="font-bold text-slate-900 dark:text-white text-sm">Notifications</span>
-                      {unreadCount > 0 && (
-                        <span className="ml-1.5 px-1.5 py-0.2 rounded-full text-[10px] font-bold bg-orange-100 dark:bg-orange-950/80 text-orange-700 dark:text-orange-400">
-                          {unreadCount} new
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {unreadCount > 0 && (
-                    <button
-                      type="button"
-                      onClick={handleMarkAllRead}
-                      className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 cursor-pointer"
-                    >
-                      Mark all read
-                    </button>
-                  )}
-                </div>
-
-                {/* Notifications Scrollable List */}
-                <div className="divide-y divide-slate-100 dark:divide-white/5 max-h-80 overflow-y-auto no-scrollbar my-1">
-                  {notifications.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`py-3 px-1.5 transition-colors space-y-1.5 ${
-                        !item.read ? 'bg-slate-50/70 dark:bg-slate-800/60 rounded-2xl px-2.5 my-1' : ''
-                      }`}
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-2 h-2 rounded-full flex-shrink-0 ${
-                              item.type === 'success'
-                                ? 'bg-emerald-500'
-                                : item.type === 'warning'
-                                ? 'bg-amber-500'
-                                : 'bg-sky-500'
-                            }`}
-                          />
-                          <span className="font-bold text-slate-900 dark:text-white text-xs leading-snug">
-                            {item.title}
-                          </span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono flex-shrink-0">
-                          {item.date}
-                        </span>
-                      </div>
-
-                      <p className="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed pl-4">
-                        {item.message}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Popover Footer */}
-                <div className="pt-2 border-t border-slate-100 dark:border-white/10 flex items-center justify-between text-[11px]">
-                  <span className="text-slate-400 dark:text-slate-500">Section 5 Cadastral Registry</span>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsNotificationsOpen(false);
-                      navigate('/citizen/transactions?tab=transfers');
-                    }}
-                    className="font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 cursor-pointer"
-                  >
-                    View Conveyances ➔
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <button type="button" onClick={() => navigate('/citizen/notifications')} title="Sale notifications" className="p-2 rounded-xl border bg-white dark:bg-slate-800">
+            <Bell className="w-4 h-4" />
+          </button>
 
           {/* User Identity Chip with Dropdown */}
           <div className="relative" ref={dropdownRef}>
@@ -396,7 +259,7 @@ export function Navbar() {
                 Confirm Log Out
               </h3>
               <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-1.5 leading-relaxed">
-                Are you sure you want to end your active session on TitleLock Citizen Portal? Any unsaved edits will be preserved locally.
+                Are you sure you want to end your active session on TitleLock Citizen Portal?
               </p>
             </div>
 
