@@ -113,22 +113,22 @@ export function RegistrarDashboardPage() {
         {priorityQueue.length > 0 ? (
           <div className="divide-y divide-slate-100">
             {priorityQueue.map((item) => (
-              <div key={item.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/60 rounded-2xl px-2 transition-colors">
+              <div key={item.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-slate-50/60 dark:hover:bg-[#20232a] rounded-2xl px-2 transition-colors">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-slate-900 text-xs">{item.id}</span>
-                    <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 text-slate-700">
+                    <span className="font-mono font-bold text-slate-900 dark:text-white text-xs">{item.id}</span>
+                    <span className="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-slate-100 dark:bg-[#121316] text-slate-700 dark:text-sky-300 border border-transparent dark:border-[#262930]">
                       {item.ulpin}
                     </span>
-                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">
+                    <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-100 dark:bg-[#2e2114] text-amber-800 dark:text-[#f59e0b] border border-transparent dark:border-[#523419]">
                       AWAITING REVIEW
                     </span>
                   </div>
-                  <div className="text-[11px] text-slate-600">
-                    <span className="font-semibold text-slate-800">{item.seller}</span>
-                    <span className="text-slate-400 mx-1.5">➔</span>
-                    <span className="font-semibold text-slate-800">{item.buyer}</span>
-                    <span className="text-slate-400 ml-2">({item.claimedAreaSqm} m²)</span>
+                  <div className="text-[11px] text-slate-600 dark:text-slate-400">
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{item.seller}</span>
+                    <span className="text-slate-400 dark:text-slate-500 mx-1.5">➔</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{item.buyer}</span>
+                    <span className="text-slate-400 dark:text-slate-500 ml-2">({item.claimedAreaSqm} m²)</span>
                   </div>
                 </div>
 
@@ -146,7 +146,7 @@ export function RegistrarDashboardPage() {
                   <button
                     type="button"
                     onClick={() => navigate('/registrar/petitions')}
-                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-[11px] transition-colors cursor-pointer"
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-[#16181c] hover:bg-slate-200 dark:hover:bg-[#20232a] text-slate-700 dark:text-slate-200 border border-transparent dark:border-[#262930] font-semibold text-[11px] transition-colors cursor-pointer"
                   >
                     Review Dossier
                   </button>

@@ -25,13 +25,15 @@ import {
   Bell,
   X,
   Sun,
-  Moon
+  Moon,
+  Menu
 } from 'lucide-react';
 
 export function RegistrarLayout() {
   const { currentUser, authLoading, logout, resetDemoState, toast } = useAuth();
   const navigate = useNavigate();
 
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const dropdownRef = useRef(null);
@@ -75,22 +77,45 @@ export function RegistrarLayout() {
   return (
     <div className="h-screen w-full bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 overflow-hidden">
       
-      {/* Pinned Glassmorphic Left Sidebar (Matching Citizen Portal Style) */}
-      <aside className="max-h-48 overflow-y-auto md:max-h-none w-full md:w-64 md:h-screen md:sticky md:top-0 z-30 flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-r border-white/60 dark:border-white/10 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_-4px_rgba(0,0,0,0.3)] md:overflow-y-auto no-scrollbar transition-all">
+      {/* Mobile Dark Backdrop Overlay */}
+      {mobileMenuOpen && (
+        <div 
+          onClick={() => setMobileMenuOpen(false)}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden animate-in fade-in duration-200"
+          aria-hidden="true"
+        />
+      )}
+
+      {/* Glassmorphic Left Sidebar (Mobile Slide-out Drawer & Desktop Pinned) */}
+      <aside className={`fixed md:sticky top-0 left-0 z-50 md:z-30 w-72 md:w-64 h-screen flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/95 dark:bg-[#121316] backdrop-blur-2xl border-r border-slate-200/80 dark:border-[#262930] shadow-[8px_0_32px_-4px_rgba(0,0,0,0.15)] md:shadow-none overflow-y-auto no-scrollbar transition-transform duration-300 ease-in-out ${
+        mobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
         <div>
-          {/* Brand Header */}
-          <div className="flex items-center gap-3 px-2 mb-8">
-            <div className="w-10 h-10 rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_2px_10px_-2px_rgba(11,107,78,0.18)] flex items-center justify-center p-2">
-              <Building2 className="w-5 h-5 text-[#0b6b4e] dark:text-emerald-400" />
-            </div>
-            <div>
-              <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1.5">
-                <span>TitleLock</span>
+          {/* Brand Header & Mobile Close Button */}
+          <div className="flex items-center justify-between px-2 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/90 dark:bg-[#1a1c20] backdrop-blur-md border border-white/80 dark:border-[#262930] shadow-[0_2px_10px_-2px_rgba(11,107,78,0.18)] flex items-center justify-center p-2">
+                <Building2 className="w-5 h-5 text-[#0b6b4e] dark:text-emerald-400" />
               </div>
-              <span className="text-[10px] font-semibold tracking-wider text-[#0b6b4e] dark:text-emerald-400 uppercase mt-1 block">
-                Sub-Registrar
-              </span>
+              <div>
+                <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1.5">
+                  <span>TitleLock</span>
+                </div>
+                <span className="text-[10px] font-semibold tracking-wider text-[#0b6b4e] dark:text-emerald-400 uppercase mt-1 block">
+                  Sub-Registrar
+                </span>
+              </div>
             </div>
+
+            {/* Mobile Close Button */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white md:hidden cursor-pointer"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
 
           {/* Section Title */}
@@ -108,11 +133,12 @@ export function RegistrarLayout() {
                 <NavLink
                   key={item.path}
                   to={item.path}
+                  onClick={() => setMobileMenuOpen(false)}
                   className={({ isActive }) =>
                     `group relative flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
                       isActive
-                        ? 'bg-white/90 text-slate-900 shadow-[0_4px_16px_-2px_rgba(0,0,0,0.06)] border border-white/90 backdrop-blur-md'
-                        : 'text-slate-500 hover:text-slate-900 hover:bg-white/50'
+                        ? 'bg-white/90 dark:bg-[#1a1c20] text-slate-900 dark:text-white shadow-[0_4px_16px_-2px_rgba(0,0,0,0.06)] dark:shadow-none border border-white/90 dark:border-[#262930] backdrop-blur-md'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-[#1a1c20]/60'
                     }`
                   }
                 >
@@ -165,8 +191,19 @@ export function RegistrarLayout() {
         {/* Pinned Top Glass Navbar (Matching Citizen Navbar Style & Theme) */}
         <header className="sticky top-0 z-40 w-full bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_24px_-4px_rgba(0,0,0,0.3)] px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
           
-          {/* Left Info / State Tag */}
-          <div className="flex items-center gap-3">
+          {/* Left: Mobile Hamburger Button & Info Tag */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Three Lines Hamburger Menu Button (Mobile & Tablet) */}
+            <button
+              type="button"
+              onClick={() => setMobileMenuOpen(prev => !prev)}
+              className="md:hidden p-2 rounded-2xl bg-white/70 dark:bg-[#1a1c20] hover:bg-white dark:hover:bg-[#202329] border border-white/80 dark:border-[#262930] shadow-xs text-slate-700 dark:text-slate-200 cursor-pointer flex-shrink-0 focus:outline-none"
+              title="Open Adjudication Menu"
+              aria-label="Open Adjudication Menu"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+
             <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 shadow-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="text-xs font-semibold text-slate-700 dark:text-slate-200">Tehsil Dadri / Noida-I Office</span>

@@ -8,11 +8,12 @@ import {
   Headphones, 
   ExternalLink,
   ShieldCheck,
-  CheckCircle2
+  CheckCircle2,
+  X
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 
-export function Sidebar() {
+export function Sidebar({ mobileIsOpen = false, onClose = () => {} }) {
   const { userTransfers } = useAuth();
 
   const navItems = [
@@ -28,26 +29,50 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="w-full md:w-64 md:h-screen md:sticky md:top-0 z-30 flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-r border-white/60 dark:border-white/10 shadow-[4px_0_24px_-4px_rgba(0,0,0,0.02)] dark:shadow-[4px_0_24px_-4px_rgba(0,0,0,0.3)] md:overflow-y-auto no-scrollbar transition-all">
-      <div>
-        {/* Brand Header */}
-        <div className="flex items-center gap-3 px-2 mb-8">
-          <div className="w-10 h-10 rounded-2xl bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-white/80 dark:border-white/10 shadow-[0_2px_10px_-2px_rgba(14,165,233,0.15)] flex items-center justify-center p-2">
-            <svg viewBox="0 0 32 32" fill="none" className="w-full h-full text-sky-500">
-              <path d="M16 4L4 10L16 16L28 10L16 4Z" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M4 16L16 22L28 16" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M4 22L16 28L28 22" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <div>
-            <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1.5">
-              <span>TitleLock</span>
+    <>
+      {/* Mobile Dark Backdrop Overlay */}
+      {mobileIsOpen && (
+        <div 
+          onClick={onClose}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs z-40 md:hidden animate-in fade-in duration-200"
+          aria-hidden="true"
+        />
+      )}
+
+      <aside className={`fixed md:sticky top-0 left-0 z-50 md:z-30 w-72 md:w-64 h-screen flex-shrink-0 flex flex-col justify-between py-6 px-4 bg-white/95 dark:bg-[#121316] backdrop-blur-2xl border-r border-slate-200/80 dark:border-[#262930] shadow-[8px_0_32px_-4px_rgba(0,0,0,0.15)] md:shadow-none overflow-y-auto no-scrollbar transition-transform duration-300 ease-in-out ${
+        mobileIsOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+      }`}>
+        <div>
+          {/* Brand Header & Mobile Close Button */}
+          <div className="flex items-center justify-between px-2 mb-8">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-white/90 dark:bg-[#1a1c20] backdrop-blur-md border border-white/80 dark:border-[#262930] shadow-[0_2px_10px_-2px_rgba(14,165,233,0.15)] flex items-center justify-center p-2">
+                <svg viewBox="0 0 32 32" fill="none" className="w-full h-full text-sky-500">
+                  <path d="M16 4L4 10L16 16L28 10L16 4Z" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M4 16L16 22L28 16" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                  <path d="M4 22L16 28L28 22" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div>
+                <div className="text-base font-bold text-slate-900 dark:text-white tracking-tight leading-none flex items-center gap-1.5">
+                  <span>TitleLock</span>
+                </div>
+                <span className="text-[10px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mt-1 block">
+                  Citizen Portal
+                </span>
+              </div>
             </div>
-            <span className="text-[10px] font-semibold tracking-wider text-slate-400 dark:text-slate-500 uppercase mt-1 block">
-              Citizen Portal
-            </span>
+
+            {/* Mobile Close 'X' Button */}
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-1.5 rounded-xl text-slate-400 hover:text-slate-700 dark:hover:text-white md:hidden cursor-pointer"
+              aria-label="Close menu"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-        </div>
 
         {/* Section Title */}
         <div className="px-3 mb-2.5">
@@ -64,11 +89,12 @@ export function Sidebar() {
               <NavLink
                 key={item.path}
                 to={item.path}
+                onClick={onClose}
                 className={({ isActive }) =>
                   `group relative flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
                     isActive
-                      ? 'bg-white/90 dark:bg-slate-800/90 text-slate-900 dark:text-white shadow-[0_4px_16px_-2px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_16px_-2px_rgba(0,0,0,0.4)] border border-white/90 dark:border-white/10 backdrop-blur-md'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-slate-800/50'
+                      ? 'bg-white/90 dark:bg-[#1a1c20] text-slate-900 dark:text-white shadow-[0_4px_16px_-2px_rgba(0,0,0,0.06)] dark:shadow-none border border-white/90 dark:border-[#262930] backdrop-blur-md'
+                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-white/50 dark:hover:bg-[#1a1c20]/60'
                   }`
                 }
               >
@@ -98,8 +124,8 @@ export function Sidebar() {
 
       {/* Citizen Support Card at bottom */}
       <div className="mt-8 space-y-4">
-        <div className="rounded-3xl p-4 bg-gradient-to-br from-sky-50/70 via-blue-50/40 to-indigo-50/50 dark:from-slate-800/80 dark:via-slate-800/50 dark:to-sky-950/40 backdrop-blur-lg border border-sky-100/70 dark:border-white/10 shadow-[0_4px_16px_-4px_rgba(14,165,233,0.06)] space-y-3">
-          <div className="w-8 h-8 rounded-xl bg-white/90 dark:bg-slate-700 shadow-xs flex items-center justify-center text-sky-600 dark:text-sky-400">
+        <div className="rounded-3xl p-4 bg-gradient-to-br from-sky-50/70 via-blue-50/40 to-indigo-50/50 dark:from-[#181a1f] dark:via-[#16181c] dark:to-[#181a1f] backdrop-blur-lg border border-sky-100/70 dark:border-[#262930] shadow-[0_4px_16px_-4px_rgba(14,165,233,0.06)] space-y-3">
+          <div className="w-8 h-8 rounded-xl bg-white/90 dark:bg-transparent shadow-xs flex items-center justify-center text-sky-600 dark:text-sky-400">
             <Headphones className="w-4 h-4" />
           </div>
           <div>
@@ -125,6 +151,7 @@ export function Sidebar() {
         </div>
       </div>
     </aside>
+    </>
   );
 }
 

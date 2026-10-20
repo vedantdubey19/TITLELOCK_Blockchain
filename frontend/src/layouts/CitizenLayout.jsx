@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
@@ -6,8 +6,10 @@ import { useAuth } from '../hooks/useAuth';
 
 export function CitizenLayout() {
   const { currentUser, authLoading, toast } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (authLoading) return <div role="status" className="p-8 text-center">Checking your session…</div>;
+
 
   // If user is logged in as a Registrar, redirect them to the Registrar Portal
   if (currentUser && (currentUser.role === 'REGISTRAR' || currentUser.activeRole === 'REGISTRAR')) {
@@ -21,13 +23,16 @@ export function CitizenLayout() {
 
   return (
     <div className="h-screen w-full bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-sky-500/20 overflow-hidden">
-      {/* Pinned Glassmorphic Left Sidebar */}
-      <Sidebar />
+      {/* Pinned Glassmorphic Left Sidebar (with Mobile Slide-Out Drawer) */}
+      <Sidebar 
+        mobileIsOpen={mobileMenuOpen} 
+        onClose={() => setMobileMenuOpen(false)} 
+      />
 
       {/* Main Content Area with Fixed Top Navbar & Scrollable Body */}
       <div className="flex-1 min-w-0 h-full flex flex-col overflow-y-auto overflow-x-hidden">
-        {/* Pinned Top Glass Navbar */}
-        <Navbar />
+        {/* Pinned Top Glass Navbar with Three-Lines Hamburger Menu Button */}
+        <Navbar onMenuToggle={() => setMobileMenuOpen(prev => !prev)} />
 
         {/* Scrollable Dynamic Page Content */}
         <main className="flex-1 px-4 sm:px-8 py-5 pb-16 max-w-[1500px] w-full mx-auto">

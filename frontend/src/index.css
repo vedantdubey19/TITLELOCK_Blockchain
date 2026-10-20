@@ -7,19 +7,28 @@
 
 @layer base {
   body {
-    @apply antialiased min-h-screen font-sans transition-colors duration-200 text-slate-900 bg-[#f8fafc];
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    min-height: 100vh;
+    font-family: inherit;
+    transition-property: color, background-color, border-color;
+    transition-duration: 200ms;
+    color: #0f172a;
+    background-color: #f8fafc;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Dark Mode Body */
+  /* Dark Mode Body - Reference Charcoal/Onyx Aesthetic #121316 */
   html.dark body {
-    @apply bg-[#080f1d] text-slate-100;
+    background-color: #121316 !important;
+    color: #e5e7eb !important;
   }
 
   /* Light Mode Body */
   html.light body,
   html:not(.dark) body {
-    @apply bg-[#f8fafc] text-slate-900;
+    background-color: #f8fafc;
+    color: #0f172a;
   }
 }
 
@@ -33,9 +42,30 @@
   background-color: rgba(2, 132, 199, 0.22);
   color: inherit;
 }
+html.dark,
+html.dark * {
+  &::selection {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+  }
+  &::-moz-selection {
+    background-color: #0284c7 !important;
+    color: #ffffff !important;
+    text-shadow: none !important;
+  }
+}
+
 html.dark ::selection {
-  background-color: rgba(14, 165, 233, 0.35);
-  color: #ffffff;
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
+}
+
+html.dark ::-moz-selection {
+  background-color: #0284c7 !important;
+  color: #ffffff !important;
+  text-shadow: none !important;
 }
 
 /* 2. Base Canvas Mesh Backgrounds */
@@ -53,15 +83,13 @@ html:not(.dark) .bg-mesh-subtle {
   background-attachment: fixed;
 }
 
-/* Institutional Dark Mode Cadastral Canvas with Deep Deep Refraction */
+/* Institutional Dark Mode Cadastral Canvas with Deep Reference Charcoal (#121316) */
 html.dark .bg-mesh-subtle {
-  background-color: #080f1d;
+  background-color: #121316;
   background-image: 
-    radial-gradient(at 10% 15%, rgba(14, 165, 233, 0.18) 0px, transparent 50%),
-    radial-gradient(at 90% 10%, rgba(249, 115, 22, 0.12) 0px, transparent 45%),
-    radial-gradient(at 50% 60%, rgba(16, 185, 129, 0.10) 0px, transparent 52%),
-    radial-gradient(at 85% 85%, rgba(14, 165, 233, 0.12) 0px, transparent 46%),
-    radial-gradient(at 20% 90%, rgba(139, 92, 246, 0.08) 0px, transparent 42%);
+    radial-gradient(at 10% 15%, rgba(14, 165, 233, 0.05) 0px, transparent 40%),
+    radial-gradient(at 90% 10%, rgba(249, 115, 22, 0.04) 0px, transparent 35%),
+    radial-gradient(at 50% 60%, rgba(16, 185, 129, 0.03) 0px, transparent 40%);
   background-attachment: fixed;
 }
 
@@ -345,4 +373,260 @@ html:not(.dark) ::-webkit-scrollbar-thumb:hover {
   transform-origin: center;
   pointer-events: none;
 }
+
+/* ==========================================================================
+   GLOBAL DARK THEME SYSTEM MATCHING REFERENCE UI
+   Reference Theme Specs:
+   - Deep Matte Dark Charcoal Background: #121316
+   - Surface / Card Background: #1a1c20 or #16181c
+   - Subtle Slate Border: #262930 or rgba(255, 255, 255, 0.08)
+   - Primary Accent Buttons: #2563eb (Royal Blue)
+   - Accent Sell Token Pill: #281d13 with text #f97316 (Warm Amber / Bronze)
+   - Inputs / Controls: #151619 with border #2c3038
+   - Typography: #f3f4f6 (Primary text), #9ca3af (Muted/Secondary text)
+   ========================================================================== */
+
+html.dark body {
+  background-color: #121316 !important;
+  color: #e5e7eb !important;
+}
+
+/* Global App Shells & Layout Containers in Dark Mode */
+html.dark aside,
+html.dark .glass-sidebar {
+  background-color: #121316 !important;
+  border-color: #23262d !important;
+}
+
+html.dark header,
+html.dark .glass-nav {
+  background-color: #121316 !important;
+  border-color: #23262d !important;
+}
+
+/* Universal Card / Panel / Container Backgrounds */
+html.dark .bg-white,
+html.dark .bg-white\/90,
+html.dark .bg-white\/80,
+html.dark .bg-white\/70,
+html.dark .bg-white\/60,
+html.dark .glass-panel {
+  background-color: #1a1c20 !important;
+  border-color: #262930 !important;
+  color: #e5e7eb !important;
+}
+
+/* Sub-panels, secondary containers, and light fills */
+html.dark .bg-slate-50,
+html.dark .bg-slate-50\/80,
+html.dark .bg-slate-50\/70,
+html.dark .bg-slate-100,
+html.dark .bg-slate-100\/80,
+html.dark .bg-slate-200,
+html.dark .bg-slate-300,
+html.dark .bg-gray-50,
+html.dark .bg-gray-100 {
+  background-color: #151619 !important;
+  border-color: #262930 !important;
+  color: #d1d5db !important;
+}
+
+/* Text Overrides for High Contrast Dark Theme */
+html.dark .text-slate-900,
+html.dark .text-slate-800,
+html.dark .text-gray-900,
+html.dark .text-gray-800 {
+  color: #f3f4f6 !important;
+}
+
+html.dark .text-slate-700,
+html.dark .text-slate-600,
+html.dark .text-gray-700,
+html.dark .text-gray-600 {
+  color: #d1d5db !important;
+}
+
+html.dark .text-slate-500,
+html.dark .text-slate-400,
+html.dark .text-gray-500,
+html.dark .text-gray-400 {
+  color: #9ca3af !important;
+}
+
+/* Universal Borders */
+html.dark .border-slate-100,
+html.dark .border-slate-200,
+html.dark .border-slate-200\/60,
+html.dark .border-slate-200\/80,
+html.dark .border-slate-200\/90,
+html.dark .border-slate-300,
+html.dark .border-gray-100,
+html.dark .border-gray-200,
+html.dark .border-white\/80,
+html.dark .border-white\/60 {
+  border-color: #262930 !important;
+}
+
+/* Inputs, Textareas, and Dropdown Selects */
+html.dark input[type="text"],
+html.dark input[type="email"],
+html.dark input[type="password"],
+html.dark input[type="number"],
+html.dark textarea,
+html.dark select {
+  background-color: #151619 !important;
+  border-color: #2c3038 !important;
+  color: #f3f4f6 !important;
+}
+
+html.dark input::placeholder,
+html.dark textarea::placeholder {
+  color: #6b7280 !important;
+}
+
+/* Modals and Popovers */
+html.dark .shadow-2xl,
+html.dark .shadow-xl {
+  box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 8px 20px -4px rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Special Reference UI Accents: Sell Token Button in Reference UI */
+html.dark .dark-sell-token-pill {
+  background-color: #271c13 !important;
+  border-color: #452a15 !important;
+  color: #f97316 !important;
+}
+
+/* Status Badges */
+html.dark .bg-amber-50,
+html.dark .bg-amber-50\/70 {
+  background-color: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.25) !important;
+  color: #fbbf24 !important;
+}
+
+html.dark .bg-emerald-50,
+html.dark .bg-emerald-50\/70 {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  border-color: rgba(16, 185, 129, 0.25) !important;
+  color: #34d399 !important;
+}
+
+html.dark .bg-rose-50,
+html.dark .bg-rose-50\/70 {
+  background-color: rgba(244, 63, 94, 0.12) !important;
+  border-color: rgba(244, 63, 94, 0.25) !important;
+  color: #fb7185 !important;
+}
+
+html.dark .bg-sky-50,
+html.dark .bg-blue-50 {
+  background-color: rgba(14, 165, 233, 0.12) !important;
+  border-color: rgba(14, 165, 233, 0.25) !important;
+  color: #38bdf8 !important;
+}
+
+/* ==========================================================================
+   DARK MODE TABLE STYLES - REFINED THEMATIC HEADERS & SELECTED ROWS
+   ========================================================================== */
+
+/* Table Header Dark Styling: Deep Slate/Charcoal background with luminous cyan/sky blue accent */
+html.dark table thead tr,
+html.dark table thead tr.bg-slate-50\/80,
+html.dark table thead {
+  background-color: #16181d !important;
+  border-bottom-color: #262930 !important;
+}
+
+html.dark table thead th {
+  color: #38bdf8 !important; /* Luminous Sky Blue for crystal clear legibility against dark canvas */
+  font-weight: 700 !important;
+  letter-spacing: 0.05em !important;
+  border-bottom: 1px solid #262930 !important;
+}
+
+/* Table Body Rows */
+html.dark table tbody tr {
+  background-color: #1a1c20;
+  transition: background-color 0.15s ease;
+}
+
+/* Table Row Hover */
+html.dark table tbody tr:hover,
+html.dark table tbody tr.hover\:bg-slate-50\/60:hover {
+  background-color: #20232a !important;
+}
+
+/* Table Row Selection / Active Highlighting: Subtle luminous navy/cyan border & background */
+html.dark table tbody tr.selected,
+html.dark table tbody tr[aria-selected="true"],
+html.dark table tbody tr.active-row {
+  background-color: rgba(14, 165, 233, 0.14) !important;
+  border-left: 3px solid #0ea5e9 !important;
+}
+
+html.dark table tbody tr.selected td,
+html.dark table tbody tr[aria-selected="true"] td {
+  color: #f8fafc !important;
+}
+
+/* Dividers in Table */
+html.dark table tbody.divide-y > :not([hidden]) ~ :not([hidden]),
+html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #262930 !important;
+}
+
+/* Text selections inside table cells */
+html.dark table td::selection,
+html.dark table th::selection {
+  background-color: rgba(14, 165, 233, 0.45) !important;
+  color: #ffffff !important;
+}
+
+/* ==========================================================================
+   CROSS-DEVICE RESPONSIVE INTERFACE SYSTEM
+   Optimized for: Desktop, Mac, Laptop, iPad, Tablets, iPhone, Mobile (portrait & landscape)
+   ========================================================================== */
+
+/* 1. Fluid Scroll Containers & Safe Mobile Touch Behavior */
+@media (max-width: 1024px) {
+  html, body {
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* 2. Responsive Table Wrappers & Smooth Mobile Touch Experience */
+.table-responsive-container,
+.overflow-x-auto {
+  -webkit-overflow-scrolling: touch;
+}
+
+@media (max-width: 1024px) {
+  /* Tables ensure clear spacing and prevent column crunching on tablets and phones */
+  table {
+    min-width: 720px;
+  }
+}
+
+@media (max-width: 640px) {
+  table {
+    min-width: 680px;
+  }
+
+  /* Modals: safe margins and scroll on phones/iPhones */
+  .fixed.inset-0 > div {
+    max-height: 92vh !important;
+    overflow-y: auto !important;
+    margin: 12px !important;
+  }
+}
+
+/* 3. Smooth Safe Area Insets for iPhone and notched devices */
+@supports (padding: env(safe-area-inset-bottom)) {
+  body {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
 

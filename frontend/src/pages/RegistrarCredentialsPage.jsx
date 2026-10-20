@@ -85,59 +85,59 @@ export function RegistrarCredentialsPage() {
           </div>
         </div>
 
-        {/* 3 Overview Info Boxes matching Reference Screenshot exactly:
+        {/* 3 Overview Info Boxes matching Reference Screenshot:
             Employee ID: | Jurisdiction: | Administrative Status: */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-1.5">
-            <div className="text-[11px] font-semibold text-slate-500">Employee ID:</div>
+          <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-[#16181c] border border-slate-100 dark:border-[#262930] space-y-1.5">
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-sky-400">Employee ID:</div>
             {isEditing ? (
               <input 
                 type="text" 
                 value={employeeId} 
                 onChange={(e) => setEmployeeId(e.target.value)} 
-                className="w-full px-2.5 py-1 text-xs font-mono font-bold rounded-lg border border-slate-300 bg-white"
+                className="w-full px-2.5 py-1 text-xs font-mono font-bold rounded-lg border border-slate-300 dark:border-[#262930] bg-white dark:bg-[#121316] text-slate-900 dark:text-white"
               />
             ) : (
-              <div className="font-mono font-bold text-slate-900 text-sm tracking-wide">
+              <div className="font-mono font-bold text-slate-900 dark:text-white text-sm tracking-wide">
                 {employeeId}
               </div>
             )}
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-1.5">
-            <div className="text-[11px] font-semibold text-slate-500">Jurisdiction:</div>
+          <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-[#16181c] border border-slate-100 dark:border-[#262930] space-y-1.5">
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-sky-400">Jurisdiction:</div>
             {isEditing ? (
               <input 
                 type="text" 
                 value={jurisdiction} 
                 onChange={(e) => setJurisdiction(e.target.value)} 
-                className="w-full px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 bg-white"
+                className="w-full px-2.5 py-1 text-xs font-semibold rounded-lg border border-slate-300 dark:border-[#262930] bg-white dark:bg-[#121316] text-slate-900 dark:text-white"
               />
             ) : (
-              <div className="font-bold text-slate-900 text-xs leading-snug">
+              <div className="font-bold text-slate-900 dark:text-white text-xs leading-snug">
                 {jurisdiction}
               </div>
             )}
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 space-y-1.5">
-            <div className="text-[11px] font-semibold text-slate-500">Administrative Status:</div>
-            <div className="font-extrabold text-emerald-600 text-xs tracking-wider uppercase">
+          <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-[#16181c] border border-slate-100 dark:border-[#262930] space-y-1.5">
+            <div className="text-[11px] font-semibold text-slate-500 dark:text-sky-400">Administrative Status:</div>
+            <div className="font-extrabold text-emerald-600 dark:text-emerald-400 text-xs tracking-wider uppercase">
               {status}
             </div>
           </div>
         </div>
 
         {/* Dual Control Settings & Key Management */}
-        <div className="pt-4 border-t border-slate-100 space-y-4">
+        <div className="pt-4 border-t border-slate-100 dark:border-[#262930] space-y-4">
           <div className="flex items-center justify-between">
-            <h3 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
               Adjudication Dual-Control & Security Protocols
             </h3>
             <button
               type="button"
               onClick={() => setIsEditing(!isEditing)}
-              className="text-xs font-bold text-[#0b6b4e] hover:underline cursor-pointer flex items-center gap-1"
+              className="text-xs font-bold text-[#0b6b4e] dark:text-emerald-400 hover:underline cursor-pointer flex items-center gap-1"
             >
               <Edit3 className="w-3.5 h-3.5" />
               <span>{isEditing ? 'Cancel Edit' : 'Edit Credentials'}</span>
@@ -145,16 +145,16 @@ export function RegistrarCredentialsPage() {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-center justify-between gap-3 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-[#16181c] border border-slate-100 dark:border-[#262930] flex items-center justify-between gap-3 text-xs">
               <div>
-                <div className="font-bold text-slate-800">Dual-Control Quorum Enforcement</div>
-                <div className="text-[11px] text-slate-500 mt-0.5">Require 2 independent registrar cryptographic approvals for disputed parcels</div>
+                <div className="font-bold text-slate-800 dark:text-slate-200">Dual-Control Quorum Enforcement</div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Require 2 independent registrar cryptographic approvals for disputed parcels</div>
               </div>
               <button
                 type="button"
                 onClick={() => setDualControl(!dualControl)}
                 className={`w-12 h-6.5 rounded-full transition-colors relative cursor-pointer flex-shrink-0 ${
-                  dualControl ? 'bg-[#0b6b4e]' : 'bg-slate-300'
+                  dualControl ? 'bg-[#0b6b4e]' : 'bg-slate-300 dark:bg-slate-700'
                 }`}
               >
                 <span
@@ -165,15 +165,15 @@ export function RegistrarCredentialsPage() {
               </button>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50/80 border border-slate-100 flex items-center justify-between gap-3 text-xs">
+            <div className="p-4 rounded-2xl bg-slate-50/80 dark:bg-[#16181c] border border-slate-100 dark:border-[#262930] flex items-center justify-between gap-3 text-xs">
               <div>
-                <div className="font-bold text-slate-800">Auto-Seal Session Timeout</div>
-                <div className="text-[11px] text-slate-500 mt-0.5">Session lock duration for judicial clearance desk</div>
+                <div className="font-bold text-slate-800 dark:text-slate-200">Auto-Seal Session Timeout</div>
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">Session lock duration for judicial clearance desk</div>
               </div>
               <select
                 value={sessionExpiry}
                 onChange={(e) => setSessionExpiry(e.target.value)}
-                className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-800 focus:outline-none"
+                className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-[#262930] bg-white dark:bg-[#121316] text-xs font-semibold text-slate-800 dark:text-slate-100 focus:outline-none"
               >
                 <option value="30">30 Minutes</option>
                 <option value="60">1 Hour</option>

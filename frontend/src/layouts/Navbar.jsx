@@ -12,12 +12,13 @@ import {
   ShieldCheck, 
   X,
   Sun,
-  Moon
+  Moon,
+  Menu
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 
-export function Navbar() {
+export function Navbar({ onMenuToggle = () => {} }) {
   const { currentUser, globalSearch, setGlobalSearch, resetDemoState, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -58,7 +59,18 @@ export function Navbar() {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full flex items-center justify-between gap-4 py-3.5 px-3 sm:px-6 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_20px_-2px_rgba(0,0,0,0.3)] transition-all">
+      <header className="sticky top-0 z-40 w-full flex items-center justify-between gap-3 sm:gap-4 py-3.5 px-3 sm:px-6 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_20px_-2px_rgba(0,0,0,0.3)] transition-all">
+        {/* Three Lines Hamburger Menu Button (Mobile & Tablet) */}
+        <button
+          type="button"
+          onClick={onMenuToggle}
+          className="md:hidden p-2 rounded-2xl bg-white/70 dark:bg-[#1a1c20] hover:bg-white dark:hover:bg-[#202329] border border-white/80 dark:border-[#262930] shadow-xs text-slate-700 dark:text-slate-200 cursor-pointer flex-shrink-0 focus:outline-none"
+          title="Open Navigation Menu"
+          aria-label="Open Navigation Menu"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         {/* Search Input Bar with Glassmorphic Refraction */}
         <div className="flex-1 max-w-xl">
           <div className="relative">
@@ -68,7 +80,7 @@ export function Navbar() {
               value={globalSearch}
               onChange={(e) => setGlobalSearch(e.target.value)}
               placeholder="Search parcel ID, location, or record..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/90 dark:border-white/10 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)] text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-400 focus:bg-white dark:focus:bg-slate-800 transition-all"
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/80 dark:bg-[#16181c] backdrop-blur-md border border-white/90 dark:border-[#262930] shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)] text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-400 focus:bg-white dark:focus:bg-[#16181c] transition-all"
             />
           </div>
         </div>
@@ -83,34 +95,40 @@ export function Navbar() {
             type="button"
             onClick={resetDemoState}
             title="Reset Demo State"
-            className="text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors p-2 rounded-2xl bg-white/60 hover:bg-white/90 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 border border-white/80 dark:border-white/10 shadow-xs cursor-pointer backdrop-blur-md"
+            className="text-slate-400 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors p-2 rounded-2xl bg-white/60 hover:bg-white/90 dark:bg-[#1a1c20] dark:hover:bg-[#202329] border border-white/80 dark:border-[#262930] shadow-xs cursor-pointer backdrop-blur-md"
           >
             <RotateCcw className="w-4 h-4" />
           </button>
 
-          <button type="button" onClick={() => navigate('/citizen/notifications')} title="Sale notifications" className="p-2 rounded-xl border bg-white dark:bg-slate-800">
+          <button
+            type="button"
+            onClick={() => navigate('/citizen/notifications')}
+            title="Sale notifications"
+            className="text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white transition-colors p-2 rounded-2xl bg-white/70 hover:bg-white dark:bg-[#1a1c20] dark:hover:bg-[#202329] border border-white/80 dark:border-[#262930] shadow-xs cursor-pointer backdrop-blur-md focus:outline-none"
+          >
             <Bell className="w-4 h-4" />
           </button>
+
 
           {/* User Identity Chip with Dropdown */}
           <div className="relative" ref={dropdownRef}>
             <button 
               type="button"
               onClick={() => setIsDropdownOpen((prev) => !prev)}
-              className="flex items-center gap-2.5 sm:gap-3 p-1.5 rounded-2xl bg-white/60 hover:bg-white/90 dark:bg-slate-800/80 dark:hover:bg-slate-700/90 border border-white/80 dark:border-white/10 shadow-xs backdrop-blur-md transition-all cursor-pointer group text-left select-none focus:outline-none"
+              className="flex items-center gap-2.5 sm:gap-3 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl bg-white/60 hover:bg-white/90 dark:bg-[#1a1c20] dark:hover:bg-[#202329] border border-white/80 dark:border-[#262930] shadow-xs backdrop-blur-md transition-all cursor-pointer group text-left select-none focus:outline-none"
               title="Account Menu"
               aria-expanded={isDropdownOpen}
             >
               <div className="text-right hidden sm:block">
                 <div className="text-xs font-bold text-sky-600 dark:text-sky-400 group-hover:text-sky-700 transition-colors">
-                  {currentUser?.name || 'Rajesh Kumar'}
+                  {currentUser?.name || 'Demo Citizen (Test Data)'}
                 </div>
                 <div className="text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                   Verified Citizen • {currentUser?.id || 'USR-001'}
                 </div>
               </div>
 
-              <div className="w-9 h-9 rounded-full overflow-hidden border-2 border-white/90 dark:border-slate-700 shadow-xs flex items-center justify-center bg-slate-100 dark:bg-slate-800 flex-shrink-0 group-hover:border-sky-400 transition-colors">
+              <div className="w-8 h-8 rounded-full overflow-hidden border border-white/90 dark:border-[#383d47] shadow-xs flex items-center justify-center bg-slate-100 dark:bg-[#23262d] flex-shrink-0 group-hover:border-sky-400 transition-colors">
                 {currentUser?.avatar ? (
                   <img 
                     src={currentUser.avatar} 
@@ -118,13 +136,13 @@ export function Navbar() {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <span className="text-xs font-bold text-slate-700">
-                    {currentUser?.name?.slice(0, 2) || 'RK'}
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200">
+                    {currentUser?.name?.slice(0, 2) || 'De'}
                   </span>
                 )}
               </div>
 
-              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 group-hover:text-slate-600 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-sky-600' : ''}`} />
+              <ChevronDown className={`w-3.5 h-3.5 text-slate-400 dark:text-slate-500 group-hover:text-slate-600 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180 text-sky-600' : ''}`} />
             </button>
 
             {/* Dropdown Menu Container with High Opacity & Crisp Text */}
