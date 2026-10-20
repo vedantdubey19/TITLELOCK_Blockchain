@@ -8,3 +8,7 @@ email-validator==2.3.0
 # dev / test
 pytest==9.1.1
 httpx2==2.13.1  # starlette 1.7 TestClient
+
+# Ethereum RPC and EIP-712 signatures
+web3==7.16.0
+eth-account==0.14.0

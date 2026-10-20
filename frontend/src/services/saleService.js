@@ -22,4 +22,6 @@ export const saleEventLabel = (action) => ({
   SALE_EXPIRED: 'Sale expired · seven-day cooldown started',
   TRANSFER_COMPLETED: 'Database ownership transferred',
   TRANSFER_FAILED: 'Transfer attempt failed',
+  WALLET_APPROVED: 'Participant signed the wallet approval',
+  BLOCKCHAIN_PREPARED: 'All approvals verified · ready for registrar wallet transaction',
 }[action] || action);

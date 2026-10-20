@@ -22,6 +22,10 @@ from .parcels.routes import router as parcels_router
 from .transfers.sales import router as sales_router, expire_sales
 from .auth.repository import AuthRepository
 from .audit.sales import router as activity_router
+from .chain.routes import router as chain_router
+from .chain.settlement import reconcile_pending
+from .fraud.routes import router as risk_router
+from .transfers.succession import router as succession_router
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
@@ -31,6 +35,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         async def expiry_worker():
             while True:
                 if settings.database_url:
+                    try:
+                        await asyncio.to_thread(reconcile_pending, AuthRepository(settings.database_url), settings)
+                    except Exception:
+                        logging.getLogger(__name__).warning("Chain reconciliation unavailable; prepared deals stay reserved")
                     try:
                         await asyncio.to_thread(expire_sales, AuthRepository(settings.database_url))
                     except Exception:
@@ -55,6 +63,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(parcels_router)
     app.include_router(sales_router)
     app.include_router(activity_router)
+    app.include_router(chain_router)
+    app.include_router(risk_router)
+    app.include_router(succession_router)
 
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request, exc):
@@ -71,7 +82,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/health", tags=["health"])
     def health() -> dict:
         """Liveness check. Database and chain probes are added in Phase 2."""
-        return {"status": "ok", "service": "titlelock-api", "env": settings.app_env, "chain_mode": settings.chain_mode}
+        return {"status": "ok", "service": "titlelock-api", "env": settings.app_env, "chain_mode": settings.chain_mode, "chain_id": settings.chain_id, "chain_contract": settings.chain_contract_address}
 
     return app
 

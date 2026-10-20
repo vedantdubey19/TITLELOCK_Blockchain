@@ -25,3 +25,10 @@ frontend/dist/
 .DS_Store
 .vscode/
 .idea/
+
+# Local chain tooling, state and contract build cache
+blockchain/lib/
+blockchain/out/
+blockchain/cache/
+blockchain/state/
+/lib/

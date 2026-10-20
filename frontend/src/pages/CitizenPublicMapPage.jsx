@@ -1,324 +1,59 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../hooks/useAuth';
-import { 
-  Building2, 
-  MapPin, 
-  Layers, 
-  Search, 
-  ShieldCheck, 
-  AlertTriangle, 
-  Compass, 
-  Maximize2, 
-  Database,
-  Key,
-  Navigation,
-  ArrowUpDown,
-  LocateFixed
-} from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { CadastralLiveMap } from '../components/common/CadastralLiveMap';
-import {
-  calculateDistanceKm,
-  formatDistance,
-  getParcelCentroid,
-  getParcelStatusColors
-} from '../utils/cadastreUtils';
+import { ChainVerification } from '../components/ChainVerification';
+import { activityApi } from '../services/saleService';
 
-/**
- * ============================================================================
- * CitizenPublicMapPage
- * ============================================================================
- * Cadastral Land Map Explorer page for citizens.
- * Integrates live satellite imagery, cadastral vector polygons, user GPS proximity,
- * and property search/filtering.
- */
 export function CitizenPublicMapPage() {
-  const navigate = useNavigate();
-  const { allParcels } = useAuth();
-  const [selectedParcel, setSelectedParcel] = useState(allParcels[0] || null);
   const [search, setSearch] = useState('');
-  const [sortByDistance, setSortByDistance] = useState(false);
-  
-  // --------------------------------------------------------------------------
-  // User Device Geolocation Management
-  // --------------------------------------------------------------------------
-  const [userLocation, setUserLocation] = useState(null);
-  const [locatingUser, setLocatingUser] = useState(false);
-  const [locationError, setLocationError] = useState(null);
-
-  const detectUserLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationError('Geolocation is not supported by your browser.');
-      return;
-    }
-    setLocatingUser(true);
-    setLocationError(null);
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        setUserLocation({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        });
-        setLocatingUser(false);
-      },
-      (err) => {
-        console.warn('Geolocation error:', err.message);
-        setLocationError('Location permission denied or unavailable');
-        setLocatingUser(false);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 60000 }
-    );
-  };
-
+  const [parcels, setParcels] = useState([]);
+  const [selected, setSelected] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [offset, setOffset] = useState(0);
   useEffect(() => {
-    detectUserLocation();
-  }, []);
-
-  // --------------------------------------------------------------------------
-  // Geospatial Data Computations (Proximity & Centroid Mapping)
-  // --------------------------------------------------------------------------
-  const parcelsWithDistance = useMemo(() => {
-    return allParcels.map((p) => {
-      let distanceKm = null;
-      if (userLocation) {
-        const centroid = getParcelCentroid(p);
-        distanceKm = calculateDistanceKm(userLocation.lat, userLocation.lng, centroid.lat, centroid.lng);
-      }
-      return {
-        ...p,
-        distanceKm
-      };
-    });
-  }, [allParcels, userLocation]);
-
-  // Filter & Sort parcels list
-  const filtered = useMemo(() => {
-    let list = parcelsWithDistance.filter(
-      (p) =>
-        p.id.toLowerCase().includes(search.toLowerCase()) ||
-        p.currentOwner?.toLowerCase().includes(search.toLowerCase()) ||
-        p.surveyNumber?.toLowerCase().includes(search.toLowerCase())
-    );
-
-    if (sortByDistance && userLocation) {
-      list = [...list].sort((a, b) => {
-        if (a.distanceKm == null) return 1;
-        if (b.distanceKm == null) return -1;
-        return a.distanceKm - b.distanceKm;
-      });
-    }
-
-    return list;
-  }, [parcelsWithDistance, search, sortByDistance, userLocation]);
-
-  // Selected parcel distance display text
-  const selectedDistanceStr = useMemo(() => {
-    if (!selectedParcel || !userLocation) return null;
-    const centroid = getParcelCentroid(selectedParcel);
-    const dist = calculateDistanceKm(userLocation.lat, userLocation.lng, centroid.lat, centroid.lng);
-    return formatDistance(dist);
-  }, [selectedParcel, userLocation]);
-
-  return (
-    <div className="space-y-6">
-      
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold">
-              100% Free Satellite Cadastre Active • No API Key Needed
-            </span>
-            {userLocation && (
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 flex items-center gap-1 font-medium">
-                <LocateFixed className="w-2.5 h-2.5" />
-                Live GPS Connected ({userLocation.lat.toFixed(3)}°, {userLocation.lng.toFixed(3)}°)
-              </span>
-            )}
-          </div>
-          <h1 className="text-xl sm:text-2xl font-semibold text-slate-900 dark:text-white tracking-tight">
-            3D Cadastral Land Map Explorer ({allParcels.length} Polygons)
-          </h1>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-            Real satellite imagery with exact cadastral polygon boundaries, live GPS location detection, and distance measurement.
-          </p>
-        </div>
-      </div>
-
-      {/* Map View Canvas Container */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Interactive Cadastre Explorer Viewport */}
-        <div className="lg:col-span-2 flex flex-col space-y-3">
-          <CadastralLiveMap
-            parcels={allParcels}
-            activeParcel={selectedParcel}
-            onSelectParcel={(p) => setSelectedParcel(p)}
-            height="560px"
-            userLocation={userLocation}
-            onOpenLargerMap={() => navigate('/citizen/map/fullscreen', { state: { selectedParcelId: selectedParcel?.id } })}
-          />
-
-          {/* Distance Info Banner */}
-          {selectedParcel && (
-            <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 bg-white/80 dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-xl text-xs shadow-xs backdrop-blur-md">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-sky-50 dark:bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sky-600 dark:text-sky-400">
-                  <Navigation className="w-4 h-4" />
-                </div>
-                <div>
-                  <div className="font-semibold text-slate-900 dark:text-white flex items-center gap-1.5">
-                    <span>{selectedParcel.id}</span>
-                    <span className="text-[10px] font-normal px-1.5 py-0.2 rounded bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-400">
-                      Survey #{selectedParcel.surveyNumber}
-                    </span>
-                  </div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                    {selectedParcel.registrationOffice} • {selectedParcel.areaSqm ? selectedParcel.areaSqm.toLocaleString() : '2,390'} m²
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3">
-                {selectedDistanceStr ? (
-                  <div className="text-right">
-                    <span className="text-[10px] uppercase font-bold tracking-wider text-slate-400">Distance from you</span>
-                    <div className="font-mono font-bold text-sky-600 dark:text-sky-400 text-sm">
-                      {selectedDistanceStr}
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={detectUserLocation}
-                    disabled={locatingUser}
-                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-sky-50 dark:bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 text-xs font-medium hover:bg-sky-100 dark:hover:bg-sky-500/20 transition-all cursor-pointer"
-                  >
-                    <LocateFixed className={`w-3.5 h-3.5 ${locatingUser ? 'animate-spin' : ''}`} />
-                    <span>{locatingUser ? 'Locating...' : 'Enable GPS Distance'}</span>
-                  </button>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Right Details Panel */}
-        <div className="glass-panel rounded-2xl p-5 space-y-4 flex flex-col max-h-[620px]">
-          <div>
-            <h2 className="text-sm font-semibold text-slate-900 dark:text-white">
-              Cadastral Plot Explorer
-            </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
-              Browse all {allParcels.length} geocoded parcels
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Filter by ULPIN, owner, survey..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 dark:border-white/10 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-sky-500"
-              />
-            </div>
-
-            {/* Sort & Geo controls */}
-            <div className="flex items-center justify-between gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => {
-                  if (!userLocation) {
-                    detectUserLocation();
-                  }
-                  setSortByDistance(!sortByDistance);
-                }}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer border ${
-                  sortByDistance && userLocation
-                    ? 'bg-sky-500/15 border-sky-500/30 text-sky-600 dark:text-sky-400'
-                    : 'bg-slate-100 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
-                }`}
-              >
-                <ArrowUpDown className="w-3 h-3" />
-                <span>{sortByDistance && userLocation ? 'Sorted by Nearest' : 'Sort by Distance'}</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={detectUserLocation}
-                disabled={locatingUser}
-                title="Refresh current location"
-                className="p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 hover:bg-slate-100 transition-all cursor-pointer"
-              >
-                <LocateFixed className={`w-3.5 h-3.5 ${locatingUser ? 'animate-spin' : ''}`} />
-              </button>
-            </div>
-            {locationError && (
-              <p className="text-[10px] text-rose-500">{locationError}</p>
-            )}
-          </div>
-
-          <div className="space-y-1.5 overflow-y-auto flex-1 pr-1">
-            {filtered.slice(0, 30).map((p) => (
-              <button
-                key={p.id}
-                type="button"
-                onClick={() => setSelectedParcel(p)}
-                className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer ${
-                  selectedParcel?.id === p.id
-                    ? 'bg-sky-50 dark:bg-sky-950/40 border-sky-500 text-sky-900 dark:text-sky-200 shadow-xs'
-                    : 'bg-white/70 dark:bg-slate-900/40 border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-800/40 text-slate-700 dark:text-slate-300'
-                }`}
-              >
-                <div className="flex items-center justify-between">
-                  <span className="font-mono font-bold text-xs text-slate-900 dark:text-white">{p.id}</span>
-                  <div className="flex items-center gap-1.5">
-                    {p.distanceKm != null && (
-                      <span className="text-[10px] font-mono text-sky-600 dark:text-sky-400 font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded">
-                        {p.distanceKm < 1 ? `${Math.round(p.distanceKm * 1000)}m` : `${p.distanceKm.toFixed(1)}km`}
-                      </span>
-                    )}
-                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded ${
-                      p.statusVariant === 'success' ? 'bg-emerald-100 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-400' :
-                      p.statusVariant === 'warning' ? 'bg-amber-100 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400' :
-                      'bg-rose-100 dark:bg-rose-500/20 text-rose-800 dark:text-rose-400'
-                    }`}>
-                      {p.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400 mt-1 flex items-center justify-between">
-                  <span>Owner: {p.currentOwner}</span>
-                  <span>{p.areaSqm ? p.areaSqm.toLocaleString() : '2,390'} m²</span>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {selectedParcel && (
-            <div className="p-3 bg-slate-100/70 dark:bg-white/[0.03] border border-slate-200 dark:border-white/5 rounded-xl text-xs space-y-1 text-slate-600 dark:text-slate-400">
-              <div className="font-semibold text-slate-900 dark:text-white flex items-center justify-between">
-                <span>Active Geometry</span>
-                {selectedDistanceStr && (
-                  <span className="text-sky-600 dark:text-sky-400 font-mono text-[11px] font-medium">
-                    {selectedDistanceStr}
-                  </span>
-                )}
-              </div>
-              <div className="font-mono text-[10px] leading-relaxed">
-                Boundary: {selectedParcel?.boundary?.length || 4} Geo-Vertices<br/>
-                Office: {selectedParcel.registrationOffice || 'Greater Noida Sub-Registrar'}
-              </div>
-            </div>
-          )}
-        </div>
-
-      </div>
-
+    let cancelled = false;
+    activityApi(`/api/properties/discover?search=${encodeURIComponent(search)}&offset=${offset}`).then((rows) => {
+      if (cancelled) return;
+      const records = rows.map((row) => ({ ...row, id: row.ulpin, surveyNumber: row.survey_number,
+        currentOwner: row.current_owner, areaSqm: Number(row.area_sqm), registrationOffice: row.registration_office,
+        status: row.title_status, statusVariant: row.frozen ? 'danger' : 'warning' }));
+      setParcels(records); setSelected(records[0] || null); setError('');
+    }).catch((failure) => { if (!cancelled) { setError(failure.message); setParcels([]); setSelected(null); } })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [search, offset]);
+  const mapped = parcels.filter((p) => Array.isArray(p.boundary) && p.boundary.length >= 3);
+  const ready = selected && selected.for_sale && !selected.frozen && !selected.deal_pending && !selected.cooldown_until
+    && ['VERIFIED', 'VERIFIED_WITH_ENCUMBRANCE'].includes(selected.title_status);
+  return <section className="space-y-4 text-slate-900">
+    <h1 className="text-xl font-bold">Property explorer</h1>
+    <label className="block">Search ULPIN or survey number
+      <input value={search} onChange={(event) => { setSearch(event.target.value); setOffset(0); setLoading(true); }} className="block border rounded-lg p-2" />
+    </label>
+    {loading && <p role="status">Loading registry records…</p>}
+    {error && <p role="alert" className="text-red-700">{error}</p>}
+    {mapped.length ? <CadastralLiveMap parcels={mapped} activeParcel={mapped.find((p) => p.id === selected?.id) || mapped[0]}
+      onSelectParcel={setSelected} height="420px" /> : <p>No surveyed map boundaries are stored for these records. Search and ownership records remain available below.</p>}
+    <div className="flex flex-wrap gap-2">
+      {parcels.map((parcel) => <button key={parcel.id} onClick={() => setSelected(parcel)} aria-pressed={selected?.id === parcel.id}
+        className="border rounded-lg p-2">{parcel.id} · {parcel.for_sale ? 'Owner listed for sale' : 'Not listed'}</button>)}
     </div>
-  );
+    {!loading && !parcels.length && !error && <p>No matching properties.</p>}
+    <div className="flex gap-4">
+      <button disabled={!offset} onClick={() => { setLoading(true); setOffset(Math.max(0, offset - 100)); }} className="underline">Previous records</button>
+      <button disabled={parcels.length < 100} onClick={() => { setLoading(true); setOffset(offset + 100); }} className="underline">Next records</button>
+    </div>
+    {selected && <article className="bg-white border rounded-xl p-4 space-y-2">
+      <h2 className="font-bold">ULPIN: {selected.id}</h2>
+      <p>Current owner: {selected.current_owner || 'Not recorded'}</p>
+      <p>Survey: {selected.survey_number || 'Not recorded'} · Area: {selected.area_sqm ?? 'Not recorded'} m²</p>
+      <p>Registry title status: {selected.title_status} · Risk status: {selected.risk_status || 'Not recorded'}</p>
+      <p>Frozen: {selected.frozen ? 'Yes' : 'No'} · Active deal: {selected.deal_pending ? 'Yes' : 'No'}</p>
+      {selected.cooldown_until && <p>Sale cooldown until {new Date(selected.cooldown_until).toLocaleString()}</p>}
+      <p>{ready ? 'Listed for sale · registrar must check blockchain and restrictions before proceeding' : 'Currently unavailable for a new listed sale'}</p>
+      <ChainVerification key={selected.id} ulpin={selected.id} />
+      <p>Give this ULPIN and your TitleLock username to the registrar to start a sale request.</p>
+    </article>}
+  </section>;
 }
-
 export default CitizenPublicMapPage;

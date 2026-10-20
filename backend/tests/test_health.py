@@ -10,7 +10,7 @@ def test_health():
     client = TestClient(create_app(Settings(_env_file=None, app_env="testing")))
     res = client.get("/api/health")
     assert res.status_code == 200
-    assert res.json() == {"status": "ok", "service": "titlelock-api", "env": "testing", "chain_mode": "mock"}
+    assert res.json() == {"status": "ok", "service": "titlelock-api", "env": "testing", "chain_mode": "mock", "chain_id": 31337, "chain_contract": ""}
 
 
 def test_openapi_docs_are_served():

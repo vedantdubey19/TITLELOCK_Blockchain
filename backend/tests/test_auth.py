@@ -20,14 +20,14 @@ class MemoryAccounts:
         self.accounts, self.sessions, self.attempts = {}, {}, Counter()
         self.mfa = {}
 
-    def create_user(self, data, password_hash, aadhaar_hash=None, aadhaar_last4=None):
+    def create_user(self, data, password_hash, aadhaar_hash=None, aadhaar_last4=None, officer_hash=None, officer_last4=None):
         if any(a['email'] == str(data.email).lower() or a['username'] == data.username.lower()
                for a in self.accounts.values()):
             raise psycopg.errors.UniqueViolation()
         account = dict(user_id=str(uuid4()), name=data.name, email=str(data.email).lower(),
                        username=data.username.lower(), password_hash=password_hash, role=data.role,
                        status='ACTIVE', phone=data.phone, jurisdiction=data.jurisdiction,
-                       description=data.description, aadhaar_hash=aadhaar_hash, aadhaar_last4=aadhaar_last4)
+                       description=data.description, aadhaar_hash=aadhaar_hash, aadhaar_last4=aadhaar_last4, officer_id_hash=officer_hash, officer_id_last4=officer_last4)
         self.accounts[account['user_id']] = account
         return account
 
@@ -67,6 +67,8 @@ def auth():
 def signup(client, **changes):
     data = dict(name='Test Citizen', email='citizen@example.com', username='citizen',
                 password='A secure password 123!', aadhaar='234567890123', phone='+91 9876543210', activeRole='OWNER')
+    if changes.get('role')=='REGISTRAR':
+        data['officerId']='TEST-OFFICER-01'
     return client.post('/api/auth/signup', json=data | changes)
 
 
@@ -115,12 +117,16 @@ def test_bad_credentials_and_portal_segregation(auth):
 
 
 def test_registrar_requires_private_code(auth):
-    client, _ = auth
+    client, store = auth
     for code in ['', 'REG-GOV-2026', 'incorrect']:
         assert signup(client, role='REGISTRAR', activeRole='REGISTRAR', registrarCode=code).status_code == 403
     registrar = signup(client, role='REGISTRAR', activeRole='REGISTRAR', registrarCode='private-test-code')
     assert registrar.status_code == 201
-    assert client.get('/test/registrar', headers=authorization(registrar)).status_code == 200
+    assert registrar.json()['pendingApproval'] is True
+    assert client.post('/api/auth/login',json=dict(identifier='citizen',password='A secure password 123!')).status_code==403
+    next(iter(store.accounts.values()))['officer_verified_at']=datetime.now(timezone.utc)
+    approved=client.post('/api/auth/login',json=dict(identifier='citizen',password='A secure password 123!',expectedRole='REGISTRAR'))
+    assert client.get('/test/registrar', headers=authorization(approved)).status_code == 200
     assert client.post('/api/auth/login', json=dict(identifier='citizen',
                        password='A secure password 123!', expectedRole='CITIZEN')).status_code == 403
     client.app.state.settings.registrar_signup_code = SecretStr('')

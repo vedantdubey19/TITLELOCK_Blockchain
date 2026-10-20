@@ -239,3 +239,261 @@ changes roll back; only the assigned registrar's attempts are recorded. A failed
 attempt does not convert a retryable pending deal into a terminal failed deal.
 Database outages can prevent recording; those failures are reported in server logs
 without sensitive request data. Historical failures before tracking cannot be reconstructed.
+
+### Local blockchain + MetaMask (Anvil 31337 and Sepolia 11155111)
+
+The contract is `blockchain/src/TitleLockRegistry.sol`, compiled with Solidity
+0.8.37, OpenZeppelin 5.7.0, and Foundry 1.8.5. Python uses web3.py 7.16.0 and
+eth-account 0.14.0. A real Anvil node is required; no in-memory fake is used in
+`CHAIN_MODE=live`. Only Anvil (31337) and Sepolia (11155111) are accepted; mainnet is rejected.
+
+Build from the project root after installing Foundry:
+
+```sh
+cd blockchain
+forge install OpenZeppelin/openzeppelin-contracts@v5.7.0 --no-git
+forge build
+forge test
+mkdir -p state
+anvil --host 127.0.0.1 --port 8545 --chain-id 31337 --block-time 1 --state state/anvil.json --state-interval 5 --silent
+```
+
+Install Foundry with `foundryup` and ensure `forge` and `anvil` are on `PATH`.
+Do not delete/reset the persisted Anvil state when comparing existing records.
+
+Apply migration 007, deploy from the backend directory, and paste the printed
+contract address into the gitignored `.env`:
+
+```sh
+.venv/bin/python -m app.cli.local_chain deploy
+```
+
+Set `CHAIN_MODE=live`, `CHAIN_ID=31337`, `CHAIN_RPC_URL=http://127.0.0.1:8545`,
+`CHAIN_CONTRACT_ADDRESS=<deployed address>`, and `CHAIN_CONFIRMATIONS=1`.
+
+Each participant links a distinct MetaMask wallet through a signed, single-use,
+five-minute EIP-712 challenge. Accounts and wallets cannot be rebound by the API.
+Private keys and recovery phrases never enter the backend or its database.
+The registrar needs test ETH for gas. Local-only administration commands are:
+
+```sh
+.venv/bin/python -m app.cli.local_chain fund WALLET_ADDRESS
+.venv/bin/python -m app.cli.local_chain authorize-registrar USERNAME
+.venv/bin/python -m app.cli.local_chain anchor ULPIN --evidence OFFICE_CHECK_REFERENCE
+```
+
+Use `--demo` before the command to administer the isolated test database instead.
+Initial anchors require an operator evidence check and full owner shares; they
+cannot overwrite an existing blockchain baseline. Do not anchor unverified
+records merely to make a mismatch disappear.
+
+Key approval is required before saving a participant wallet signature. All owners
+and the assigned registrar sign one EIP-712 Transfer, bound to contract, chain,
+unique deal ID, property ID, previous/new ownership hashes, buyer, registrar,
+document hash and deadline. The contract independently verifies all current owner
+signatures and the assigned authorized registrar, deadline and unused deal ID.
+The frontend asks MetaMask to send the registrar transaction only after the backend
+verifies the existing key approvals and wallet signatures. Keys stay off-chain.
+
+`/complete` in live mode prepares a wallet transaction instead of updating ownership.
+The parcel remains reserved during PREPARED/SUBMITTED states. The background worker
+and manual refresh reconcile confirmed events, even if the browser closed after
+broadcast. Replays do not duplicate database ownership. Reverted transactions can
+be retried; an unexecuted transaction after deadline expires into the seven-day
+cooldown. RPC outages leave verification unavailable and prepared deals reserved.
+A database mismatch after mining enters REVIEW instead of silently overwriting data.
+
+Ownership commitments use canonical JSON with a schema version, property ID, survey
+number, normalized area, ownership type, current primary owner UUID, and active
+owner UUID/share pairs. Verification also compares anchored transfer document and
+ownership hashes and the recorded history entry with contract events. This checks
+consistency, not legal authenticity. Existing pre-chain history is not retroactively
+claimed to be anchored. The local chain is a development tool, not an independently
+operated production trust anchor. Raw keys, passwords, Aadhaar and documents stay
+out of blockchain records.
+
+Opt-in real-chain backend integration test:
+
+```sh
+CHAIN_TEST_RPC=http://127.0.0.1:8545 AUTH_TEST_DATABASE_URL=<isolated-test-db> .venv/bin/python -m pytest
+```
+
+The integration test deploys its own contract and uses disposable wallets in an
+isolated database schema. Actual MetaMask unlock/link/sign/send prompts remain
+manual user actions and are not replaced with automated wallet approval.
+
+Wallet-link messages and public signatures are retained as proof and checked before using a stored address. Database edits to wallet mappings fail verification. Transaction dates for anchored transfers are also checked against on-chain execution timestamps.
+
+### Exchanged sale keys and property discovery
+
+Migration `008_sale_exchange.sql` gives new deals exchange version 2: each owner
+enters the assigned registrar's key; the assigned registrar enters each owner's
+key. Both sides must finish, including every co-owner, before completion. Keys
+remain HMAC fingerprints only, scoped to their originating account and deal.
+The existing 24-hour deadline and seven-day cooldown still apply. Older deals
+retain their original version-1 key semantics so already issued keys are not
+silently reinterpreted; the UI labels those deals as legacy.
+
+Sale requests snapshot buyer name and phone for participant-only notifications.
+The citizen explorer and registrar ULPIN lookup read `/api/properties/discover`;
+no phone numbers or identity documents are exposed through discovery. Every
+current owner must opt in through `/{ulpin}/availability` before advertising a
+parcel for sale. Transfer settlement clears listing consents, retains ownership
+history, and changes only active ownership. Blockchain comparison is available
+to authenticated citizens and registrars, including prospective buyers.
+
+`parcel_map_geometry` holds surveyed `[longitude, latitude]` boundaries with a
+source reference. The supplied database has no boundary coordinates; discovery
+therefore shows records and an explicit missing-boundary message instead of
+fabricated polygons. Import reviewed survey boundaries before a real map demo.
+
+### Account workflows (backend Phase 3)
+
+Apply migration 009. Registrar signup now requires `officerId` and the existing
+private invitation code, but returns `pendingApproval` without a session. Officer
+IDs are stored as a secret-key HMAC; a last-four suffix is retained only for IDs of at least eight characters. Raw IDs are never stored.
+Existing officer accounts also require review before backend access. The signup
+code alone no longer authorizes an officer; this is manual evidence review,
+not a government identity-provider integration.
+
+From `backend/`, a trusted database operator can run:
+
+```sh
+.venv/bin/python -m app.cli.review_officer list
+.venv/bin/python -m app.cli.review_officer approve USERNAME --evidence OFFICE-CHECK-REFERENCE
+.venv/bin/python -m app.cli.review_officer reject USERNAME --evidence CHECK-REFERENCE
+.venv/bin/python -m app.cli.review_officer revoke USERNAME --evidence CHECK-REFERENCE
+.venv/bin/python -m app.cli.link_identity --list
+.venv/bin/python -m app.cli.link_identity REQUEST_UUID --evidence CHECK-REFERENCE
+.venv/bin/python -m app.cli.link_identity REQUEST_UUID --reject --evidence CHECK-REFERENCE
+```
+
+Approval prompts privately for the officer ID reviewed against original evidence.
+Decisions record the database operator, reference and timestamp, and revoke prior
+sessions/challenges. No public endpoint can approve a registrar or ownership link.
+Revoking backend access does not retract an already signed blockchain transaction;
+contract registrar roles must also be revoked by the chain administrator.
+
+`PATCH /api/auth/profile` accepts name, email, phone, jurisdiction, description,
+and personal profile fields already defined by `ProfileUpdate`. It cannot change
+username, role, Aadhaar, officer ID, ownership, wallet or verification flags.
+Registrar jurisdiction is operator-managed. Email/phone changes require
+`currentPassword`, reset the relevant verification flag, consume outstanding OTP
+challenges and revoke all sessions; the response sets `login_required: true`.
+`GET /api/auth/me` returns the persisted profile and actual verification flags.
+Profile nominee/guardian fields are descriptive only, not legal succession grants.
+These backend responses still need wiring into the relevant frontend forms.
+
+### Risk and succession review (backend Phase 4)
+
+Apply migration 010. `/api/risk/assessments` issues a registrar-only, deal-bound,
+single-use assessment valid for 30 minutes. A sale may provide `assessment_id`;
+otherwise creation assesses automatically. Creation and completion both check
+fresh facts. The version-1 deterministic rules cover ownership/share consistency,
+legal restrictions (including unresolved claims and recorded high risk), workflow
+conflicts, reused documents, and blockchain consistency. Scores are rule points,
+not calibrated fraud probabilities or proof of title. Mock mode explicitly marks
+the blockchain check as not checked; live mode fails closed on chain errors.
+Boundary overlap and document authenticity are not verified by this engine.
+
+Document reuse checks include pending/completed sale records, with a shared
+transaction lock to prevent concurrent reuse across parcels. Expired requests
+may be refiled. Assessment binding includes registrar, buyer, parcel, document,
+and the current record snapshot. No approval or hold resolution overrides a
+court freeze, active claim or database/blockchain mismatch.
+
+Verified registrars can list assessments, open an evidence-backed risk hold, and
+resolve a hold with a recorded reason/reference. `/api/risk/holds` shows open
+holds; `include_resolved=true` includes their audit history. Opening a new hold
+is blocked while a chain deal is PREPARED/SUBMITTED/REVIEW because already signed
+or broadcast transactions cannot be silently undone by a database-only action.
+
+Succession is explicitly REVIEW-ONLY, as requested. A proposed heir or surviving
+co-owner submits `/api/succession` with the deceased owner's registry UUID,
+registered heir accounts and shares, death/legal-evidence references and a SHA256
+document hash. Shares must allocate exactly that owner's active share; surviving
+co-owner shares are not reassigned. References are claims until manual review;
+no death status or document authenticity is inferred automatically.
+
+Unreviewed SUBMITTED claims do not freeze property or block sales. An independent
+verified registrar accepts a case using `/{id}/assign`; IN_REVIEW and
+EVIDENCE_VERIFIED cases block sale actions. The assigned registrar may mark
+EVIDENCE_VERIFIED or REJECTED with evidence and a note. A rejected case releases
+only its own workflow hold. A different verified registrar can take over only
+if the previous registrar is no longer active/verified. Applicants can withdraw
+only unassigned claims. Ownership snapshots prevent endorsing stale claims.
+
+Case details/events are available only to the applicant, named heirs, current
+owners (including approved linked identities), and verified registrars. Lists
+and event histories are bounded and paginated. All sensitive responses use
+no-store. Every succession response that endorses evidence explicitly returns
+`transfer_enabled: false`: no ownership is changed and no blockchain transaction
+is submitted. Nominee profile fields never grant an inheritance automatically.
+The final succession transfer authority/contract policy remains deferred.
+Frontend succession/risk screens are not wired by this backend-only phase.
+
+### Sepolia deployment preparation
+
+Only Anvil (31337) and Ethereum Sepolia (11155111) are supported; mainnet remains
+blocked. Sepolia settings require an HTTPS RPC endpoint and at least three block
+confirmations. These confirmations reduce reorg risk; they are not consensus
+finality. Wallet binding and transfer signatures are scoped to the configured
+chain and contract. Existing local wallet bindings cannot be silently reused on
+Sepolia. Use a separate database/schema and reviewed new anchors, keeping local
+history and pending deals intact. No automatic data migration or deployment occurs.
+
+The gitignored `backend/.env.sepolia` is a separate setup file. Put the provider
+HTTPS endpoint in `CHAIN_RPC_URL`; do not put wallet private keys or recovery
+phrases in any backend environment file. It is not loaded by the running local
+server. Application deployment must explicitly load its environment values.
+
+Build the existing contract with the pinned Foundry/Solidity configuration before
+signing deployment from a dedicated test wallet. Foundry supports local encrypted
+keystores/hardware signing; signing stays under the operator's control. After a
+successful wallet-signed deployment, from `backend/` run:
+
+```sh
+.venv/bin/python -m app.cli.sepolia --env-file .env.sepolia TRANSACTION_HASH
+```
+
+This verifies Sepolia, successful contract creation, exact compiled creation
+bytecode, canonical receipt block, confirmations, deployed code and deployer admin
+role. It prints the contract address and deployment block for the separate config;
+it does not change the existing local deployment. Registrar role grants and initial
+property anchors still require separate operator review and admin-wallet signing.
+The `local_chain` CLI deliberately retains its Anvil-only unlocked-account guard.
+Hosted operation is not complete until those steps and an end-to-end Sepolia
+transfer have been confirmed. RPC providers can impose event-query range limits;
+validate the chosen provider against actual history before public use.
+
+### Isolated Sepolia workflow demo
+
+`python -m app.cli.sepolia_demo setup` creates synthetic accounts and a property
+inside `titlelock_auth_test`, schema `titlelock_sepolia_demo`, and saves its scoped
+connection/secrets in the ignored `.env.sepolia`. It copies no main records.
+`python -m app.cli.sepolia_demo serve` serves the built frontend and API on
+127.0.0.1:5003. This is a local test fixture with known demo credentials, never a
+production server. Wallets must bind again against the Sepolia contract domain.
+
+`python -m app.cli.sepolia_admin prepare --registrar USERNAME --parcel ULPIN
+--admin ADDRESS --output PATH` produces public unsigned role/anchor calldata for
+reviewed accounts. `python -m app.cli.deploy_wallet --transactions PATH` serves a
+loopback-only MetaMask signing page. It never handles a private key. Role grants
+require administrator approval; initial anchors require reviewed ownership and
+`confirm-anchor TRANSACTION_HASH --parcel ULPIN --evidence REFERENCE` verifies the
+canonical receipt, exact registry event, owner wallets and hash before recording
+the baseline. Existing differing baselines cannot be overwritten.
+
+For the free Alchemy plan, historical event requests can be limited to ten blocks.
+`CHAIN_LOGS_RPC_URL` optionally selects a separate HTTPS Sepolia event provider;
+all other reads stay on `CHAIN_RPC_URL`. Both endpoints must report the configured
+chain ID and agree on the canonical head block. A lagging/disagreeing event source
+fails verification closed. Queries are bounded by `CHAIN_LOG_BLOCK_RANGE` and start
+at the verified deployment block. Do not silently advance that block to skip logs.
+
+MetaMask Added Protection can route a transaction through another contract. Keep
+protection enabled: a routed transfer is accepted only with the assigned sender
+and an exact OwnershipTransferred event from this registry, matching the entire
+signed deal. A pending routed transaction is not accepted as execution proof; the
+worker independently reconciles confirmed registry events. Database ownership
+updates still require the configured confirmation count and matching prior state.

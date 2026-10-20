@@ -45,6 +45,7 @@ export function CitizenNotificationsPage() {
     {items.map((item) => <article key={item.event_id} className="bg-white p-4 border rounded-xl space-y-2">
       <p className="font-semibold">{saleEventLabel(item.action)} · {item.parcel_id}</p>
       <p>{item.reason}</p>
+      {item.buyer_name && <p>Buyer: {item.buyer_name} · Phone: {item.buyer_phone || "Not recorded"}</p>}
       <p className="text-xs">{new Date(item.created_at).toLocaleString()} · {item.read_at ? 'Read' : 'Unread'}</p>
       <p className="text-xs break-all">Request: {item.sale_id}</p>
       {!item.read_at && <button disabled={busy} onClick={() => markRead(item.event_id)} className="underline mr-4">Mark as read</button>}

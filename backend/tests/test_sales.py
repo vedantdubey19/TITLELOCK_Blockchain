@@ -14,24 +14,36 @@ def sales(postgres_auth):
     client.app.state.settings.registrar_signup_code = SecretStr('test-registrar-code')
     accounts = {}
     for name, role in [('owner','CITIZEN'),('coowner','CITIZEN'),('buyer','CITIZEN'),('registrar','REGISTRAR'),('otherregistrar','REGISTRAR')]:
-        data = dict(name=name, username=name, email=f'{name}@example.com', password='Password 123!', role=role)
-        data.update(dict(registrarCode='test-registrar-code') if role == 'REGISTRAR' else dict(aadhaar='234567890123'))
+        data = dict(name=name, username=name, email=f'{name}@example.com', password='Password 123!', phone='+919876543210', role=role)
+        data.update(dict(registrarCode='test-registrar-code',officerId='OFFICER-'+name) if role == 'REGISTRAR' else dict(aadhaar='234567890123'))
         response = client.post('/api/auth/signup',json=data)
         assert response.status_code == 201
+        if role=='REGISTRAR':
+            from app.cli.review_officer import review
+            review(repo,name,'APPROVED','synthetic-fixture-review',client.app.state.settings.secret_key,'OFFICER-'+name)
+            response=client.post('/api/auth/login',json=dict(identifier=name,password='Password 123!',expectedRole='REGISTRAR'))
+            assert response.status_code==200
         accounts[name] = response.json()
     with repo.connect() as conn:
         conn.execute('''CREATE TABLE parcels(ulpin text PRIMARY KEY,frozen boolean NOT NULL DEFAULT false,title_status text DEFAULT 'VERIFIED',
             current_owner_user_id uuid,ownership_type text DEFAULT 'JOINT',last_registered_date date,
             transfer_history jsonb DEFAULT '[]',updated_at timestamptz DEFAULT now())''')
         conn.execute('''CREATE TABLE ownerships(id uuid DEFAULT gen_random_uuid(),parcel_id text,user_id uuid,share_bps integer,active boolean)''')
+        for table in ('encumbrances','disputes'):
+            conn.execute(f'CREATE TABLE {table}(id uuid DEFAULT gen_random_uuid(),parcel_id text,status text,details jsonb)')
         for parcel in ('LAND-1','LAND-2'):
             conn.execute('INSERT INTO parcels(ulpin,current_owner_user_id) VALUES (%s,%s)',(parcel,accounts['owner']['user']['id']))
             for name, share in [('owner',6000),('coowner',4000)]:
                 conn.execute('INSERT INTO ownerships(parcel_id,user_id,share_bps,active) VALUES (%s,%s,%s,true)',(parcel,accounts[name]['user']['id'],share))
     def call(name, method, path='', data=None):
         return client.request(method,'/api/sales'+path,headers={'Authorization':'Bearer '+accounts[name]['access_token']},json=data)
-    def create(parcel='LAND-1'):
-        return call('registrar','POST',data=dict(parcel_id=parcel,buyer_username='buyer',document_hash='test-document-hash'))
+    def create(parcel='LAND-1', legacy=True):
+        result = call('registrar','POST',data=dict(parcel_id=parcel,buyer_username='buyer',document_hash='test-document-hash' if parcel=='LAND-1' else 'test-document-hash-'+parcel))
+        if legacy and result.status_code == 201:
+            # Preserve coverage for deals issued before the exchanged-key migration.
+            with repo.connect() as conn:
+                conn.execute('UPDATE sale_requests SET key_exchange_version=1 WHERE id=%s',(result.json()['id'],))
+        return result
     return repo, accounts, call, create
 
 
@@ -125,3 +137,74 @@ def test_cross_request_secret_and_completed_approvals_expire(sales):
     assert call('registrar','POST',f'/{first}/complete',{}).status_code == 409
     with repo.connect() as conn:
         assert conn.execute("SELECT count(*) AS n FROM ownerships WHERE parcel_id='LAND-1' AND active").fetchone()['n'] == 2
+
+
+def test_exchanged_keys_require_opposite_party_and_every_coowner(sales):
+    repo, accounts, call, create = sales
+    sale = create(legacy=False).json()['id']
+    keys = {name:call(name,'POST',f'/{sale}/keys/{side}',{}).json()['key']
+            for name,side in [('registrar','registrar'),('owner','owner'),('coowner','owner')]}
+    assert call('registrar','POST',f'/{sale}/approve/registrar',{'key':keys['registrar']}).status_code == 401
+    assert call('owner','POST',f'/{sale}/approve/owner',{'key':keys['owner']}).status_code == 401
+    assert call('buyer','POST',f'/{sale}/approve/owner',{'key':keys['registrar']}).status_code == 403
+    assert call('otherregistrar','POST',f'/{sale}/approve/registrar',{'key':keys['owner']}).status_code == 403
+    assert call('owner','POST',f'/{sale}/approve/owner',{'key':keys['registrar']}).status_code == 200
+    assert call('owner','POST',f'/{sale}/approve/owner',{'key':keys['registrar']}).status_code == 401
+    assert call('registrar','POST',f'/{sale}/approve/registrar',{'key':keys['owner']}).status_code == 200
+    assert call('registrar','POST',f'/{sale}/approve/registrar',{'key':keys['owner']}).status_code == 401
+    assert call('registrar','POST',f'/{sale}/complete',{}).status_code == 409
+    assert call('coowner','POST',f'/{sale}/approve/owner',{'key':keys['registrar']}).status_code == 200
+    assert call('registrar','POST',f'/{sale}/approve/registrar',{'key':keys['coowner']}).status_code == 200
+    assert call('registrar','POST',f'/{sale}/keys/registrar',{}).status_code == 409
+    assert call('owner','POST',f'/{sale}/keys/owner',{}).status_code == 409
+    with repo.connect() as conn:
+        saved = str(conn.execute('SELECT * FROM sale_requests WHERE id=%s',(sale,)).fetchone()) + str(conn.execute('SELECT * FROM sale_owner_approvals WHERE request_id=%s',(sale,)).fetchall())
+        assert all(key not in saved for key in keys.values())
+        conn.execute("INSERT INTO parcel_sale_consents SELECT parcel_id,user_id,true FROM ownerships WHERE parcel_id='LAND-1' AND active")
+    assert call('registrar','POST',f'/{sale}/complete',{}).status_code == 200
+    row = call('buyer','GET').json()[0]
+    assert row['buyer_name']=='buyer' and row['buyer_phone']=='+919876543210'
+    with repo.connect() as conn:
+        assert conn.execute("SELECT count(*) AS n FROM parcel_sale_consents WHERE parcel_id='LAND-1'").fetchone()['n']==0
+
+
+def exchange_approvals(call, sale):
+    registrar_key = call('registrar','POST',f'/{sale}/keys/registrar',{}).json()['key']
+    for name in ('owner','coowner'):
+        key = call(name,'POST',f'/{sale}/keys/owner',{}).json()['key']
+        assert call(name,'POST',f'/{sale}/approve/owner',{'key':registrar_key}).status_code==200
+        assert call('registrar','POST',f'/{sale}/approve/registrar',{'key':key}).status_code==200
+
+
+def test_discovery_listing_consent_lookup_and_private_buyer_details(sales, postgres_auth):
+    repo, accounts, call, create = sales
+    client, _ = postgres_auth
+    def api(name, method, path, body=None):
+        return client.request(method,path,json=body,headers={'Authorization':'Bearer '+accounts[name]['access_token']})
+    with repo.connect() as conn:
+        conn.execute("ALTER TABLE parcels ADD COLUMN survey_number text DEFAULT 'SURVEY-1', ADD COLUMN area_sqm numeric DEFAULT 1200, ADD COLUMN registration_office text, ADD COLUMN risk_status text")
+    client.cookies.clear()
+    assert client.get('/api/properties/discover').status_code == 401
+    assert api('buyer','GET','/api/properties/discover?search=LAND-1').json()[0]['for_sale'] is False
+    assert api('buyer','POST','/api/properties/LAND-1/availability',{'for_sale':True}).status_code==404
+    assert api('owner','POST','/api/properties/LAND-1/availability',{'for_sale':True}).status_code==200
+    assert api('buyer','GET','/api/properties/discover?search=LAND-1').json()[0]['for_sale'] is False
+    assert api('coowner','POST','/api/properties/LAND-1/availability',{'for_sale':True}).status_code==200
+    result=api('buyer','GET','/api/properties/discover?search=LAND-1')
+    assert result.headers['cache-control']=='no-store'
+    record=result.json()[0]
+    assert record['for_sale'] is True and record['current_owner']=='owner'
+    assert record['boundary'] is None and 'phone' not in result.text
+    assert api('registrar','GET','/api/properties/discover?search=SURVEY').status_code==200
+    assert len(api('buyer','GET','/api/properties/discover?limit=1&offset=1').json())==1
+    assert api('buyer','GET',"/api/properties/discover?search=' OR 1=1 --").json()==[]
+    assert api('coowner','POST','/api/properties/LAND-1/availability',{'for_sale':False}).status_code==200
+    assert api('buyer','GET','/api/properties/discover?search=LAND-1').json()[0]['for_sale'] is False
+    sale=create(legacy=False).json()['id']
+    inbox=api('owner','GET','/api/notifications').json()[0]
+    assert inbox['buyer_name']=='buyer' and inbox['buyer_phone']=='+919876543210'
+    assert api('otherregistrar','GET','/api/notifications').json()==[]
+    assert api('buyer','GET','/api/properties/discover?search=LAND-1').json()[0]['deal_pending'] is True
+    exchange_approvals(call,sale)
+    assert call('registrar','POST',f'/{sale}/complete',{}).status_code==200
+    assert api('buyer','GET','/api/properties/discover?search=LAND-1').json()[0]['current_owner']=='buyer'

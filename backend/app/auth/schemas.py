@@ -43,6 +43,8 @@ class Signup(BaseModel):
     def validate_role(self):
         if self.role == 'CITIZEN' and self.aadhaar is None:
             raise ValueError('Aadhaar number is required for citizen signup')
+        if self.role == 'REGISTRAR' and (self.officerId is None or len(self.officerId.get_secret_value().strip()) < 3):
+            raise ValueError('Officer ID is required for registrar signup')
         expected = 'REGISTRAR' if self.role == 'REGISTRAR' else 'OWNER'
         if self.activeRole is not None and self.activeRole != expected:
             raise ValueError('activeRole must match the account role')
@@ -117,7 +119,7 @@ class PendingOfficer(BaseModel):
 
 
 class ProfileUpdate(BaseModel):
-    model_config = ConfigDict(extra='forbid', str_strip_whitespace=False)
+    model_config = ConfigDict(extra='forbid', str_strip_whitespace=True)
     name: str = Field(min_length=1, max_length=120)
     email: EmailStr = Field(max_length=254)
     phone: str = Field(max_length=32)
@@ -129,6 +131,14 @@ class ProfileUpdate(BaseModel):
     emergencyContact: str = Field(default='', max_length=32)
     recoveryGuardian: str = Field(default='', max_length=120)
     currentPassword: SecretStr | None = Field(default=None, max_length=128)
+
+    @field_validator('phone', 'emergencyContact')
+    @classmethod
+    def normalize_phone(cls, value):
+        number = re.sub(r'[ ()-]', '', value)
+        if number and not re.fullmatch(r'\+?[0-9]{10,15}', number):
+            raise ValueError('Enter a phone number with 10–15 digits and an optional country prefix')
+        return number
 
     @field_validator('name')
     @classmethod

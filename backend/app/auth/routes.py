@@ -1,6 +1,7 @@
 import hashlib
 import hmac
 import secrets
+import re
 
 import psycopg
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -8,8 +9,10 @@ from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pwdlib import PasswordHash
 
 from .repository import AuthRepository
-from .schemas import AuthResponse, Login, Signup, User, OTPChallenge, OTPVerification, SignupCreated
+from .schemas import AuthResponse, Login, Signup, User, OTPChallenge, OTPVerification, SignupCreated, PendingOfficer, ProfileUpdate
 from . import otp
+from .identity import officer_fingerprint, officer_suffix
+from psycopg.types.json import Jsonb
 
 def check_origin(request: Request):
     origin = request.headers.get('origin')
@@ -55,10 +58,14 @@ def public_user(account):
         aadhaarLast4=account.get('aadhaar_last4'),
         emailVerified=bool(account.get('email_verified_at')),
         phoneVerified=bool(account.get('phone_verified_at')),
+        officerVerified=bool(account.get('officer_verified_at')),
+        profile=account.get('profile') or {},
     )
 
 
 def issue_session(account, request, response, repository, mfa_verified=False):
+    if account['role']=='REGISTRAR' and not account.get('officer_verified_at'):
+        raise HTTPException(403,'Registrar identity approval is required')
     token = secrets.token_urlsafe(32)
     ttl = request.app.state.settings.session_ttl_hours
     repository.create_session(account['user_id'], token_hash(token), ttl, mfa_verified)
@@ -93,6 +100,8 @@ def current_user(
     account = repository.session_user(token_hash(token)) if token else None
     if not account or account['status'] != 'ACTIVE' or (request.app.state.settings.login_otp_enabled and not account.get('mfa_verified')):
         raise HTTPException(401, 'Invalid or expired session', headers={'WWW-Authenticate': 'Bearer'})
+    if account['role'] == 'REGISTRAR' and not account.get('officer_verified_at'):
+        raise HTTPException(403, 'Registrar identity approval is required')
     return public_user(account)
 
 
@@ -104,7 +113,7 @@ def require_role(*roles):
     return check
 
 
-@router.post('/signup', response_model=AuthResponse | SignupCreated, status_code=201)
+@router.post('/signup', response_model=AuthResponse | SignupCreated | PendingOfficer, status_code=201)
 def signup(data: Signup, request: Request, response: Response, repository=Depends(get_repository)):
     response.headers['Cache-Control'] = 'no-store'
     check_attempts(request, repository)
@@ -116,10 +125,17 @@ def signup(data: Signup, request: Request, response: Response, repository=Depend
     try:
         number = data.aadhaar.get_secret_value() if data.role == 'CITIZEN' else None
         digest = aadhaar_digest(number, request) if number else None
+        officer_id = data.officerId.get_secret_value().strip() if data.role == 'REGISTRAR' else None
+        if officer_id and not request.app.state.settings.secret_key:
+            raise HTTPException(503, 'SECRET_KEY is required for officer identity storage')
+        officer_hash = officer_fingerprint(request.app.state.settings.secret_key, officer_id) if officer_id else None
         account = repository.create_user(data, passwords.hash(data.password.get_secret_value()),
-                                         digest, number[-4:] if number else None)
+                                         digest, number[-4:] if number else None, officer_hash, officer_suffix(officer_id) if officer_id else None)
     except psycopg.errors.UniqueViolation:
-        raise HTTPException(409, 'Email or username is already registered') from None
+        raise HTTPException(409, 'Email, username, or officer ID is already registered') from None
+    if data.role == 'REGISTRAR':
+        response.delete_cookie(COOKIE_NAME, path='/api')
+        return PendingOfficer()
     if request.app.state.settings.login_otp_enabled:
         return SignupCreated()
     return issue_session(account, request, response, repository)
@@ -133,6 +149,8 @@ def login(data: Login, request: Request, response: Response, repository=Depends(
     valid = passwords.verify(data.password.get_secret_value(), account['password_hash'] if account else dummy_hash)
     if not account or not valid or account['status'] != 'ACTIVE':
         raise HTTPException(401, 'Invalid credentials', headers={'WWW-Authenticate': 'Bearer'})
+    if account['role'] == 'REGISTRAR' and not account.get('officer_verified_at'):
+        raise HTTPException(403, 'Registrar identity approval is required')
     if data.expectedRole and account['role'] != data.expectedRole:
         raise HTTPException(403, 'Use the correct portal for this account')
     if request.app.state.settings.login_otp_enabled:
@@ -173,3 +191,37 @@ def logout(
     response = Response(status_code=204, headers={'Cache-Control': 'no-store'})
     response.delete_cookie(COOKIE_NAME, path='/api')
     return response
+
+
+@router.patch('/profile')
+def update_profile(data: ProfileUpdate, request: Request, response: Response,
+                   user=Depends(current_user), repository=Depends(get_repository)):
+    response.headers['Cache-Control'] = 'no-store'
+    if not repository.allow_attempt('profile:'+user.id,10):
+        raise HTTPException(429,'Too many profile updates; retry in 15 minutes')
+    try:
+        with repository.connect() as conn:
+            account = conn.execute('SELECT a.*,u.account_status FROM auth_accounts a JOIN users u ON u.id=a.user_id WHERE a.user_id=%s FOR UPDATE OF a,u',(user.id,)).fetchone()
+            if account['account_status']!='ACTIVE' or (account['role']=='REGISTRAR' and not account['officer_verified_at']):
+                raise HTTPException(403,'Account approval is required')
+            email_changed = str(data.email).lower()!=account['email'].lower()
+            phone_changed = data.phone!=re.sub(r'[ ()-]', '', account['phone'] or '')
+            contact_changed = email_changed or phone_changed
+            if contact_changed and (not data.currentPassword or not passwords.verify(data.currentPassword.get_secret_value(),account['password_hash'])):
+                raise HTTPException(401,'Current password is required to change email or phone')
+            if user.role=='REGISTRAR' and data.jurisdiction!=account['jurisdiction']:
+                raise HTTPException(403,'Registrar jurisdiction changes require operator review')
+            profile = {key:getattr(data,key) for key in ('residentialAddress','primaryNomineeName','nomineeRelation','emergencyContact','recoveryGuardian')}
+            conn.execute('UPDATE users SET display_name=%s,updated_at=now() WHERE id=%s',(data.name,user.id))
+            conn.execute('''UPDATE auth_accounts SET email=%s,phone=%s,jurisdiction=%s,description=%s,profile=%s,
+                email_verified_at=CASE WHEN %s THEN NULL ELSE email_verified_at END,
+                phone_verified_at=CASE WHEN %s THEN NULL ELSE phone_verified_at END WHERE user_id=%s''',
+                (str(data.email).lower(),data.phone if phone_changed else account['phone'],data.jurisdiction,data.description,Jsonb(profile),email_changed,phone_changed,user.id))
+            if contact_changed:
+                conn.execute('DELETE FROM auth_sessions WHERE user_id=%s',(user.id,))
+                conn.execute('UPDATE login_challenges SET consumed=true WHERE user_id=%s',(user.id,))
+    except psycopg.errors.UniqueViolation:
+        raise HTTPException(409,'Email is already registered') from None
+    if contact_changed:
+        response.delete_cookie(COOKIE_NAME,path='/api')
+    return {'user':public_user(repository.find_user(user.username)), 'login_required':contact_changed}

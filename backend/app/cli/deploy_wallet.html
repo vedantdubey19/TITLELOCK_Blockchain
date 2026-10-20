@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><title>TitleLock · Sepolia deployment</title>
+<style>body{font:18px system-ui;max-width:760px;margin:70px auto;padding:24px;background:#101827;color:#edf3ff}button{padding:14px;margin:12px 12px 12px 0;cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}a{color:#98c8ff}</style>
+<h1>Deploy TitleLock on Sepolia</h1>
+<p>This deploys the compiled TitleLockRegistry contract on chain 11155111 using test ETH. The selected wallet becomes the contract administrator. No property records are uploaded by this step.</p>
+<button id="connect">1. Connect MetaMask</button><button id="deploy" disabled>2. Deploy contract</button>
+<pre id="status">Connect the intended administrator wallet first.</pre><a id="explorer" hidden target="_blank" rel="noopener noreferrer">View deployment transaction</a>
+<script>
+const bytecode = __BYTECODE__;
+const status = document.getElementById('status');
+const deploy = document.getElementById('deploy');
+let account, provider, submitted = false;
+const expected = __ADMIN__.toLowerCase();
+async function check() {
+  if (await provider.request({method:'eth_chainId'}) !== '0xaa36a7') throw new Error('Select Ethereum Sepolia in MetaMask.');
+  const accounts = await provider.request({method:'eth_accounts'});
+  if (accounts[0]?.toLowerCase() !== expected) throw new Error('Select the reviewed administrator wallet: '+expected);
+  return accounts[0];
+}
+document.getElementById('connect').onclick = async () => {
+  try {
+    const injected = window.ethereum;
+    provider = injected?.providers?.find(p=>p.isMetaMask) || injected;
+    if (!provider?.isMetaMask) throw new Error('Open this page in Chrome with MetaMask enabled.');
+    await provider.request({method:'eth_requestAccounts'});
+    account = await check(); deploy.disabled = submitted;
+    status.textContent = 'Administrator: '+account+'\nNetwork: Ethereum Sepolia\nReview the contract creation in MetaMask when you click Deploy.';
+  } catch (error) { status.textContent = error.message; deploy.disabled = true; }
+};
+deploy.onclick = async () => {
+  deploy.disabled = true;
+  try {
+    account = await check();
+    const tx = await provider.request({method:'eth_sendTransaction', params:[{from:account,chainId:'0xaa36a7',value:'0x0',data:bytecode}]});
+    submitted = true;
+    status.textContent = 'Deployment submitted. Do not deploy again.\nTransaction: '+tx+'\nThe backend must verify its receipt and confirmations before use.';
+    const link = document.getElementById('explorer'); link.href='https://sepolia.etherscan.io/tx/'+tx; link.hidden=false;
+  } catch (error) { status.textContent = error.message; deploy.disabled = submitted; }
+};
+</script></html>

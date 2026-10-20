@@ -49,7 +49,7 @@ def notifications(response: Response, unread_only: bool = False, limit: int = Qu
                   before_id: int | None = Query(None,ge=1), user=Depends(current_user), repository=Depends(get_repository)):
     response.headers['Cache-Control'] = 'no-store'
     with repository.connect() as conn:
-        return conn.execute('''SELECT n.event_id,n.read_at,e.sale_id,e.action,e.reason,e.created_at,s.parcel_id
+        return conn.execute('''SELECT n.event_id,n.read_at,e.sale_id,e.action,e.reason,e.created_at,s.parcel_id,s.buyer_name,s.buyer_phone
             FROM sale_notifications n JOIN sale_events e ON e.id=n.event_id JOIN sale_requests s ON s.id=e.sale_id
             WHERE n.user_id=%s AND (NOT %s OR n.read_at IS NULL)
                 AND (%s::bigint IS NULL OR n.event_id<%s) ORDER BY n.event_id DESC LIMIT %s''',

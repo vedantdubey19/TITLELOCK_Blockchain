@@ -1,8 +1,11 @@
+import { activityApi } from '../services/saleService';
+import { ChainVerification } from './ChainVerification';
 import { useEffect, useState } from 'react';
 
 export function PropertyRecord({ ulpin }) {
   const [record, setRecord] = useState(null);
   const [error, setError] = useState('');
+  const [listingMessage, setListingMessage] = useState('');
 
   useEffect(() => {
     const controller = new AbortController();
@@ -36,6 +39,14 @@ export function PropertyRecord({ ulpin }) {
 
   return (
     <div className="space-y-4 text-xs max-h-[65vh] overflow-y-auto pr-1">
+      <ChainVerification ulpin={ulpin} />
+      <div className="flex flex-wrap gap-3">
+        {[true, false].map((for_sale) => <button key={String(for_sale)} className="underline" onClick={async () => {
+          try { const result = await activityApi(`/api/properties/${encodeURIComponent(ulpin)}/availability`, { for_sale }); setListingMessage(result.message); }
+          catch (failure) { setListingMessage(failure.message); }
+        }}>{for_sale ? 'Agree to advertise for sale' : 'Withdraw my sale listing consent'}</button>)}
+      </div>
+      {listingMessage && <p role="status">{listingMessage}</p>}
       <dl className="grid grid-cols-2 gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
         {Object.entries(fields).map(([label, value]) => (
           <div key={label}><dt className="text-slate-500">{label}</dt>

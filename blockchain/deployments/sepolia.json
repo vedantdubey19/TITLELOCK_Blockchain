@@ -1,0 +1,18 @@
+{
+  "chain_id": 11155111,
+  "contract": "TitleLockRegistry",
+  "address": "0xADbAdFEE8843a5A1c50785B0788c3aeA1CF95362",
+  "transaction_hash": "0x2d99ae41e80de28809765beeb857898da790b205c475b7d74c681b6f3510d4db",
+  "deployment_block": 11954043,
+  "admin": "0xA53444651377Aa847eb238A1B70FdB310c2190E3",
+  "compiler": "0.8.37+commit.f401782d",
+  "evm_version": "cancun",
+  "required_confirmations": 3,
+  "test_setup": {
+    "registrar_role_transaction": "0xac59207b3c1597a8265bea76a51f58fdbb3e1d85d3d30288c62414bf223f6bc4",
+    "synthetic_property": "DEMO-SEPOLIA-001",
+    "anchor_transaction": "0xd1477ae97c30cabca3d9183e70ee289569120fe2528bc90b37bd4b25e4e96e63",
+    "completed_transfer_transaction": "0x02752b032f73d1d6a3bdcb791fedba008b5d3d525ce13f139c39a0edaf81f31b",
+    "completed_sale_id": "cfc50aba-603d-4f90-99c5-5351d203a686"
+  }
+}

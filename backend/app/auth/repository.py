@@ -10,7 +10,7 @@ class AuthRepository:
     def connect(self):
         return psycopg.connect(self.database_url, row_factory=dict_row, connect_timeout=5)
 
-    def create_user(self, data, password_hash, aadhaar_hash=None, aadhaar_last4=None):
+    def create_user(self, data, password_hash, aadhaar_hash=None, aadhaar_last4=None, officer_hash=None, officer_last4=None):
         # Never link a new login to existing ownership by an unverified display name.
         with self.connect() as conn:
             user = conn.execute(
@@ -19,10 +19,10 @@ class AuthRepository:
             ).fetchone()
             conn.execute(
                 """INSERT INTO auth_accounts
-                   (user_id, email, username, password_hash, role, phone, jurisdiction, description, aadhaar_hash, aadhaar_last4)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                   (user_id, email, username, password_hash, role, phone, jurisdiction, description, aadhaar_hash, aadhaar_last4, officer_id_hash, officer_id_last4)
+                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
                 (user['id'], str(data.email).lower(), data.username.lower(), password_hash,
-                 data.role, data.phone, data.jurisdiction, data.description, aadhaar_hash, aadhaar_last4),
+                 data.role, data.phone, data.jurisdiction, data.description, aadhaar_hash, aadhaar_last4, officer_hash, officer_last4),
             )
         return self.find_user(data.username)
 

@@ -1,0 +1,19 @@
+<!doctype html><html lang="en"><meta charset="utf-8"><title>TitleLock · Sepolia administration</title>
+<style>body{font:18px system-ui;max-width:850px;margin:60px auto;padding:20px;background:#101827;color:white}button{padding:14px;cursor:pointer}pre{white-space:pre-wrap;overflow-wrap:anywhere}</style>
+<h1>Sepolia test registry administration</h1><p>Review each transaction in MetaMask. Only the listed test contract and test ETH are involved.</p>
+<button id="send">Connect and submit next transaction</button><pre id="status"></pre>
+<script>
+const tasks=__TRANSACTIONS__; let index=0,busy=false;
+const status=document.getElementById('status'),button=document.getElementById('send');
+const results=[];
+function show(){status.textContent=results.join('\n')+'\n\n'+(tasks[index]?.label||'All transactions submitted. Verify receipts before use.');button.disabled=busy||index>=tasks.length;}
+button.onclick=async()=>{busy=true;show();try{
+const injected=window.ethereum;const provider=injected?.providers?.find(p=>p.isMetaMask)||injected;
+if(!provider?.isMetaMask)throw new Error('MetaMask required');
+const accounts=await provider.request({method:'eth_requestAccounts'});
+if(await provider.request({method:'eth_chainId'})!=='0xaa36a7')throw new Error('Select Ethereum Sepolia');
+const task=tasks[index];if(accounts[0]?.toLowerCase()!==task.transaction.from.toLowerCase())throw new Error('Select the specified administrator account');
+const hash=await provider.request({method:'eth_sendTransaction',params:[task.transaction]});
+results.push(task.label+'\n'+hash);index++;
+}catch(error){results.push(error.message);}finally{busy=false;show();}};show();
+</script></html>

@@ -1,9 +1,9 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Query
 from pydantic import BaseModel, ConfigDict, Field
 
-from ..auth.routes import check_origin, get_repository, require_role
+from ..auth.routes import check_origin, current_user, get_repository, require_role
 
 router = APIRouter(prefix='/api/properties', tags=['properties'], dependencies=[Depends(check_origin)])
 
@@ -53,6 +53,50 @@ def link_status(response: Response, user=Depends(require_role('CITIZEN')), repos
     with repository.connect() as conn:
         return conn.execute('''SELECT id,registry_user_id,status,review_note,created_at,reviewed_at
             FROM identity_link_requests WHERE account_user_id=%s ORDER BY created_at DESC''', (user.id,)).fetchall()
+
+
+class SaleAvailability(BaseModel):
+    for_sale: bool
+
+
+@router.post('/{ulpin}/availability')
+def sale_availability(ulpin: str, data: SaleAvailability, response: Response,
+                      user=Depends(require_role('CITIZEN')), repository=Depends(get_repository)):
+    response.headers['Cache-Control'] = 'no-store'
+    with repository.connect() as conn:
+        conn.execute('SELECT ulpin FROM parcels WHERE ulpin=%s FOR UPDATE',(ulpin,))
+        owners = conn.execute('''SELECT user_id FROM ownerships WHERE parcel_id=%s AND active AND
+            (user_id=%s OR user_id IN (SELECT registry_user_id FROM account_identity_links WHERE account_user_id=%s))
+            FOR UPDATE''',(ulpin,user.id,user.id)).fetchall()
+        if not owners:
+            raise HTTPException(404,'Property unavailable or not owned by this account')
+        for owner in owners:
+            conn.execute('''INSERT INTO parcel_sale_consents(parcel_id,registry_user_id,for_sale) VALUES (%s,%s,%s)
+                ON CONFLICT(parcel_id,registry_user_id) DO UPDATE SET for_sale=EXCLUDED.for_sale''',
+                (ulpin,owner['user_id'],data.for_sale))
+    return {'for_sale':data.for_sale,'message':'Preference saved. Every current owner must agree before the property is advertised for sale.'}
+
+
+@router.get('/discover')
+def discover_properties(response: Response, search: str = Query('',max_length=150),
+                        limit: int = Query(100,ge=1,le=200), offset: int = Query(0,ge=0),
+                        user=Depends(current_user), repository=Depends(get_repository)):
+    response.headers['Cache-Control'] = 'no-store'
+    from ..transfers.sales import expire_sales
+    expire_sales(repository)
+    with repository.connect() as conn:
+        return conn.execute('''SELECT p.ulpin,p.survey_number,p.area_sqm,p.registration_office,
+            p.title_status,p.risk_status,p.frozen,u.display_name AS current_owner,g.boundary,
+            (SELECT COALESCE(sum(o.share_bps),0) FROM ownerships o WHERE o.parcel_id=p.ulpin AND o.active)=10000 AND
+                NOT EXISTS(SELECT 1 FROM ownerships o LEFT JOIN parcel_sale_consents c
+                    ON c.parcel_id=o.parcel_id AND c.registry_user_id=o.user_id
+                    WHERE o.parcel_id=p.ulpin AND o.active AND NOT COALESCE(c.for_sale,false)) AS for_sale,
+            EXISTS(SELECT 1 FROM sale_requests s WHERE s.parcel_id=p.ulpin AND s.status='PENDING') AS deal_pending,
+            (SELECT cooldown_until FROM sale_parcel_state WHERE parcel_id=p.ulpin AND cooldown_until>clock_timestamp()) AS cooldown_until
+            FROM parcels p LEFT JOIN users u ON u.id=p.current_owner_user_id
+            LEFT JOIN parcel_map_geometry g ON g.parcel_id=p.ulpin
+            WHERE %s='' OR strpos(lower(p.ulpin),lower(%s))>0 OR strpos(lower(COALESCE(p.survey_number,'')),lower(%s))>0
+            ORDER BY p.ulpin LIMIT %s OFFSET %s''',(search,search,search,limit,offset)).fetchall()
 
 
 @router.get('/{ulpin}', responses={404: {'description': 'Property unavailable or not owned by this account'}})
