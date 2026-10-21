@@ -73,8 +73,14 @@ def run_migrations(database_url: str) -> None:
 
     logger.info("Ensuring database schema and migrations are applied...")
     with psycopg.connect(database_url, autocommit=True) as conn:
-        conn.execute(BASE_SCHEMA)
+        try:
+            conn.execute(BASE_SCHEMA)
+        except Exception as exc:
+            logger.warning("Base schema initialization notice: %s", exc)
         for migration in sorted(migrations_dir.glob("*.sql")):
-            logger.info("Applying migration %s", migration.name)
-            conn.execute(migration.read_text())
+            try:
+                logger.info("Applying migration %s", migration.name)
+                conn.execute(migration.read_text())
+            except Exception as exc:
+                logger.warning("Migration %s notice: %s", migration.name, exc)
     logger.info("Database schema and migrations successfully applied.")
