@@ -43,7 +43,9 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         if settings.database_url:
             try:
                 await asyncio.to_thread(run_migrations, settings.database_url)
-            except Exception:
+                app.state.migration_status = "ok"
+            except Exception as e:
+                app.state.migration_status = f"failed: {type(e).__name__}: {e}"
                 logging.getLogger(__name__).exception("Database schema bootstrap / migration failed on startup")
 
         async def expiry_worker():
@@ -122,7 +124,10 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.exception_handler(UndefinedTable)
     async def database_unavailable(request, exc):
         logging.getLogger(__name__).error("Database error on %s %s: %s", request.method, request.url.path, exc)
-        return JSONResponse(status_code=503, content={"detail": "Database unavailable or authentication migration not applied"})
+        return JSONResponse(status_code=503, content={
+            "detail": f"Database error ({type(exc).__name__}): {exc}",
+            "migration_status": getattr(request.app.state, "migration_status", "unknown")
+        })
 
     @app.get("/api/health", tags=["health"])
     def health() -> dict:
