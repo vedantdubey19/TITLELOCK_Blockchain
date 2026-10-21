@@ -1,4 +1,4 @@
-"""Database schema initialization and migration runner."""
+"""Database schema initialization, migration, and data seed runner."""
 from __future__ import annotations
 
 import logging
@@ -7,58 +7,182 @@ import psycopg
 
 logger = logging.getLogger(__name__)
 
-BASE_SCHEMA = """
-CREATE TABLE IF NOT EXISTS users (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    identity_reference text UNIQUE NOT NULL,
-    display_name text,
-    account_status text NOT NULL DEFAULT 'ACTIVE',
-    created_at timestamptz DEFAULT now(),
-    updated_at timestamptz DEFAULT now()
-);
-ALTER TABLE users ADD COLUMN IF NOT EXISTS account_status text NOT NULL DEFAULT 'ACTIVE';
-ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name text;
+BASE_SCHEMA_TABLES = [
+    """CREATE TABLE IF NOT EXISTS users (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        identity_reference text UNIQUE NOT NULL,
+        display_name text,
+        account_status text NOT NULL DEFAULT 'ACTIVE',
+        created_at timestamptz DEFAULT now(),
+        updated_at timestamptz DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS parcels (
+        ulpin text PRIMARY KEY,
+        current_owner_user_id uuid,
+        survey_number text,
+        area_sqm numeric,
+        registration_office text,
+        ownership_type text,
+        title_status text,
+        risk_status text,
+        frozen boolean DEFAULT false,
+        freeze_reason text,
+        last_registered_date date,
+        transfer_history jsonb NOT NULL DEFAULT '[]',
+        updated_at timestamptz DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS ownerships (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        parcel_id text,
+        user_id uuid,
+        share_bps integer CHECK(share_bps > 0 AND share_bps <= 10000),
+        active boolean NOT NULL
+    )""",
+    """CREATE TABLE IF NOT EXISTS encumbrances (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        parcel_id text,
+        status text,
+        details jsonb,
+        created_at timestamptz DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS disputes (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        parcel_id text,
+        status text,
+        details jsonb,
+        created_at timestamptz DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS parcel_map_geometry (
+        parcel_id text PRIMARY KEY,
+        boundary jsonb NOT NULL,
+        source_reference text NOT NULL
+    )""",
+    """CREATE TABLE IF NOT EXISTS parcel_sale_consents (
+        parcel_id text NOT NULL,
+        registry_user_id uuid NOT NULL,
+        for_sale boolean NOT NULL,
+        PRIMARY KEY(parcel_id, registry_user_id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS sale_parcel_state (
+        parcel_id text PRIMARY KEY,
+        cooldown_until timestamptz
+    )""",
+    """CREATE TABLE IF NOT EXISTS sale_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        parcel_id text NOT NULL,
+        buyer_user_id uuid NOT NULL,
+        registrar_user_id uuid NOT NULL,
+        document_hash text NOT NULL DEFAULT '',
+        status text NOT NULL DEFAULT 'PENDING' CHECK(status IN ('PENDING','COMPLETED','EXPIRED')),
+        expires_at timestamptz,
+        registrar_key_hash text,
+        registrar_approved boolean NOT NULL DEFAULT false,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        completed_at timestamptz,
+        key_exchange_version integer NOT NULL DEFAULT 2,
+        buyer_name text NOT NULL DEFAULT '',
+        buyer_phone text NOT NULL DEFAULT '',
+        registrar_key_issued_at timestamptz
+    )""",
+    """CREATE TABLE IF NOT EXISTS sale_owner_approvals (
+        request_id uuid NOT NULL,
+        registry_user_id uuid NOT NULL,
+        share_bps integer NOT NULL,
+        key_hash text,
+        approved_by uuid,
+        approved boolean NOT NULL DEFAULT false,
+        owner_key_received boolean NOT NULL DEFAULT false,
+        PRIMARY KEY(request_id, registry_user_id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS sale_events (
+        id bigserial PRIMARY KEY,
+        sale_id uuid NOT NULL,
+        actor_user_id uuid,
+        action text NOT NULL,
+        reason text,
+        created_at timestamptz NOT NULL DEFAULT clock_timestamp()
+    )""",
+    """CREATE TABLE IF NOT EXISTS sale_notifications (
+        event_id bigint NOT NULL,
+        user_id uuid NOT NULL,
+        read_at timestamptz,
+        PRIMARY KEY(event_id, user_id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS sale_chain_payloads (
+        sale_id uuid PRIMARY KEY,
+        typed_data jsonb NOT NULL,
+        old_state jsonb NOT NULL,
+        new_state jsonb NOT NULL,
+        signatures jsonb NOT NULL DEFAULT '{}',
+        state text NOT NULL DEFAULT 'SIGNING',
+        tx_hash text,
+        block_number bigint,
+        confirmed_at timestamptz,
+        created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS risk_assessments (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        parcel_id text NOT NULL,
+        registrar_user_id uuid NOT NULL,
+        buyer_user_id uuid NOT NULL,
+        document_hash text NOT NULL,
+        snapshot_hash text NOT NULL,
+        rules_version integer NOT NULL DEFAULT 1,
+        findings jsonb NOT NULL,
+        score integer NOT NULL CHECK(score BETWEEN 0 AND 100),
+        decision text NOT NULL CHECK(decision IN ('CLEAR','BLOCK')),
+        consumed_by uuid UNIQUE,
+        expires_at timestamptz NOT NULL DEFAULT now()+interval '30 minutes',
+        created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS risk_review_holds (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        assessment_id uuid NOT NULL,
+        parcel_id text NOT NULL,
+        opened_by uuid NOT NULL,
+        reason text NOT NULL,
+        evidence_reference text NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        resolved_by uuid,
+        resolution_reference text,
+        resolved_at timestamptz
+    )""",
+    """CREATE TABLE IF NOT EXISTS succession_cases (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        parcel_id text NOT NULL,
+        applicant_user_id uuid NOT NULL,
+        deceased_user_id uuid NOT NULL,
+        heirs jsonb NOT NULL,
+        death_certificate_reference text NOT NULL,
+        legal_heir_reference text NOT NULL,
+        document_hash text NOT NULL,
+        ownership_snapshot jsonb NOT NULL,
+        status text NOT NULL DEFAULT 'SUBMITTED',
+        assigned_registrar_id uuid,
+        review_note text,
+        created_at timestamptz NOT NULL DEFAULT now(),
+        reviewed_at timestamptz
+    )""",
+    """CREATE TABLE IF NOT EXISTS succession_events (
+        id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        case_id uuid NOT NULL,
+        action text NOT NULL,
+        actor_user_id uuid NOT NULL,
+        note text,
+        created_at timestamptz NOT NULL DEFAULT now()
+    )"""
+]
 
-CREATE TABLE IF NOT EXISTS parcels (
-    ulpin text PRIMARY KEY,
-    current_owner_user_id uuid REFERENCES users(id),
-    survey_number text,
-    area_sqm numeric,
-    registration_office text,
-    ownership_type text,
-    title_status text,
-    risk_status text,
-    frozen boolean DEFAULT false,
-    freeze_reason text,
-    last_registered_date date,
-    transfer_history jsonb NOT NULL DEFAULT '[]',
-    updated_at timestamptz DEFAULT now()
-);
-ALTER TABLE parcels ADD COLUMN IF NOT EXISTS frozen boolean DEFAULT false;
-ALTER TABLE parcels ADD COLUMN IF NOT EXISTS freeze_reason text;
-ALTER TABLE parcels ADD COLUMN IF NOT EXISTS title_status text;
-ALTER TABLE parcels ADD COLUMN IF NOT EXISTS risk_status text;
-ALTER TABLE parcels ADD COLUMN IF NOT EXISTS transfer_history jsonb NOT NULL DEFAULT '[]';
-ALTER TABLE parcels ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now();
-
-CREATE TABLE IF NOT EXISTS ownerships (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    parcel_id text REFERENCES parcels(ulpin),
-    user_id uuid REFERENCES users(id),
-    share_bps integer CHECK(share_bps > 0 AND share_bps <= 10000),
-    active boolean NOT NULL
-);
-
-CREATE TABLE IF NOT EXISTS encumbrances (
-    id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-    parcel_id text REFERENCES parcels(ulpin),
-    status text,
-    details jsonb,
-    created_at timestamptz DEFAULT now()
-);
-
-CREATE TABLE IF NOT EXISTS disputes (LIKE encumbrances INCLUDING ALL);
-"""
+SAFE_ALTERS = [
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS account_status text NOT NULL DEFAULT 'ACTIVE'",
+    "ALTER TABLE users ADD COLUMN IF NOT EXISTS display_name text",
+    "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS frozen boolean DEFAULT false",
+    "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS freeze_reason text",
+    "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS title_status text",
+    "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS risk_status text",
+    "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS transfer_history jsonb NOT NULL DEFAULT '[]'",
+    "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now()",
+]
 
 
 def run_migrations(database_url: str) -> None:
@@ -67,23 +191,30 @@ def run_migrations(database_url: str) -> None:
     migrations_dir = Path(__file__).resolve().parent.parent / "migrations"
     if not migrations_dir.is_dir():
         migrations_dir = Path("/app/migrations")
-    if not migrations_dir.is_dir():
-        logger.warning("Migrations directory not found at %s", migrations_dir)
-        return
 
     logger.info("Ensuring database schema and migrations are applied...")
     with psycopg.connect(database_url, autocommit=True) as conn:
-        try:
-            conn.execute(BASE_SCHEMA)
-        except Exception as exc:
-            logger.warning("Base schema initialization notice: %s", exc)
-        for migration in sorted(migrations_dir.glob("*.sql")):
+        for stmt in BASE_SCHEMA_TABLES:
             try:
-                logger.info("Applying migration %s", migration.name)
-                conn.execute(migration.read_text())
+                conn.execute(stmt)
             except Exception as exc:
-                logger.warning("Migration %s notice: %s", migration.name, exc)
-        logger.info("Database schema and migrations successfully applied.")
+                logger.debug("Table creation notice: %s", exc)
+
+        for stmt in SAFE_ALTERS:
+            try:
+                conn.execute(stmt)
+            except Exception as exc:
+                logger.debug("Safe alter notice: %s", exc)
+
+        if migrations_dir.is_dir():
+            for migration in sorted(migrations_dir.glob("*.sql")):
+                try:
+                    logger.info("Applying migration %s", migration.name)
+                    conn.execute(migration.read_text())
+                except Exception as exc:
+                    logger.warning("Migration %s notice: %s", migration.name, exc)
+
+        logger.info("Database schema applied. Checking property seed...")
         seed_properties(conn)
 
 
@@ -91,8 +222,11 @@ def seed_properties(conn) -> None:
     try:
         row = conn.execute("SELECT count(*) FROM parcels").fetchone()
         if row and row[0] > 0:
-            logger.info("Parcels already populated (%s records), skipping seed", row[0])
-            return
+            logger.info("Parcels already populated (%s records), checking geometries...", row[0])
+            geom_row = conn.execute("SELECT count(*) FROM parcel_map_geometry").fetchone()
+            if geom_row and geom_row[0] > 0:
+                logger.info("Geometries already populated (%s records), skipping seed", geom_row[0])
+                return
     except Exception as exc:
         logger.warning("Could not check parcels count: %s", exc)
         return
@@ -151,6 +285,6 @@ def seed_properties(conn) -> None:
                    ON CONFLICT DO NOTHING""",
                 (p["ulpin"], user_id),
             )
-        logger.info("Successfully seeded %s properties and boundaries.", len(properties))
+        logger.info("Successfully seeded %s properties and cadastre boundaries.", len(properties))
     except Exception as exc:
         logger.exception("Error while seeding properties: %s", exc)
