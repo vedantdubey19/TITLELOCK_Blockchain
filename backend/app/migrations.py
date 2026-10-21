@@ -170,6 +170,100 @@ BASE_SCHEMA_TABLES = [
         actor_user_id uuid NOT NULL,
         note text,
         created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS auth_accounts (
+        user_id uuid PRIMARY KEY,
+        email text NOT NULL,
+        username text NOT NULL,
+        password_hash text NOT NULL,
+        role text NOT NULL,
+        phone text NOT NULL DEFAULT '',
+        jurisdiction text NOT NULL DEFAULT '',
+        description text NOT NULL DEFAULT '',
+        aadhaar_hash text,
+        aadhaar_last4 text,
+        profile jsonb NOT NULL DEFAULT '{}',
+        email_verified_at timestamptz,
+        phone_verified_at timestamptz,
+        officer_id_hash text,
+        officer_id_last4 text,
+        officer_verified_at timestamptz,
+        officer_evidence_reference text,
+        created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS auth_sessions (
+        token_hash text PRIMARY KEY,
+        user_id uuid NOT NULL,
+        expires_at timestamptz NOT NULL,
+        mfa_verified boolean NOT NULL DEFAULT false,
+        created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS auth_rate_limits (
+        key text PRIMARY KEY,
+        attempts integer NOT NULL,
+        resets_at timestamptz NOT NULL
+    )""",
+    """CREATE TABLE IF NOT EXISTS login_challenges (
+        id text PRIMARY KEY,
+        user_id uuid NOT NULL,
+        email text NOT NULL,
+        phone text NOT NULL,
+        email_code_hash text NOT NULL,
+        twilio_verification_sid text,
+        attempts integer NOT NULL DEFAULT 0,
+        delivered boolean NOT NULL DEFAULT false,
+        consumed boolean NOT NULL DEFAULT false,
+        expires_at timestamptz NOT NULL DEFAULT now() + interval '5 minutes',
+        created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS identity_link_requests (
+        id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+        account_user_id uuid NOT NULL,
+        registry_user_id uuid NOT NULL,
+        evidence_reference text NOT NULL,
+        status text NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED')),
+        reviewed_by uuid,
+        review_note text,
+        reviewed_by_operator text,
+        reviewed_at timestamptz,
+        created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS account_identity_links (
+        account_user_id uuid NOT NULL,
+        registry_user_id uuid NOT NULL,
+        request_id uuid NOT NULL,
+        PRIMARY KEY(account_user_id, registry_user_id)
+    )""",
+    """CREATE TABLE IF NOT EXISTS chain_wallets (
+        user_id uuid PRIMARY KEY,
+        address text NOT NULL UNIQUE,
+        linked_at timestamptz NOT NULL DEFAULT now(),
+        binding_message jsonb,
+        binding_signature text
+    )""",
+    """CREATE TABLE IF NOT EXISTS chain_wallet_challenges (
+        user_id uuid,
+        address text NOT NULL,
+        message jsonb NOT NULL,
+        expires_at timestamptz NOT NULL,
+        consumed boolean NOT NULL DEFAULT false
+    )""",
+    """CREATE TABLE IF NOT EXISTS chain_baselines (
+        parcel_id text PRIMARY KEY,
+        chain_id bigint NOT NULL,
+        contract_address text NOT NULL,
+        state_hash text NOT NULL,
+        tx_hash text NOT NULL,
+        evidence_reference text NOT NULL,
+        created_at timestamptz NOT NULL DEFAULT now()
+    )""",
+    """CREATE TABLE IF NOT EXISTS account_review_events (
+        id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        account_user_id uuid NOT NULL,
+        decision text NOT NULL CHECK(decision IN ('APPROVED','REJECTED','REVOKED')),
+        evidence_reference text NOT NULL,
+        operator_name text NOT NULL DEFAULT current_user,
+        created_at timestamptz NOT NULL DEFAULT now()
     )"""
 ]
 
@@ -182,6 +276,41 @@ SAFE_ALTERS = [
     "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS risk_status text",
     "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS transfer_history jsonb NOT NULL DEFAULT '[]'",
     "ALTER TABLE parcels ADD COLUMN IF NOT EXISTS updated_at timestamptz DEFAULT now()",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS aadhaar_hash text",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS aadhaar_last4 text",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS profile jsonb NOT NULL DEFAULT '{}'",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS email_verified_at timestamptz",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS phone_verified_at timestamptz",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS officer_id_hash text",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS officer_id_last4 text",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS officer_verified_at timestamptz",
+    "ALTER TABLE auth_accounts ADD COLUMN IF NOT EXISTS officer_evidence_reference text",
+    "ALTER TABLE auth_sessions ADD COLUMN IF NOT EXISTS mfa_verified boolean NOT NULL DEFAULT false",
+    "ALTER TABLE sale_requests ADD COLUMN IF NOT EXISTS key_exchange_version integer NOT NULL DEFAULT 2",
+    "ALTER TABLE sale_requests ADD COLUMN IF NOT EXISTS buyer_name text NOT NULL DEFAULT ''",
+    "ALTER TABLE sale_requests ADD COLUMN IF NOT EXISTS buyer_phone text NOT NULL DEFAULT ''",
+    "ALTER TABLE sale_requests ADD COLUMN IF NOT EXISTS registrar_key_issued_at timestamptz",
+    "ALTER TABLE sale_owner_approvals ADD COLUMN IF NOT EXISTS owner_key_received boolean NOT NULL DEFAULT false",
+    "ALTER TABLE sale_events ADD COLUMN IF NOT EXISTS reason text",
+    "ALTER TABLE chain_wallets ADD COLUMN IF NOT EXISTS binding_message jsonb",
+    "ALTER TABLE chain_wallets ADD COLUMN IF NOT EXISTS binding_signature text",
+    "ALTER TABLE identity_link_requests ADD COLUMN IF NOT EXISTS reviewed_by_operator text",
+]
+
+BASE_SCHEMA_INDEXES = [
+    "CREATE UNIQUE INDEX IF NOT EXISTS auth_email_unique ON auth_accounts (lower(email))",
+    "CREATE UNIQUE INDEX IF NOT EXISTS auth_username_unique ON auth_accounts (lower(username))",
+    "CREATE INDEX IF NOT EXISTS auth_sessions_user_idx ON auth_sessions (user_id)",
+    "CREATE INDEX IF NOT EXISTS login_challenges_user_idx ON login_challenges(user_id)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS identity_link_pending ON identity_link_requests(account_user_id, registry_user_id) WHERE status='PENDING'",
+    "CREATE UNIQUE INDEX IF NOT EXISTS sale_pending_parcel ON sale_requests(parcel_id) WHERE status='PENDING'",
+    "CREATE INDEX IF NOT EXISTS sale_events_timeline ON sale_events(sale_id, id DESC)",
+    "CREATE INDEX IF NOT EXISTS sale_notifications_inbox ON sale_notifications(user_id, event_id DESC)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS officer_identity_unique ON auth_accounts(officer_id_hash) WHERE officer_id_hash IS NOT NULL",
+    "CREATE INDEX IF NOT EXISTS sale_document_review_idx ON sale_requests(lower(btrim(document_hash))) WHERE status IN ('PENDING','COMPLETED')",
+    "CREATE INDEX IF NOT EXISTS risk_parcel_idx ON risk_assessments(parcel_id, created_at DESC)",
+    "CREATE UNIQUE INDEX IF NOT EXISTS risk_open_hold ON risk_review_holds(parcel_id) WHERE resolved_at IS NULL",
+    "CREATE UNIQUE INDEX IF NOT EXISTS succession_active_claim ON succession_cases(parcel_id, deceased_user_id) WHERE status IN ('SUBMITTED','IN_REVIEW','EVIDENCE_VERIFIED')",
 ]
 
 
@@ -205,6 +334,12 @@ def run_migrations(database_url: str) -> None:
                 conn.execute(stmt)
             except Exception as exc:
                 logger.debug("Safe alter notice: %s", exc)
+
+        for stmt in BASE_SCHEMA_INDEXES:
+            try:
+                conn.execute(stmt)
+            except Exception as exc:
+                logger.debug("Index creation notice: %s", exc)
 
         if migrations_dir.is_dir():
             for migration in sorted(migrations_dir.glob("*.sql")):
