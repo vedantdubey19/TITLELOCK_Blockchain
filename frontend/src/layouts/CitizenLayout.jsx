@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, Navigate } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Sidebar } from './Sidebar';
+import PortalFooter from '../components/common/PortalFooter';
 import { useAuth } from '../hooks/useAuth';
 
 export function CitizenLayout() {
@@ -22,7 +23,7 @@ export function CitizenLayout() {
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-sky-500/20 overflow-hidden">
+    <div className="min-h-screen w-full min-w-0 bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-sky-500/20 overflow-hidden">
       {/* Pinned Glassmorphic Left Sidebar (with Mobile Slide-Out Drawer) */}
       <Sidebar 
         mobileIsOpen={mobileMenuOpen} 
@@ -38,6 +39,7 @@ export function CitizenLayout() {
         <main className="flex-1 px-4 sm:px-8 py-5 pb-16 max-w-[1500px] w-full mx-auto">
           <Outlet />
         </main>
+        <PortalFooter />
       </div>
 
       {/* Floating Toast Notification */}

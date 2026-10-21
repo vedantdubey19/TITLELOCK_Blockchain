@@ -17,6 +17,7 @@ import CitizenNotificationsPage from '../pages/CitizenNotificationsPage';
 import CitizenProfilePage from '../pages/CitizenProfilePage';
 import CitizenSettingsPage from '../pages/CitizenSettingsPage';
 import HomePage from '../pages/HomePage';
+import NotFoundPage from '../pages/NotFoundPage';
 
 // Registrar Pages
 import RegistrarDashboardPage from '../pages/RegistrarDashboardPage';
@@ -74,7 +75,7 @@ export function AppRoutes() {
       </Route>
 
       {/* Fallback */}
-      <Route path="*" element={<Navigate to="/citizen/dashboard" replace />} />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

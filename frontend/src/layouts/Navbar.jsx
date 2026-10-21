@@ -11,12 +11,13 @@ import {
   ShieldCheck, 
   X,
   Sun,
-  Moon
+  Moon,
+  Menu
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
 
-export function Navbar() {
+export function Navbar({ onMenuToggle }) {
   const { currentUser, globalSearch, setGlobalSearch, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
@@ -58,8 +59,12 @@ export function Navbar() {
   return (
     <>
       <header className="sticky top-0 z-40 w-full flex items-center justify-between gap-4 py-3.5 px-3 sm:px-6 bg-white/70 dark:bg-slate-900/75 backdrop-blur-xl border-b border-white/60 dark:border-white/10 shadow-[0_4px_20px_-2px_rgba(0,0,0,0.02)] dark:shadow-[0_4px_20px_-2px_rgba(0,0,0,0.3)] transition-all">
-        {/* Search Input Bar with Glassmorphic Refraction */}
-        <div className="flex-1 max-w-xl">
+        <div className="flex items-center gap-2 min-w-0 flex-1 max-w-xl">
+          <button type="button" onClick={onMenuToggle} aria-label="Open navigation menu" className="shrink-0 rounded-xl border border-slate-200 bg-white p-2 text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 md:hidden">
+            <Menu className="h-4 w-4" />
+          </button>
+          {/* Search Input Bar with Glassmorphic Refraction */}
+          <div className="min-w-0 flex-1">
           <div className="relative">
             <Search className="w-4 h-4 text-slate-400 dark:text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
             <input
@@ -69,6 +74,7 @@ export function Navbar() {
               placeholder="Search parcel ID, location, or record..."
               className="w-full pl-10 pr-4 py-2.5 rounded-2xl bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border border-white/90 dark:border-white/10 shadow-[0_2px_12px_-2px_rgba(0,0,0,0.03)] text-xs text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-400 focus:bg-white dark:focus:bg-slate-800 transition-all"
             />
+          </div>
           </div>
         </div>
 

@@ -122,7 +122,7 @@ export function CitizenFullscreenMapPage() {
   }, [selectedParcel, userLocation]);
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans select-none transition-colors duration-200">
+    <div className="relative w-full min-h-screen overflow-hidden bg-slate-100 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col font-sans select-none transition-colors duration-200">
       
       {/* TOP HEADER BAR (In standard flex flow so children below never overlap or underlap) */}
       <header className="flex-none h-16 w-full px-4 sm:px-6 bg-white/95 dark:bg-slate-950/95 backdrop-blur-xl border-b border-slate-200/90 dark:border-white/10 flex items-center justify-between shadow-sm dark:shadow-2xl z-30 transition-colors duration-200 relative">
