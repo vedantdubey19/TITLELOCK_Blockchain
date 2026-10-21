@@ -8,7 +8,26 @@ from psycopg import sql
 from psycopg.conninfo import make_conninfo, conninfo_to_dict
 import pytest
 
-from app.cli.database_backup import backup, digest, pg_environment, restore, source_url
+from app.cli.database_backup import backup, decrypt_archive, digest, encrypt_archive, pg_environment, restore, source_url
+
+
+def test_encrypted_archive_requires_the_private_passphrase_and_detects_tampering(tmp_path):
+    plain=tmp_path/'plain.pgdump'; plain.write_bytes(b'synthetic registry backup')
+    secret=tmp_path/'backup-key'; secret.write_text('this-is-a-long-private-backup-passphrase')
+    secret.chmod(0o600)
+    encrypted=tmp_path/'archive.pgdump.enc'
+    metadata=encrypt_archive(plain,encrypted,secret.read_bytes())
+    restored=tmp_path/'restored.pgdump'
+    decrypt_archive(encrypted,restored,metadata,secret.read_bytes())
+    assert restored.read_bytes()==plain.read_bytes()
+    metadata['tables']=[{'schema':'public','table':'forged','rows':1}]
+    with pytest.raises(ValueError,match='manifest integrity'):
+        decrypt_archive(encrypted,tmp_path/'forged.pgdump',metadata,secret.read_bytes())
+    encrypted.unlink()
+    metadata=encrypt_archive(plain,encrypted,secret.read_bytes())
+    encrypted.write_bytes(encrypted.read_bytes()+b'changed')
+    with pytest.raises(ValueError,match='integrity'):
+        decrypt_archive(encrypted,tmp_path/'tampered.pgdump',metadata,secret.read_bytes())
 
 
 def test_credentials_stay_in_private_temporary_files():

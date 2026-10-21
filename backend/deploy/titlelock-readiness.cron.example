@@ -1,0 +1,3 @@
+# Replace URL with the production HTTPS origin. A non-2xx exit is visible to
+# the host scheduler/log collector and can be connected to its alert policy.
+*/5 * * * * curl --fail --silent --show-error --max-time 10 https://titlelock.example.com/api/readiness >/dev/null
