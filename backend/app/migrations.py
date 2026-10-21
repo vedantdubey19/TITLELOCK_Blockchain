@@ -247,44 +247,47 @@ def seed_properties(conn) -> None:
         for p in properties:
             owner_name = p.get("current_owner", "").strip() or "Cadastre Owner"
             owner_ref = "seed:owner:" + owner_name.lower().replace(" ", "_")
-            user = conn.execute(
-                """INSERT INTO users (identity_reference, display_name, account_status)
-                   VALUES (%s, %s, 'ACTIVE')
-                   ON CONFLICT (identity_reference) DO UPDATE SET display_name = EXCLUDED.display_name
-                   RETURNING id""",
-                (owner_ref, owner_name),
-            ).fetchone()
+            
+            user = conn.execute("SELECT id FROM users WHERE identity_reference = %s", (owner_ref,)).fetchone()
+            if not user:
+                user = conn.execute(
+                    "INSERT INTO users (identity_reference, display_name, account_status) VALUES (%s, %s, 'ACTIVE') RETURNING id",
+                    (owner_ref, owner_name),
+                ).fetchone()
             user_id = user[0]
 
-            conn.execute(
-                """INSERT INTO parcels (ulpin, current_owner_user_id, survey_number, area_sqm,
-                                       registration_office, ownership_type, title_status, risk_status,
-                                       frozen, last_registered_date, transfer_history)
-                   VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                   ON CONFLICT (ulpin) DO NOTHING""",
-                (
-                    p["ulpin"], user_id, p.get("survey_number"), p.get("area_sqm"),
-                    p.get("registration_office"), p.get("ownership_type", "SOLE"),
-                    p.get("title_status", "VERIFIED"), p.get("risk_status", "LOW_RISK"),
-                    bool(p.get("frozen", False)), p.get("last_registered_date"),
-                    Jsonb(p.get("transfer_history") or []),
-                ),
-            )
-
-            if p.get("boundary"):
+            parcel = conn.execute("SELECT ulpin FROM parcels WHERE ulpin = %s", (p["ulpin"],)).fetchone()
+            if not parcel:
                 conn.execute(
-                    """INSERT INTO parcel_map_geometry (parcel_id, boundary, source_reference)
-                       VALUES (%s, %s, %s)
-                       ON CONFLICT (parcel_id) DO UPDATE SET boundary = EXCLUDED.boundary""",
-                    (p["ulpin"], Jsonb(p["boundary"]), "cadastre-survey-2026"),
+                    """INSERT INTO parcels (ulpin, current_owner_user_id, survey_number, area_sqm,
+                                           registration_office, ownership_type, title_status, risk_status,
+                                           frozen, last_registered_date, transfer_history)
+                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                    (
+                        p["ulpin"], user_id, p.get("survey_number"), p.get("area_sqm"),
+                        p.get("registration_office"), p.get("ownership_type", "SOLE"),
+                        p.get("title_status", "VERIFIED"), p.get("risk_status", "LOW_RISK"),
+                        bool(p.get("frozen", False)), p.get("last_registered_date"),
+                        Jsonb(p.get("transfer_history") or []),
+                    ),
                 )
 
-            conn.execute(
-                """INSERT INTO ownerships (parcel_id, user_id, share_bps, active)
-                   VALUES (%s, %s, 10000, true)
-                   ON CONFLICT DO NOTHING""",
-                (p["ulpin"], user_id),
-            )
+            if p.get("boundary"):
+                geom = conn.execute("SELECT parcel_id FROM parcel_map_geometry WHERE parcel_id = %s", (p["ulpin"],)).fetchone()
+                if not geom:
+                    conn.execute(
+                        """INSERT INTO parcel_map_geometry (parcel_id, boundary, source_reference)
+                           VALUES (%s, %s, %s)""",
+                        (p["ulpin"], Jsonb(p["boundary"]), "cadastre-survey-2026"),
+                    )
+
+            ownership = conn.execute("SELECT 1 FROM ownerships WHERE parcel_id = %s AND user_id = %s", (p["ulpin"], user_id)).fetchone()
+            if not ownership:
+                conn.execute(
+                    """INSERT INTO ownerships (parcel_id, user_id, share_bps, active)
+                       VALUES (%s, %s, 10000, true)""",
+                    (p["ulpin"], user_id),
+                )
         logger.info("Successfully seeded %s properties and cadastre boundaries.", len(properties))
     except Exception as exc:
         logger.exception("Error while seeding properties: %s", exc)
