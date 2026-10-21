@@ -124,9 +124,19 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.exception_handler(UndefinedTable)
     async def database_unavailable(request, exc):
         logging.getLogger(__name__).error("Database error on %s %s: %s", request.method, request.url.path, exc)
+        user_info = {}
+        try:
+            if request.app.state.settings.database_url:
+                with psycopg.connect(request.app.state.settings.database_url, connect_timeout=3) as conn:
+                    row = conn.execute("SELECT current_user, session_user, current_database()").fetchone()
+                    owners = conn.execute("SELECT tablename, tableowner FROM pg_tables WHERE tablename IN ('users', 'auth_rate_limits', 'auth_accounts')").fetchall()
+                    user_info = {"current_user": row[0], "session_user": row[1], "database": row[2], "table_owners": dict(owners)}
+        except Exception as e:
+            user_info = {"lookup_failed": str(e)}
         return JSONResponse(status_code=503, content={
             "detail": f"Database error ({type(exc).__name__}): {exc}",
-            "migration_status": getattr(request.app.state, "migration_status", "unknown")
+            "migration_status": getattr(request.app.state, "migration_status", "unknown"),
+            "db_info": user_info
         })
 
     @app.get("/api/health", tags=["health"])
