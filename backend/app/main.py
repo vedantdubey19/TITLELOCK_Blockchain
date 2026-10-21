@@ -18,6 +18,7 @@ from fastapi.exceptions import RequestValidationError
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
+import psycopg
 from psycopg import OperationalError
 from psycopg.errors import UndefinedTable
 
@@ -32,12 +33,19 @@ from .chain.settlement import reconcile_pending
 from .fraud.routes import router as risk_router
 from .transfers.succession import router as succession_router
 from .observability import readiness
+from .migrations import run_migrations
 
 
 def create_app(settings: Settings | None = None) -> FastAPI:
     settings = settings or get_settings()
     @asynccontextmanager
     async def lifespan(app):
+        if settings.database_url:
+            try:
+                await asyncio.to_thread(run_migrations, settings.database_url)
+            except Exception:
+                logging.getLogger(__name__).exception("Database schema bootstrap / migration failed on startup")
+
         async def expiry_worker():
             while True:
                 if settings.database_url:
@@ -109,9 +117,11 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                   for error in exc.errors()]
         return JSONResponse(status_code=422, content={'detail': errors})
 
+    @app.exception_handler(psycopg.Error)
     @app.exception_handler(OperationalError)
     @app.exception_handler(UndefinedTable)
     async def database_unavailable(request, exc):
+        logging.getLogger(__name__).error("Database error on %s %s: %s", request.method, request.url.path, exc)
         return JSONResponse(status_code=503, content={"detail": "Database unavailable or authentication migration not applied"})
 
     @app.get("/api/health", tags=["health"])
