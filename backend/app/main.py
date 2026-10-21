@@ -124,7 +124,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.exception_handler(UndefinedTable)
     async def database_unavailable(request, exc):
         logging.getLogger(__name__).error("Database error on %s %s: %s", request.method, request.url.path, exc)
-        return JSONResponse(status_code=503, content={"detail": "Database unavailable or authentication migration not applied"})
+        return JSONResponse(status_code=503, content={"detail": f"{type(exc).__name__}: {exc}"})
 
     @app.get("/api/health", tags=["health"])
     def health() -> dict:

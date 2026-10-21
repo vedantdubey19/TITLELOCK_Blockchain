@@ -83,8 +83,8 @@ def run_migrations(database_url: str) -> None:
                 conn.execute(migration.read_text())
             except Exception as exc:
                 logger.warning("Migration %s notice: %s", migration.name, exc)
-    logger.info("Database schema and migrations successfully applied.")
-    seed_properties(conn)
+        logger.info("Database schema and migrations successfully applied.")
+        seed_properties(conn)
 
 
 def seed_properties(conn) -> None:

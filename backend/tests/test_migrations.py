@@ -15,4 +15,3 @@ def test_psycopg_error_returns_503_instead_of_500():
     client = TestClient(app, raise_server_exceptions=False)
     response = client.get("/test/psycopg-error")
     assert response.status_code == 503
-    assert response.json()["detail"] == "Database unavailable or authentication migration not applied"
