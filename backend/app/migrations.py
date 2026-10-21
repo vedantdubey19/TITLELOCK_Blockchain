@@ -221,10 +221,10 @@ def run_migrations(database_url: str) -> None:
 def seed_properties(conn) -> None:
     try:
         row = conn.execute("SELECT count(*) FROM parcels").fetchone()
-        if row and row[0] > 0:
+        if row and row[0] >= 100:
             logger.info("Parcels already populated (%s records), checking geometries...", row[0])
             geom_row = conn.execute("SELECT count(*) FROM parcel_map_geometry").fetchone()
-            if geom_row and geom_row[0] > 0:
+            if geom_row and geom_row[0] >= 100:
                 logger.info("Geometries already populated (%s records), skipping seed", geom_row[0])
                 return
     except Exception as exc:
