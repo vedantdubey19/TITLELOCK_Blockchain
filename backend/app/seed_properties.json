@@ -1,0 +1,7190 @@
+[
+  {
+    "ulpin": "UP-0001-CLEAN",
+    "survey_number": "SN-712-B",
+    "current_owner": "Nitin Dagar",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Nitin Dagar",
+        "share_percent": 100,
+        "wallet_address": "demo:nitin.dagar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2390,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2014-02-04",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51454,
+        28.46306
+      ],
+      [
+        77.51502,
+        28.46306
+      ],
+      [
+        77.51502,
+        28.46352
+      ],
+      [
+        77.51454,
+        28.46352
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Amit Malik",
+        "date": "2011-04-24",
+        "doc_hash": "0x7771f894f2e36355"
+      },
+      {
+        "from": "Amit Malik",
+        "to": "Nitin Dagar",
+        "date": "2014-02-04",
+        "doc_hash": "0x9e5cf6e992559248"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0002-CLEAN",
+    "survey_number": "SN-595-F",
+    "current_owner": "Pooja Pandey",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Pooja Pandey",
+        "share_percent": 100,
+        "wallet_address": "demo:pooja.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Ritu Pandey",
+        "status": "DORMANT",
+        "relationship": "Sister"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2920,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2008-05-20",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49165,
+        28.46051
+      ],
+      [
+        77.49252,
+        28.46051
+      ],
+      [
+        77.49252,
+        28.46082
+      ],
+      [
+        77.49165,
+        28.46082
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pooja Pandey",
+        "date": "2008-05-20",
+        "doc_hash": "0xebe48123a5b0e526"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0003-FLAGGED-TARGET",
+    "survey_number": "SN-575-D",
+    "current_owner": "Sanjay Ansari",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Sanjay Ansari",
+        "share_percent": 100,
+        "wallet_address": "demo:sanjay.ansari",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Kavita Ansari",
+        "status": "CONTESTED",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3680,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2026-08-06",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.49366,
+        28.4801
+      ],
+      [
+        77.49449,
+        28.4801
+      ],
+      [
+        77.49449,
+        28.48051
+      ],
+      [
+        77.49366,
+        28.48051
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Fatima Ansari",
+        "date": "2011-08-05",
+        "doc_hash": "0xa945e7bb290f5d0f"
+      },
+      {
+        "from": "Fatima Ansari",
+        "to": "Mukesh Ansari",
+        "date": "2026-07-24",
+        "doc_hash": "0x2f9e09c9d828f123"
+      },
+      {
+        "from": "Mukesh Ansari",
+        "to": "Sanjay Ansari",
+        "date": "2026-08-06",
+        "doc_hash": "0x45d6ac4263d52b10"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0004-BACKDATE-TARGET",
+    "survey_number": "SN-803-E",
+    "current_owner": "Amit Rana",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Amit Rana",
+        "share_percent": 60,
+        "wallet_address": "demo:amit.rana",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Fatima Rana",
+        "share_percent": 40,
+        "wallet_address": "demo:fatima.rana",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 1640,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-08-09",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.5079,
+        28.46315
+      ],
+      [
+        77.50839,
+        28.46315
+      ],
+      [
+        77.50839,
+        28.46346
+      ],
+      [
+        77.5079,
+        28.46346
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Renu Verma",
+        "date": "2008-01-21",
+        "doc_hash": "0x5497db67a54b3b83"
+      },
+      {
+        "from": "Renu Verma",
+        "to": "Mukesh Tyagi",
+        "date": "2019-07-10",
+        "doc_hash": "0x8b890fec6872d96b"
+      },
+      {
+        "from": "Mukesh Tyagi",
+        "to": "Amit Rana",
+        "date": "2013-10-15",
+        "doc_hash": "0xd563d56dc887417c"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0005-CLEAN",
+    "survey_number": "SN-383-E",
+    "current_owner": "Neha Sisodia",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Neha Sisodia",
+        "share_percent": 40,
+        "wallet_address": "demo:neha.sisodia",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Karan Sisodia",
+        "share_percent": 30,
+        "wallet_address": "demo:karan.sisodia",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Alka Sisodia",
+        "share_percent": 20,
+        "wallet_address": "demo:alka.sisodia",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Gurpreet Sisodia",
+        "share_percent": 10,
+        "wallet_address": "demo:gurpreet.sisodia",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 4,
+      "total_owners": 4
+    },
+    "nominees": [
+      {
+        "name": "Vikram Sisodia",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2960,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2025-06-01",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50301,
+        28.46359
+      ],
+      [
+        77.50377,
+        28.46359
+      ],
+      [
+        77.50377,
+        28.46395
+      ],
+      [
+        77.50301,
+        28.46395
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Neha Sisodia",
+        "date": "2025-06-01",
+        "doc_hash": "0x2bd8af216fa12947"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0006-CLEAN",
+    "survey_number": "SN-721-F",
+    "current_owner": "Rajesh Sharma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Rajesh Sharma",
+        "share_percent": 50,
+        "wallet_address": "demo:rajesh.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Asha Sharma",
+        "share_percent": 30,
+        "wallet_address": "demo:asha.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Vikram Sharma",
+        "share_percent": 20,
+        "wallet_address": "demo:vikram.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4330,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2010-12-13",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51819,
+        28.48522
+      ],
+      [
+        77.51888,
+        28.48522
+      ],
+      [
+        77.51888,
+        28.4858
+      ],
+      [
+        77.51819,
+        28.4858
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rajesh Sharma",
+        "date": "2010-12-13",
+        "doc_hash": "0x1807dfaf1f7e4273"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0007-ENCUMBRANCE",
+    "survey_number": "SN-887-A",
+    "current_owner": "Anil Pandey",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Anil Pandey",
+        "share_percent": 100,
+        "wallet_address": "demo:anil.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Divya Pandey",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2026-5121",
+        "type": "TAX_LIEN",
+        "holder": "Knowledge Park Credit Society",
+        "amount_inr": 10900000,
+        "registered_date": "2021-11-27",
+        "expiry_date": "2037-11-27",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3460,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2017-08-18",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.49408,
+        28.48872
+      ],
+      [
+        77.49492,
+        28.48872
+      ],
+      [
+        77.49492,
+        28.4891
+      ],
+      [
+        77.49408,
+        28.4891
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rekha Rana",
+        "date": "2008-11-01",
+        "doc_hash": "0xfaa7176f6d1675c1"
+      },
+      {
+        "from": "Rekha Rana",
+        "to": "Anil Pandey",
+        "date": "2017-08-18",
+        "doc_hash": "0xe0df084ead090b97"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0008-CLEAN",
+    "survey_number": "SN-711-F",
+    "current_owner": "Nitin Bansal",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Nitin Bansal",
+        "share_percent": 100,
+        "wallet_address": "demo:nitin.bansal",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Vikram Bansal",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 1770,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2016-02-28",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.48922,
+        28.45665
+      ],
+      [
+        77.4897,
+        28.45665
+      ],
+      [
+        77.4897,
+        28.45699
+      ],
+      [
+        77.48922,
+        28.45699
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Nitin Bansal",
+        "date": "2016-02-28",
+        "doc_hash": "0x57ad057df4f031fc"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0009-CLEAN",
+    "survey_number": "SN-333-A",
+    "current_owner": "Devendra Tomar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Devendra Tomar",
+        "share_percent": 40,
+        "wallet_address": "demo:devendra.tomar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Asha Tomar",
+        "share_percent": 30,
+        "wallet_address": "demo:asha.tomar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Vivek Tomar",
+        "share_percent": 30,
+        "wallet_address": "demo:vivek.tomar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3410,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2016-03-05",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.52388,
+        28.47833
+      ],
+      [
+        77.52455,
+        28.47833
+      ],
+      [
+        77.52455,
+        28.4788
+      ],
+      [
+        77.52388,
+        28.4788
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Devendra Tomar",
+        "date": "2016-03-05",
+        "doc_hash": "0xa95c2c0b07465834"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0010-DUPLICATE-TARGET",
+    "survey_number": "SN-863-D",
+    "current_owner": "Sanjay Chauhan",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Sanjay Chauhan",
+        "share_percent": 40,
+        "wallet_address": "demo:sanjay.chauhan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Seema Chauhan",
+        "share_percent": 40,
+        "wallet_address": "demo:seema.chauhan",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Naveen Chauhan",
+        "share_percent": 20,
+        "wallet_address": "demo:naveen.chauhan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2025-1186",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Renu Bhati",
+        "filed_date": "2025-10-06",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 4090,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2025-08-22",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.49925,
+        28.48544
+      ],
+      [
+        77.49989,
+        28.48544
+      ],
+      [
+        77.49989,
+        28.48603
+      ],
+      [
+        77.49925,
+        28.48603
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ritu Saini",
+        "date": "2007-08-23",
+        "doc_hash": "0xbe3b496ec129017d"
+      },
+      {
+        "from": "Ritu Saini",
+        "to": "Renu Bhati",
+        "date": "2025-07-20",
+        "doc_hash": "0x0e66c6be51478b93"
+      },
+      {
+        "from": "Ritu Saini",
+        "to": "Sanjay Chauhan",
+        "date": "2025-08-22",
+        "doc_hash": "0xd734fc4aa86a04d1"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0011-ENCUMBRANCE",
+    "survey_number": "SN-914-A",
+    "current_owner": "Mamta Tyagi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Mamta Tyagi",
+        "share_percent": 100,
+        "wallet_address": "demo:mamta.tyagi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2022-4078",
+        "type": "BANK_LIEN",
+        "holder": "Demo National Bank",
+        "amount_inr": 2400000,
+        "registered_date": "2025-12-06",
+        "expiry_date": "2045-12-06",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 5140,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2022-08-05",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.48754,
+        28.47804
+      ],
+      [
+        77.48842,
+        28.47804
+      ],
+      [
+        77.48842,
+        28.47858
+      ],
+      [
+        77.48754,
+        28.47858
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pankaj Mishra",
+        "date": "2010-03-09",
+        "doc_hash": "0x7522aa7fa3132dd6"
+      },
+      {
+        "from": "Pankaj Mishra",
+        "to": "Vinod Rana",
+        "date": "2011-09-16",
+        "doc_hash": "0xcfba5e788c7ddcd4"
+      },
+      {
+        "from": "Vinod Rana",
+        "to": "Mamta Tyagi",
+        "date": "2022-08-05",
+        "doc_hash": "0xe5a34078795c2b9b"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0012-VELOCITY-TARGET",
+    "survey_number": "SN-392-C",
+    "current_owner": "Sanjay Bhati",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Sanjay Bhati",
+        "share_percent": 40,
+        "wallet_address": "demo:sanjay.bhati",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Gurpreet Bhati",
+        "share_percent": 40,
+        "wallet_address": "demo:gurpreet.bhati",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Suresh Bhati",
+        "share_percent": 20,
+        "wallet_address": "demo:suresh.bhati",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Jyoti Bhati",
+        "status": "DORMANT",
+        "relationship": "Sister"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 2850,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2026-07-25",
+    "title_status": "FROZEN",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.48786,
+        28.46647
+      ],
+      [
+        77.48859,
+        28.46647
+      ],
+      [
+        77.48859,
+        28.46683
+      ],
+      [
+        77.48786,
+        28.46683
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Seema Nagar",
+        "date": "2017-02-02",
+        "doc_hash": "0xa4e03f97cfe24ae2"
+      },
+      {
+        "from": "Seema Nagar",
+        "to": "Neha Singh",
+        "date": "2026-07-11",
+        "doc_hash": "0x28759158a969bd91"
+      },
+      {
+        "from": "Neha Singh",
+        "to": "Lokesh Pandey",
+        "date": "2026-07-21",
+        "doc_hash": "0x15e5bc121adc2207"
+      },
+      {
+        "from": "Lokesh Pandey",
+        "to": "Sanjay Bhati",
+        "date": "2026-07-25",
+        "doc_hash": "0x63a362b4bb8a1881"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0013-CLEAN",
+    "survey_number": "SN-267-A",
+    "current_owner": "Pankaj Mavi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Pankaj Mavi",
+        "share_percent": 100,
+        "wallet_address": "demo:pankaj.mavi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2390,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2023-01-02",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.4977,
+        28.47413
+      ],
+      [
+        77.49819,
+        28.47413
+      ],
+      [
+        77.49819,
+        28.47458
+      ],
+      [
+        77.4977,
+        28.47458
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ritu Malik",
+        "date": "2004-03-18",
+        "doc_hash": "0xc5ba0cf1cfe7a42a"
+      },
+      {
+        "from": "Ritu Malik",
+        "to": "Tarun Mishra",
+        "date": "2017-08-03",
+        "doc_hash": "0xc6c715bfe6f1cf5f"
+      },
+      {
+        "from": "Tarun Mishra",
+        "to": "Pankaj Mavi",
+        "date": "2023-01-02",
+        "doc_hash": "0xe0800498faa13ee6"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0014-CLEAN",
+    "survey_number": "SN-596-A",
+    "current_owner": "Divya Ansari",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Divya Ansari",
+        "share_percent": 100,
+        "wallet_address": "demo:divya.ansari",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Mukesh Ansari",
+        "status": "DORMANT",
+        "relationship": "Sister"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2490,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2022-11-18",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49352,
+        28.47187
+      ],
+      [
+        77.494,
+        28.47187
+      ],
+      [
+        77.494,
+        28.47235
+      ],
+      [
+        77.49352,
+        28.47235
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Divya Ansari",
+        "date": "2022-11-18",
+        "doc_hash": "0x10481dfa5fe2fe3e"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0015-ENCUMBRANCE",
+    "survey_number": "SN-512-C",
+    "current_owner": "Vinod Verma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Vinod Verma",
+        "share_percent": 40,
+        "wallet_address": "demo:vinod.verma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sunita Verma",
+        "share_percent": 30,
+        "wallet_address": "demo:sunita.verma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Fatima Verma",
+        "share_percent": 30,
+        "wallet_address": "demo:fatima.verma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2022-5346",
+        "type": "BANK_LIEN",
+        "holder": "Yamuna Housing Finance Ltd",
+        "amount_inr": 4600000,
+        "registered_date": "2025-02-20",
+        "expiry_date": "2043-02-20",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3520,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2022-04-14",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51144,
+        28.48544
+      ],
+      [
+        77.51201,
+        28.48544
+      ],
+      [
+        77.51201,
+        28.48601
+      ],
+      [
+        77.51144,
+        28.48601
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Meena Bansal",
+        "date": "2019-05-01",
+        "doc_hash": "0x1521f6525859b6d7"
+      },
+      {
+        "from": "Meena Bansal",
+        "to": "Vinod Verma",
+        "date": "2022-04-14",
+        "doc_hash": "0xc76f910c11ac44be"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0016-CLEAN",
+    "survey_number": "SN-400-E",
+    "current_owner": "Vinod Sisodia",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Vinod Sisodia",
+        "share_percent": 50,
+        "wallet_address": "demo:vinod.sisodia",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mohit Bansal",
+        "share_percent": 30,
+        "wallet_address": "demo:mohit.bansal",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Manoj Rana",
+        "share_percent": 20,
+        "wallet_address": "demo:manoj.rana",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Shweta Sisodia",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3320,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2020-07-05",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50294,
+        28.48343
+      ],
+      [
+        77.50346,
+        28.48343
+      ],
+      [
+        77.50346,
+        28.48402
+      ],
+      [
+        77.50294,
+        28.48402
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Sunil Chauhan",
+        "date": "2006-11-11",
+        "doc_hash": "0x4436734f51edc8e2"
+      },
+      {
+        "from": "Sunil Chauhan",
+        "to": "Usha Verma",
+        "date": "2013-09-03",
+        "doc_hash": "0xdde56d3ad757944c"
+      },
+      {
+        "from": "Usha Verma",
+        "to": "Vinod Sisodia",
+        "date": "2020-07-05",
+        "doc_hash": "0x437ccafb71c76b67"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0017-CLEAN",
+    "survey_number": "SN-841-B",
+    "current_owner": "Lokesh Kumar",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Lokesh Kumar",
+        "share_percent": 100,
+        "wallet_address": "demo:lokesh.kumar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2220,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2013-03-09",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51419,
+        28.45777
+      ],
+      [
+        77.51469,
+        28.45777
+      ],
+      [
+        77.51469,
+        28.45818
+      ],
+      [
+        77.51419,
+        28.45818
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Nisha Sisodia",
+        "date": "2006-02-17",
+        "doc_hash": "0xa20b6436d8ec586b"
+      },
+      {
+        "from": "Nisha Sisodia",
+        "to": "Sunita Dagar",
+        "date": "2011-07-22",
+        "doc_hash": "0xd74d762cf3e5f541"
+      },
+      {
+        "from": "Sunita Dagar",
+        "to": "Lokesh Kumar",
+        "date": "2013-03-09",
+        "doc_hash": "0xc3adb9efaae9aee3"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0018-ENCUMBRANCE",
+    "survey_number": "SN-197-B",
+    "current_owner": "Geeta Ansari",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Geeta Ansari",
+        "share_percent": 50,
+        "wallet_address": "demo:geeta.ansari",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Asha Ansari",
+        "share_percent": 30,
+        "wallet_address": "demo:asha.ansari",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Anita Ansari",
+        "share_percent": 20,
+        "wallet_address": "demo:anita.ansari",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2022-6351",
+        "type": "MORTGAGE",
+        "holder": "Yamuna Housing Finance Ltd",
+        "amount_inr": 10600000,
+        "registered_date": "2025-11-03",
+        "expiry_date": "2044-11-03",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3150,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2020-12-25",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.51882,
+        28.46964
+      ],
+      [
+        77.51953,
+        28.46964
+      ],
+      [
+        77.51953,
+        28.47005
+      ],
+      [
+        77.51882,
+        28.47005
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Geeta Ansari",
+        "date": "2020-12-25",
+        "doc_hash": "0xa2e2997738497912"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0019-ENCUMBRANCE",
+    "survey_number": "SN-759-D",
+    "current_owner": "Meena Gupta",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Meena Gupta",
+        "share_percent": 100,
+        "wallet_address": "demo:meena.gupta",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Nitin Gupta",
+        "status": "DORMANT",
+        "relationship": "Sister"
+      }
+    ],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2020-9411",
+        "type": "BANK_LIEN",
+        "holder": "Demo National Bank",
+        "amount_inr": 8900000,
+        "registered_date": "2017-04-23",
+        "expiry_date": "2032-04-23",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3120,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2016-09-23",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51813,
+        28.48031
+      ],
+      [
+        77.51877,
+        28.48031
+      ],
+      [
+        77.51877,
+        28.48076
+      ],
+      [
+        77.51813,
+        28.48076
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Mohit Pal",
+        "date": "2005-11-21",
+        "doc_hash": "0x8f24f14b96ccafff"
+      },
+      {
+        "from": "Mohit Pal",
+        "to": "Fatima Dagar",
+        "date": "2010-12-09",
+        "doc_hash": "0x1ba98d07221cd724"
+      },
+      {
+        "from": "Fatima Dagar",
+        "to": "Meena Gupta",
+        "date": "2016-09-23",
+        "doc_hash": "0x45580af0073ef472"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0020-CLEAN",
+    "survey_number": "SN-634-E",
+    "current_owner": "Meena Gupta",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Meena Gupta",
+        "share_percent": 40,
+        "wallet_address": "demo:meena.gupta",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Priya Mavi",
+        "share_percent": 40,
+        "wallet_address": "demo:priya.mavi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mukesh Bansal",
+        "share_percent": 20,
+        "wallet_address": "demo:mukesh.bansal",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 5300,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2023-05-10",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49093,
+        28.48541
+      ],
+      [
+        77.49176,
+        28.48541
+      ],
+      [
+        77.49176,
+        28.486
+      ],
+      [
+        77.49093,
+        28.486
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Sarita Mavi",
+        "date": "2005-06-12",
+        "doc_hash": "0xa941c30ca53c9521"
+      },
+      {
+        "from": "Sarita Mavi",
+        "to": "Meena Gupta",
+        "date": "2023-05-10",
+        "doc_hash": "0xae9b41ba824b46c5"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0021-CLEAN",
+    "survey_number": "SN-319-A",
+    "current_owner": "Alka Chauhan",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Alka Chauhan",
+        "share_percent": 100,
+        "wallet_address": "demo:alka.chauhan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4000,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2008-01-24",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51508,
+        28.48914
+      ],
+      [
+        77.51574,
+        28.48914
+      ],
+      [
+        77.51574,
+        28.4897
+      ],
+      [
+        77.51508,
+        28.4897
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pooja Yadav",
+        "date": "2005-10-01",
+        "doc_hash": "0x41eadf91c263064f"
+      },
+      {
+        "from": "Pooja Yadav",
+        "to": "Alka Chauhan",
+        "date": "2008-01-24",
+        "doc_hash": "0xf28d937af6c5bbc1"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0022-CLEAN",
+    "survey_number": "SN-162-F",
+    "current_owner": "Sanjay Saini",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Sanjay Saini",
+        "share_percent": 40,
+        "wallet_address": "demo:sanjay.saini",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sunil Sisodia",
+        "share_percent": 30,
+        "wallet_address": "demo:sunil.sisodia",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sunita Khan",
+        "share_percent": 30,
+        "wallet_address": "demo:sunita.khan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Pooja Saini",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2800,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2018-08-06",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50758,
+        28.45705
+      ],
+      [
+        77.50834,
+        28.45705
+      ],
+      [
+        77.50834,
+        28.45739
+      ],
+      [
+        77.50758,
+        28.45739
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Lokesh Joshi",
+        "date": "2012-02-27",
+        "doc_hash": "0xb9e5113b9d802682"
+      },
+      {
+        "from": "Lokesh Joshi",
+        "to": "Sanjay Saini",
+        "date": "2018-08-06",
+        "doc_hash": "0x3065cf758a020c5c"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0023-ENCUMBRANCE",
+    "survey_number": "SN-874-A",
+    "current_owner": "Poonam Joshi",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Poonam Joshi",
+        "share_percent": 50,
+        "wallet_address": "demo:poonam.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Meena Joshi",
+        "share_percent": 30,
+        "wallet_address": "demo:meena.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Vikram Joshi",
+        "share_percent": 20,
+        "wallet_address": "demo:vikram.joshi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Gurpreet Joshi",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2024-3539",
+        "type": "COURT_ATTACHMENT",
+        "holder": "Yamuna Housing Finance Ltd",
+        "amount_inr": 9600000,
+        "registered_date": "2026-02-02",
+        "expiry_date": "2032-02-02",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3810,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2018-05-19",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.49563,
+        28.45932
+      ],
+      [
+        77.49632,
+        28.45932
+      ],
+      [
+        77.49632,
+        28.45983
+      ],
+      [
+        77.49563,
+        28.45983
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Geeta Malik",
+        "date": "2007-06-14",
+        "doc_hash": "0x388f4c244cf74765"
+      },
+      {
+        "from": "Geeta Malik",
+        "to": "Kavita Kumar",
+        "date": "2013-04-13",
+        "doc_hash": "0x5d39610983bb5916"
+      },
+      {
+        "from": "Kavita Kumar",
+        "to": "Poonam Joshi",
+        "date": "2018-05-19",
+        "doc_hash": "0x8af1654be355a107"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0024-CLEAN",
+    "survey_number": "SN-471-F",
+    "current_owner": "Renu Sharma",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Renu Sharma",
+        "share_percent": 100,
+        "wallet_address": "demo:renu.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Yogesh Sharma",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4060,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2018-11-17",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49136,
+        28.46686
+      ],
+      [
+        77.49203,
+        28.46686
+      ],
+      [
+        77.49203,
+        28.46742
+      ],
+      [
+        77.49136,
+        28.46742
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pankaj Yadav",
+        "date": "2013-09-18",
+        "doc_hash": "0x3982dbf33dba1795"
+      },
+      {
+        "from": "Pankaj Yadav",
+        "to": "Renu Sharma",
+        "date": "2018-11-17",
+        "doc_hash": "0xf7ca1132a960199b"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0025-CLEAN",
+    "survey_number": "SN-308-F",
+    "current_owner": "Shweta Mavi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Shweta Mavi",
+        "share_percent": 100,
+        "wallet_address": "demo:shweta.mavi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Radha Mavi",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3140,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2017-08-09",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50332,
+        28.46942
+      ],
+      [
+        77.5039,
+        28.46942
+      ],
+      [
+        77.5039,
+        28.46992
+      ],
+      [
+        77.50332,
+        28.46992
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Anita Sharma",
+        "date": "2016-07-15",
+        "doc_hash": "0xe59d7568e0f32241"
+      },
+      {
+        "from": "Anita Sharma",
+        "to": "Shweta Mavi",
+        "date": "2017-08-09",
+        "doc_hash": "0xbd328e8b36079a2a"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0026-CLEAN",
+    "survey_number": "SN-723-F",
+    "current_owner": "Ritu Khan",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Ritu Khan",
+        "share_percent": 50,
+        "wallet_address": "demo:ritu.khan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Shweta Khan",
+        "share_percent": 30,
+        "wallet_address": "demo:shweta.khan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Karan Khan",
+        "share_percent": 20,
+        "wallet_address": "demo:karan.khan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Sanjay Khan",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4070,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2014-09-09",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50401,
+        28.47389
+      ],
+      [
+        77.50481,
+        28.47389
+      ],
+      [
+        77.50481,
+        28.47436
+      ],
+      [
+        77.50401,
+        28.47436
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Fatima Rana",
+        "date": "2004-03-19",
+        "doc_hash": "0x45e8f721e3012e25"
+      },
+      {
+        "from": "Fatima Rana",
+        "to": "Ritu Khan",
+        "date": "2014-09-09",
+        "doc_hash": "0x5aabbcebd728f6f4"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0027-DUPLICATE-TARGET",
+    "survey_number": "SN-647-C",
+    "current_owner": "Nisha Sharma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Nisha Sharma",
+        "share_percent": 25,
+        "wallet_address": "demo:nisha.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Vinod Joshi",
+        "share_percent": 25,
+        "wallet_address": "demo:vinod.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Fatima Saini",
+        "share_percent": 25,
+        "wallet_address": "demo:fatima.saini",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Renu Bhati",
+        "share_percent": 25,
+        "wallet_address": "demo:renu.bhati",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 4,
+      "total_owners": 4
+    },
+    "nominees": [
+      {
+        "name": "Suresh Sharma",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2024-8486",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Anil Sharma",
+        "filed_date": "2024-10-03",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 3130,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2024-08-20",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.48941,
+        28.47637
+      ],
+      [
+        77.49026,
+        28.47637
+      ],
+      [
+        77.49026,
+        28.47671
+      ],
+      [
+        77.48941,
+        28.47671
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Harpreet Bansal",
+        "date": "2011-11-01",
+        "doc_hash": "0x62e03dd61bda22cf"
+      },
+      {
+        "from": "Harpreet Bansal",
+        "to": "Anil Sharma",
+        "date": "2024-07-15",
+        "doc_hash": "0xa53d7622cc941d42"
+      },
+      {
+        "from": "Harpreet Bansal",
+        "to": "Nisha Sharma",
+        "date": "2024-08-20",
+        "doc_hash": "0x9331a9fbccd94484"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0028-ENCUMBRANCE",
+    "survey_number": "SN-594-E",
+    "current_owner": "Jyoti Sharma",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Jyoti Sharma",
+        "share_percent": 100,
+        "wallet_address": "demo:jyoti.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Rekha Sharma",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2024-4906",
+        "type": "LEASE",
+        "holder": "Knowledge Park Credit Society",
+        "amount_inr": 5800000,
+        "registered_date": "2023-03-25",
+        "expiry_date": "2029-03-25",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3560,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2020-06-05",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.50297,
+        28.46024
+      ],
+      [
+        77.50359,
+        28.46024
+      ],
+      [
+        77.50359,
+        28.46077
+      ],
+      [
+        77.50297,
+        28.46077
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Sachin Pal",
+        "date": "2006-09-07",
+        "doc_hash": "0x78851890f54cd1a7"
+      },
+      {
+        "from": "Sachin Pal",
+        "to": "Manoj Nagar",
+        "date": "2015-09-06",
+        "doc_hash": "0x527f3b9a3df43939"
+      },
+      {
+        "from": "Manoj Nagar",
+        "to": "Jyoti Sharma",
+        "date": "2020-06-05",
+        "doc_hash": "0xe58af8d3b78af267"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0029-CLEAN",
+    "survey_number": "SN-643-A",
+    "current_owner": "Mukesh Pandey",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Mukesh Pandey",
+        "share_percent": 100,
+        "wallet_address": "demo:mukesh.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3060,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2015-11-16",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.5078,
+        28.46608
+      ],
+      [
+        77.50849,
+        28.46608
+      ],
+      [
+        77.50849,
+        28.46649
+      ],
+      [
+        77.5078,
+        28.46649
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Mamta Khan",
+        "date": "2004-10-05",
+        "doc_hash": "0x8577297cdc4f32a9"
+      },
+      {
+        "from": "Mamta Khan",
+        "to": "Karan Tyagi",
+        "date": "2014-06-09",
+        "doc_hash": "0x446e48af505a3117"
+      },
+      {
+        "from": "Karan Tyagi",
+        "to": "Mukesh Pandey",
+        "date": "2015-11-16",
+        "doc_hash": "0x6e84840cc459318e"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0030-CLEAN",
+    "survey_number": "SN-137-B",
+    "current_owner": "Meena Yadav",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Meena Yadav",
+        "share_percent": 70,
+        "wallet_address": "demo:meena.yadav",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Amit Yadav",
+        "share_percent": 30,
+        "wallet_address": "demo:amit.yadav",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4070,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2025-11-24",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.52137,
+        28.46956
+      ],
+      [
+        77.52203,
+        28.46956
+      ],
+      [
+        77.52203,
+        28.47013
+      ],
+      [
+        77.52137,
+        28.47013
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rajesh Tyagi",
+        "date": "2012-12-28",
+        "doc_hash": "0x0d15bba5325737a8"
+      },
+      {
+        "from": "Rajesh Tyagi",
+        "to": "Meena Yadav",
+        "date": "2025-11-24",
+        "doc_hash": "0xc07382c3433ee1a0"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0031-DUPLICATE-TARGET",
+    "survey_number": "SN-593-A",
+    "current_owner": "Komal Pal",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Komal Pal",
+        "share_percent": 100,
+        "wallet_address": "demo:komal.pal",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2022-9445",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Kunal Joshi",
+        "filed_date": "2022-05-20",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 5430,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2022-04-05",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.49993,
+        28.46388
+      ],
+      [
+        77.50081,
+        28.46388
+      ],
+      [
+        77.50081,
+        28.46445
+      ],
+      [
+        77.49993,
+        28.46445
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pooja Verma",
+        "date": "2014-12-17",
+        "doc_hash": "0xe1f721def5bd3439"
+      },
+      {
+        "from": "Pooja Verma",
+        "to": "Kunal Joshi",
+        "date": "2022-03-14",
+        "doc_hash": "0xf6210952fa9495ca"
+      },
+      {
+        "from": "Pooja Verma",
+        "to": "Komal Pal",
+        "date": "2022-04-05",
+        "doc_hash": "0x778bcd50b1a11788"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0032-VELOCITY-TARGET",
+    "survey_number": "SN-551-F",
+    "current_owner": "Geeta Nagar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Geeta Nagar",
+        "share_percent": 60,
+        "wallet_address": "demo:geeta.nagar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Anita Nagar",
+        "share_percent": 40,
+        "wallet_address": "demo:anita.nagar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Lokesh Nagar",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 1480,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-08-19",
+    "title_status": "FROZEN",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.50249,
+        28.46726
+      ],
+      [
+        77.50293,
+        28.46726
+      ],
+      [
+        77.50293,
+        28.46757
+      ],
+      [
+        77.50249,
+        28.46757
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Poonam Mavi",
+        "date": "2017-04-12",
+        "doc_hash": "0x956e0261844600f6"
+      },
+      {
+        "from": "Poonam Mavi",
+        "to": "Kavita Yadav",
+        "date": "2026-08-10",
+        "doc_hash": "0x3cecd1608a4ba013"
+      },
+      {
+        "from": "Kavita Yadav",
+        "to": "Geeta Nagar",
+        "date": "2026-08-19",
+        "doc_hash": "0x0da006fbd1f97a65"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0033-FLAGGED-TARGET",
+    "survey_number": "SN-663-A",
+    "current_owner": "Radha Saini",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Radha Saini",
+        "share_percent": 50,
+        "wallet_address": "demo:radha.saini",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sunil Saini",
+        "share_percent": 50,
+        "wallet_address": "demo:sunil.saini",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Renu Saini",
+        "status": "CONTESTED",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3090,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2026-04-18",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.49947,
+        28.45562
+      ],
+      [
+        77.50031,
+        28.45562
+      ],
+      [
+        77.50031,
+        28.45596
+      ],
+      [
+        77.49947,
+        28.45596
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ritu Saini",
+        "date": "2010-07-01",
+        "doc_hash": "0x1306540358260a30"
+      },
+      {
+        "from": "Ritu Saini",
+        "to": "Rohit Saini",
+        "date": "2026-04-12",
+        "doc_hash": "0xc0bcc269bf71ca17"
+      },
+      {
+        "from": "Rohit Saini",
+        "to": "Radha Saini",
+        "date": "2026-04-18",
+        "doc_hash": "0xfb20c517215ac634"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0034-CLEAN",
+    "survey_number": "SN-853-B",
+    "current_owner": "Sunita Ansari",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Sunita Ansari",
+        "share_percent": 50,
+        "wallet_address": "demo:sunita.ansari",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Neha Chauhan",
+        "share_percent": 30,
+        "wallet_address": "demo:neha.chauhan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Vinod Sharma",
+        "share_percent": 20,
+        "wallet_address": "demo:vinod.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2760,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2018-08-02",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.48913,
+        28.46918
+      ],
+      [
+        77.48962,
+        28.46918
+      ],
+      [
+        77.48962,
+        28.4697
+      ],
+      [
+        77.48913,
+        28.4697
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ashok Verma",
+        "date": "2004-06-21",
+        "doc_hash": "0x4dc1de06f18108d8"
+      },
+      {
+        "from": "Ashok Verma",
+        "to": "Devendra Tyagi",
+        "date": "2009-08-28",
+        "doc_hash": "0xaceb11b8983bab28"
+      },
+      {
+        "from": "Devendra Tyagi",
+        "to": "Sunita Ansari",
+        "date": "2018-08-02",
+        "doc_hash": "0xae1e66a7938538fc"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0035-CLEAN",
+    "survey_number": "SN-254-D",
+    "current_owner": "Gurpreet Tyagi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Gurpreet Tyagi",
+        "share_percent": 100,
+        "wallet_address": "demo:gurpreet.tyagi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2950,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2025-02-14",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50917,
+        28.48125
+      ],
+      [
+        77.50964,
+        28.48125
+      ],
+      [
+        77.50964,
+        28.48183
+      ],
+      [
+        77.50917,
+        28.48183
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rohit Ahmad",
+        "date": "2014-07-29",
+        "doc_hash": "0x1cf65d217a65e4e4"
+      },
+      {
+        "from": "Rohit Ahmad",
+        "to": "Priya Dagar",
+        "date": "2020-10-31",
+        "doc_hash": "0x208e7c041148da69"
+      },
+      {
+        "from": "Priya Dagar",
+        "to": "Gurpreet Tyagi",
+        "date": "2025-02-14",
+        "doc_hash": "0x9ced46940104a2ff"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0036-ENCUMBRANCE",
+    "survey_number": "SN-403-C",
+    "current_owner": "Kunal Bansal",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Kunal Bansal",
+        "share_percent": 100,
+        "wallet_address": "demo:kunal.bansal",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2019-7311",
+        "type": "COURT_ATTACHMENT",
+        "holder": "Demo National Bank",
+        "amount_inr": 10300000,
+        "registered_date": "2024-05-26",
+        "expiry_date": "2043-05-26",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3370,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2006-02-27",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.49931,
+        28.4598
+      ],
+      [
+        77.50013,
+        28.4598
+      ],
+      [
+        77.50013,
+        28.46018
+      ],
+      [
+        77.49931,
+        28.46018
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Kunal Bansal",
+        "date": "2006-02-27",
+        "doc_hash": "0xd4fa7c6f3a387293"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0037-ENCUMBRANCE",
+    "survey_number": "SN-563-B",
+    "current_owner": "Karan Pal",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Karan Pal",
+        "share_percent": 40,
+        "wallet_address": "demo:karan.pal",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Radha Pal",
+        "share_percent": 20,
+        "wallet_address": "demo:radha.pal",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Vivek Pal",
+        "share_percent": 20,
+        "wallet_address": "demo:vivek.pal",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Alka Pal",
+        "share_percent": 20,
+        "wallet_address": "demo:alka.pal",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 4,
+      "total_owners": 4
+    },
+    "nominees": [],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2026-7465",
+        "type": "BANK_LIEN",
+        "holder": "Noida Agro Finance Ltd",
+        "amount_inr": 7500000,
+        "registered_date": "2023-09-10",
+        "expiry_date": "2037-09-10",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2970,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2009-02-25",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.49793,
+        28.4786
+      ],
+      [
+        77.4986,
+        28.4786
+      ],
+      [
+        77.4986,
+        28.47901
+      ],
+      [
+        77.49793,
+        28.47901
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Karan Pal",
+        "date": "2009-02-25",
+        "doc_hash": "0x20e2098d6299fc6c"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0038-VELOCITY-TARGET",
+    "survey_number": "SN-949-E",
+    "current_owner": "Anil Mavi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Anil Mavi",
+        "share_percent": 100,
+        "wallet_address": "demo:anil.mavi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 3280,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2026-04-17",
+    "title_status": "FROZEN",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.49516,
+        28.45769
+      ],
+      [
+        77.49598,
+        28.45769
+      ],
+      [
+        77.49598,
+        28.45806
+      ],
+      [
+        77.49516,
+        28.45806
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Renu Gupta",
+        "date": "2018-01-08",
+        "doc_hash": "0xfc9ab34b71e04d0f"
+      },
+      {
+        "from": "Renu Gupta",
+        "to": "Arjun Yadav",
+        "date": "2026-04-02",
+        "doc_hash": "0xa2e8de7c600a0dc0"
+      },
+      {
+        "from": "Arjun Yadav",
+        "to": "Tarun Dagar",
+        "date": "2026-04-11",
+        "doc_hash": "0x0f260a37ae50a592"
+      },
+      {
+        "from": "Tarun Dagar",
+        "to": "Anil Mavi",
+        "date": "2026-04-17",
+        "doc_hash": "0x0941e6debce6f38a"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0039-CLEAN",
+    "survey_number": "SN-985-A",
+    "current_owner": "Usha Ahmad",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Usha Ahmad",
+        "share_percent": 100,
+        "wallet_address": "demo:usha.ahmad",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4070,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2020-11-06",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51023,
+        28.45755
+      ],
+      [
+        77.51103,
+        28.45755
+      ],
+      [
+        77.51103,
+        28.45802
+      ],
+      [
+        77.51023,
+        28.45802
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Vivek Kumar",
+        "date": "2012-09-26",
+        "doc_hash": "0x632d57146de42594"
+      },
+      {
+        "from": "Vivek Kumar",
+        "to": "Mohit Saini",
+        "date": "2015-10-16",
+        "doc_hash": "0xe46c71cf9f70b8ba"
+      },
+      {
+        "from": "Mohit Saini",
+        "to": "Usha Ahmad",
+        "date": "2020-11-06",
+        "doc_hash": "0x5d3c9ce7e8d8235c"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0040-CLEAN",
+    "survey_number": "SN-741-A",
+    "current_owner": "Renu Malik",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Renu Malik",
+        "share_percent": 60,
+        "wallet_address": "demo:renu.malik",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Priya Malik",
+        "share_percent": 40,
+        "wallet_address": "demo:priya.malik",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Mukesh Malik",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2390,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2016-03-25",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.52322,
+        28.4649
+      ],
+      [
+        77.52368,
+        28.4649
+      ],
+      [
+        77.52368,
+        28.46538
+      ],
+      [
+        77.52322,
+        28.46538
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Renu Malik",
+        "date": "2016-03-25",
+        "doc_hash": "0xfb59acb315a6fd41"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0041-CLEAN",
+    "survey_number": "SN-454-B",
+    "current_owner": "Radha Sharma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Radha Sharma",
+        "share_percent": 50,
+        "wallet_address": "demo:radha.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Manoj Sharma",
+        "share_percent": 30,
+        "wallet_address": "demo:manoj.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mohit Sharma",
+        "share_percent": 20,
+        "wallet_address": "demo:mohit.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3310,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2022-07-17",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49496,
+        28.46246
+      ],
+      [
+        77.49564,
+        28.46246
+      ],
+      [
+        77.49564,
+        28.46291
+      ],
+      [
+        77.49496,
+        28.46291
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Radha Sharma",
+        "date": "2022-07-17",
+        "doc_hash": "0x30d040aed180d983"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0042-FLAGGED-TARGET",
+    "survey_number": "SN-285-D",
+    "current_owner": "Gurpreet Joshi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Gurpreet Joshi",
+        "share_percent": 100,
+        "wallet_address": "demo:gurpreet.joshi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Sunita Joshi",
+        "status": "CONTESTED",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2750,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-04-18",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.51341,
+        28.47974
+      ],
+      [
+        77.51403,
+        28.47974
+      ],
+      [
+        77.51403,
+        28.48015
+      ],
+      [
+        77.51341,
+        28.48015
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Mamta Joshi",
+        "date": "2002-12-08",
+        "doc_hash": "0x76b9b1feaf8d7b95"
+      },
+      {
+        "from": "Mamta Joshi",
+        "to": "Tarun Joshi",
+        "date": "2026-04-12",
+        "doc_hash": "0xe05afe026c4c9546"
+      },
+      {
+        "from": "Tarun Joshi",
+        "to": "Gurpreet Joshi",
+        "date": "2026-04-18",
+        "doc_hash": "0x100e031dfdd49732"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0043-CLEAN",
+    "survey_number": "SN-987-E",
+    "current_owner": "Vinod Verma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Vinod Verma",
+        "share_percent": 40,
+        "wallet_address": "demo:vinod.verma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Rajesh Verma",
+        "share_percent": 30,
+        "wallet_address": "demo:rajesh.verma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Rekha Verma",
+        "share_percent": 20,
+        "wallet_address": "demo:rekha.verma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Arjun Verma",
+        "share_percent": 10,
+        "wallet_address": "demo:arjun.verma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 4,
+      "total_owners": 4
+    },
+    "nominees": [
+      {
+        "name": "Shweta Verma",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3660,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2021-08-17",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49009,
+        28.48201
+      ],
+      [
+        77.49078,
+        28.48201
+      ],
+      [
+        77.49078,
+        28.4825
+      ],
+      [
+        77.49009,
+        28.4825
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Poonam Tyagi",
+        "date": "2006-04-18",
+        "doc_hash": "0xeec4283b5d69bfbe"
+      },
+      {
+        "from": "Poonam Tyagi",
+        "to": "Vinod Verma",
+        "date": "2021-08-17",
+        "doc_hash": "0x13683df3c09e92ff"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0044-CLEAN",
+    "survey_number": "SN-101-B",
+    "current_owner": "Ramesh Tomar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Ramesh Tomar",
+        "share_percent": 40,
+        "wallet_address": "demo:ramesh.tomar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Geeta Tomar",
+        "share_percent": 30,
+        "wallet_address": "demo:geeta.tomar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Meena Tomar",
+        "share_percent": 20,
+        "wallet_address": "demo:meena.tomar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Jyoti Tomar",
+        "share_percent": 10,
+        "wallet_address": "demo:jyoti.tomar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 4,
+      "total_owners": 4
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2260,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2019-11-15",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50546,
+        28.46037
+      ],
+      [
+        77.50601,
+        28.46037
+      ],
+      [
+        77.50601,
+        28.46075
+      ],
+      [
+        77.50546,
+        28.46075
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Asha Mavi",
+        "date": "2008-08-30",
+        "doc_hash": "0x7117e0ad972f795a"
+      },
+      {
+        "from": "Asha Mavi",
+        "to": "Ramesh Tomar",
+        "date": "2019-11-15",
+        "doc_hash": "0x5b9a388629b91dd4"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0045-CLEAN",
+    "survey_number": "SN-114-C",
+    "current_owner": "Poonam Chauhan",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Poonam Chauhan",
+        "share_percent": 100,
+        "wallet_address": "demo:poonam.chauhan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Renu Chauhan",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3720,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2018-10-28",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.48608,
+        28.46318
+      ],
+      [
+        77.48686,
+        28.46318
+      ],
+      [
+        77.48686,
+        28.46362
+      ],
+      [
+        77.48608,
+        28.46362
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Lokesh Ansari",
+        "date": "2006-10-02",
+        "doc_hash": "0x9bd59b2476366b3d"
+      },
+      {
+        "from": "Lokesh Ansari",
+        "to": "Tarun Ahmad",
+        "date": "2011-07-19",
+        "doc_hash": "0xacf6077e605797b7"
+      },
+      {
+        "from": "Tarun Ahmad",
+        "to": "Poonam Chauhan",
+        "date": "2018-10-28",
+        "doc_hash": "0xf9c6a0031b43e030"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0046-CLEAN",
+    "survey_number": "SN-542-C",
+    "current_owner": "Mamta Bhati",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Mamta Bhati",
+        "share_percent": 100,
+        "wallet_address": "demo:mamta.bhati",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3340,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2012-01-29",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50127,
+        28.48878
+      ],
+      [
+        77.50194,
+        28.48878
+      ],
+      [
+        77.50194,
+        28.48924
+      ],
+      [
+        77.50127,
+        28.48924
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Mohit Rana",
+        "date": "2004-03-23",
+        "doc_hash": "0x9a6aa6680b44e128"
+      },
+      {
+        "from": "Mohit Rana",
+        "to": "Mamta Bhati",
+        "date": "2012-01-29",
+        "doc_hash": "0xdd19b70d05ec7d95"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0047-DUPLICATE-TARGET",
+    "survey_number": "SN-995-F",
+    "current_owner": "Deepak Singh",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Deepak Singh",
+        "share_percent": 50,
+        "wallet_address": "demo:deepak.singh",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Vikram Singh",
+        "share_percent": 30,
+        "wallet_address": "demo:vikram.singh",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Geeta Singh",
+        "share_percent": 20,
+        "wallet_address": "demo:geeta.singh",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2025-4758",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Geeta Joshi",
+        "filed_date": "2025-09-09",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 1540,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2025-08-28",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.48777,
+        28.48257
+      ],
+      [
+        77.4882,
+        28.48257
+      ],
+      [
+        77.4882,
+        28.4829
+      ],
+      [
+        77.48777,
+        28.4829
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Gurpreet Dagar",
+        "date": "2011-07-30",
+        "doc_hash": "0x4a019b410dea931e"
+      },
+      {
+        "from": "Gurpreet Dagar",
+        "to": "Geeta Joshi",
+        "date": "2025-07-20",
+        "doc_hash": "0x1bac05b5207f149f"
+      },
+      {
+        "from": "Gurpreet Dagar",
+        "to": "Deepak Singh",
+        "date": "2025-08-28",
+        "doc_hash": "0x6b1a35c7dfc9f54d"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0048-BACKDATE-TARGET",
+    "survey_number": "SN-751-B",
+    "current_owner": "Pooja Mavi",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Pooja Mavi",
+        "share_percent": 60,
+        "wallet_address": "demo:pooja.mavi",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Asha Nagar",
+        "share_percent": 40,
+        "wallet_address": "demo:asha.nagar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Vikram Mavi",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3210,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2026-04-07",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.49171,
+        28.47385
+      ],
+      [
+        77.49234,
+        28.47385
+      ],
+      [
+        77.49234,
+        28.47432
+      ],
+      [
+        77.49171,
+        28.47432
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Yogesh Joshi",
+        "date": "2010-02-17",
+        "doc_hash": "0xa3bb2b8f4479ccc5"
+      },
+      {
+        "from": "Yogesh Joshi",
+        "to": "Nisha Rana",
+        "date": "2019-04-15",
+        "doc_hash": "0xfc2fc72fee429e47"
+      },
+      {
+        "from": "Nisha Rana",
+        "to": "Pooja Mavi",
+        "date": "2009-06-19",
+        "doc_hash": "0x2a3cbad689430bf0"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0049-CLEAN",
+    "survey_number": "SN-690-F",
+    "current_owner": "Jyoti Bhati",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Jyoti Bhati",
+        "share_percent": 50,
+        "wallet_address": "demo:jyoti.bhati",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Geeta Bhati",
+        "share_percent": 50,
+        "wallet_address": "demo:geeta.bhati",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Devendra Bhati",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3700,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2021-02-10",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51986,
+        28.47263
+      ],
+      [
+        77.52044,
+        28.47263
+      ],
+      [
+        77.52044,
+        28.47322
+      ],
+      [
+        77.51986,
+        28.47322
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Komal Pal",
+        "date": "2007-07-28",
+        "doc_hash": "0x07f2264c4b8c1753"
+      },
+      {
+        "from": "Komal Pal",
+        "to": "Jyoti Bhati",
+        "date": "2021-02-10",
+        "doc_hash": "0x1a61e6b0e2f4c4c9"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0050-ENCUMBRANCE",
+    "survey_number": "SN-166-F",
+    "current_owner": "Arjun Sharma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Arjun Sharma",
+        "share_percent": 50,
+        "wallet_address": "demo:arjun.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Amit Sharma",
+        "share_percent": 50,
+        "wallet_address": "demo:amit.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Seema Sharma",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2020-3452",
+        "type": "BANK_LIEN",
+        "holder": "Noida Agro Finance Ltd",
+        "amount_inr": 3700000,
+        "registered_date": "2021-02-03",
+        "expiry_date": "2029-02-03",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2260,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2019-06-21",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.49767,
+        28.48766
+      ],
+      [
+        77.49825,
+        28.48766
+      ],
+      [
+        77.49825,
+        28.48802
+      ],
+      [
+        77.49767,
+        28.48802
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Arjun Sharma",
+        "date": "2019-06-21",
+        "doc_hash": "0x76c79a3b39a3fe7c"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0051-VELOCITY-TARGET",
+    "survey_number": "SN-769-B",
+    "current_owner": "Vinod Joshi",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Vinod Joshi",
+        "share_percent": 40,
+        "wallet_address": "demo:vinod.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Vivek Joshi",
+        "share_percent": 30,
+        "wallet_address": "demo:vivek.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Anita Joshi",
+        "share_percent": 30,
+        "wallet_address": "demo:anita.joshi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Poonam Joshi",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 3630,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-04-04",
+    "title_status": "FROZEN",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.51838,
+        28.46115
+      ],
+      [
+        77.51924,
+        28.46115
+      ],
+      [
+        77.51924,
+        28.46154
+      ],
+      [
+        77.51838,
+        28.46154
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Arjun Khan",
+        "date": "2013-10-22",
+        "doc_hash": "0x4e932b83353434bf"
+      },
+      {
+        "from": "Arjun Khan",
+        "to": "Sunil Rana",
+        "date": "2026-03-27",
+        "doc_hash": "0x4228718b1fa0b5ae"
+      },
+      {
+        "from": "Sunil Rana",
+        "to": "Vinod Joshi",
+        "date": "2026-04-04",
+        "doc_hash": "0x7a90d4df12643597"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0052-CLEAN",
+    "survey_number": "SN-637-C",
+    "current_owner": "Gurpreet Chauhan",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Gurpreet Chauhan",
+        "share_percent": 50,
+        "wallet_address": "demo:gurpreet.chauhan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Fatima Chauhan",
+        "share_percent": 30,
+        "wallet_address": "demo:fatima.chauhan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Nisha Chauhan",
+        "share_percent": 20,
+        "wallet_address": "demo:nisha.chauhan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Ritu Chauhan",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3270,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2017-10-21",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.52388,
+        28.45673
+      ],
+      [
+        77.52472,
+        28.45673
+      ],
+      [
+        77.52472,
+        28.45709
+      ],
+      [
+        77.52388,
+        28.45709
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Vinod Dagar",
+        "date": "2004-12-16",
+        "doc_hash": "0xefbdeea57e07b307"
+      },
+      {
+        "from": "Vinod Dagar",
+        "to": "Neha Pal",
+        "date": "2008-11-28",
+        "doc_hash": "0x7d149c1daf682c9b"
+      },
+      {
+        "from": "Neha Pal",
+        "to": "Gurpreet Chauhan",
+        "date": "2017-10-21",
+        "doc_hash": "0x6dcfbed0b0a148aa"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0053-VELOCITY-TARGET",
+    "survey_number": "SN-139-F",
+    "current_owner": "Radha Sharma",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Radha Sharma",
+        "share_percent": 100,
+        "wallet_address": "demo:radha.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Vivek Sharma",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 2100,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-08-28",
+    "title_status": "FROZEN",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.51621,
+        28.48313
+      ],
+      [
+        77.51675,
+        28.48313
+      ],
+      [
+        77.51675,
+        28.48349
+      ],
+      [
+        77.51621,
+        28.48349
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ritu Sisodia",
+        "date": "2006-03-05",
+        "doc_hash": "0x0a1dc81d9930a903"
+      },
+      {
+        "from": "Ritu Sisodia",
+        "to": "Mamta Kumar",
+        "date": "2026-08-12",
+        "doc_hash": "0x254d4c2e78f00042"
+      },
+      {
+        "from": "Mamta Kumar",
+        "to": "Tarun Rana",
+        "date": "2026-08-21",
+        "doc_hash": "0x1ecb44766747ab53"
+      },
+      {
+        "from": "Tarun Rana",
+        "to": "Radha Sharma",
+        "date": "2026-08-28",
+        "doc_hash": "0x1f262a64f51ad83a"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0054-CLEAN",
+    "survey_number": "SN-656-F",
+    "current_owner": "Naveen Pandey",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Naveen Pandey",
+        "share_percent": 100,
+        "wallet_address": "demo:naveen.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Tarun Pandey",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 1950,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2022-04-08",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51833,
+        28.45572
+      ],
+      [
+        77.51877,
+        28.45572
+      ],
+      [
+        77.51877,
+        28.45613
+      ],
+      [
+        77.51833,
+        28.45613
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Poonam Ahmad",
+        "date": "2006-12-19",
+        "doc_hash": "0xc03d78ef4ec8b076"
+      },
+      {
+        "from": "Poonam Ahmad",
+        "to": "Arjun Yadav",
+        "date": "2008-06-17",
+        "doc_hash": "0x494110056e48cbe3"
+      },
+      {
+        "from": "Arjun Yadav",
+        "to": "Naveen Pandey",
+        "date": "2022-04-08",
+        "doc_hash": "0xd236e7166c30a621"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0055-BACKDATE-TARGET",
+    "survey_number": "SN-416-E",
+    "current_owner": "Divya Malik",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Divya Malik",
+        "share_percent": 100,
+        "wallet_address": "demo:divya.malik",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Sunil Malik",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 1670,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2026-08-13",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.51553,
+        28.46976
+      ],
+      [
+        77.51597,
+        28.46976
+      ],
+      [
+        77.51597,
+        28.47011
+      ],
+      [
+        77.51553,
+        28.47011
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ramesh Sisodia",
+        "date": "2010-09-05",
+        "doc_hash": "0xda64275dbd88d912"
+      },
+      {
+        "from": "Ramesh Sisodia",
+        "to": "Nitin Pal",
+        "date": "2023-02-07",
+        "doc_hash": "0x54a856cac8dee985"
+      },
+      {
+        "from": "Nitin Pal",
+        "to": "Divya Malik",
+        "date": "2016-11-21",
+        "doc_hash": "0x16c0155a8cc73ce6"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0056-CLEAN",
+    "survey_number": "SN-623-D",
+    "current_owner": "Meena Singh",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Meena Singh",
+        "share_percent": 100,
+        "wallet_address": "demo:meena.singh",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Asha Singh",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3330,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2025-07-22",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.48756,
+        28.47505
+      ],
+      [
+        77.48813,
+        28.47505
+      ],
+      [
+        77.48813,
+        28.47559
+      ],
+      [
+        77.48756,
+        28.47559
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Sarita Nagar",
+        "date": "2023-03-01",
+        "doc_hash": "0x177ecd71b1ae1359"
+      },
+      {
+        "from": "Sarita Nagar",
+        "to": "Meena Singh",
+        "date": "2025-07-22",
+        "doc_hash": "0x0bd7dc82a17c0253"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0057-VELOCITY-TARGET",
+    "survey_number": "SN-283-D",
+    "current_owner": "Amit Bhati",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Amit Bhati",
+        "share_percent": 50,
+        "wallet_address": "demo:amit.bhati",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Fatima Bhati",
+        "share_percent": 50,
+        "wallet_address": "demo:fatima.bhati",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Radha Bhati",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 2870,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2026-08-11",
+    "title_status": "FROZEN",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.48753,
+        28.45628
+      ],
+      [
+        77.48831,
+        28.45628
+      ],
+      [
+        77.48831,
+        28.45662
+      ],
+      [
+        77.48753,
+        28.45662
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Nitin Bansal",
+        "date": "2010-12-14",
+        "doc_hash": "0x452b81ffac63a5a2"
+      },
+      {
+        "from": "Nitin Bansal",
+        "to": "Nitin Tyagi",
+        "date": "2026-08-05",
+        "doc_hash": "0xadf6056003765ebe"
+      },
+      {
+        "from": "Nitin Tyagi",
+        "to": "Amit Bhati",
+        "date": "2026-08-11",
+        "doc_hash": "0x2b932cfee90e9fcb"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0058-BACKDATE-TARGET",
+    "survey_number": "SN-303-E",
+    "current_owner": "Lokesh Sisodia",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Lokesh Sisodia",
+        "share_percent": 100,
+        "wallet_address": "demo:lokesh.sisodia",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Sunita Sisodia",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4050,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2025-08-07",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.49343,
+        28.48527
+      ],
+      [
+        77.49421,
+        28.48527
+      ],
+      [
+        77.49421,
+        28.48575
+      ],
+      [
+        77.49343,
+        28.48575
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pooja Pal",
+        "date": "2014-04-09",
+        "doc_hash": "0xb7544d0cfaeb16bd"
+      },
+      {
+        "from": "Pooja Pal",
+        "to": "Rajesh Mavi",
+        "date": "2019-01-01",
+        "doc_hash": "0xa054ddcf0afd8707"
+      },
+      {
+        "from": "Rajesh Mavi",
+        "to": "Lokesh Sisodia",
+        "date": "2013-12-24",
+        "doc_hash": "0xa27cf2395040a654"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0059-CLEAN",
+    "survey_number": "SN-974-A",
+    "current_owner": "Vivek Singh",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Vivek Singh",
+        "share_percent": 100,
+        "wallet_address": "demo:vivek.singh",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Poonam Singh",
+        "status": "DORMANT",
+        "relationship": "Sister"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2680,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2014-02-27",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.48638,
+        28.48871
+      ],
+      [
+        77.48713,
+        28.48871
+      ],
+      [
+        77.48713,
+        28.48904
+      ],
+      [
+        77.48638,
+        28.48904
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pankaj Singh",
+        "date": "2004-09-26",
+        "doc_hash": "0x867735b04fd0fd4f"
+      },
+      {
+        "from": "Pankaj Singh",
+        "to": "Vivek Singh",
+        "date": "2014-02-27",
+        "doc_hash": "0x80e81aa1fc43405e"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0060-DUPLICATE-TARGET",
+    "survey_number": "SN-350-A",
+    "current_owner": "Naveen Kumar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Naveen Kumar",
+        "share_percent": 60,
+        "wallet_address": "demo:naveen.kumar",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Priya Kumar",
+        "share_percent": 40,
+        "wallet_address": "demo:priya.kumar",
+        "credential_status": "UNDER_REVIEW"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2023-8259",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Arjun Kumar",
+        "filed_date": "2023-03-09",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 2810,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2023-02-27",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.49421,
+        28.47846
+      ],
+      [
+        77.49486,
+        28.47846
+      ],
+      [
+        77.49486,
+        28.47886
+      ],
+      [
+        77.49421,
+        28.47886
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Anil Singh",
+        "date": "2014-02-15",
+        "doc_hash": "0x01c8cc5af3255d45"
+      },
+      {
+        "from": "Anil Singh",
+        "to": "Arjun Kumar",
+        "date": "2023-02-27",
+        "doc_hash": "0x2aaa54844f318c3b"
+      },
+      {
+        "from": "Anil Singh",
+        "to": "Naveen Kumar",
+        "date": "2023-02-27",
+        "doc_hash": "0x32646b0263da311e"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0061-CLEAN",
+    "survey_number": "SN-839-B",
+    "current_owner": "Sanjay Tomar",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Sanjay Tomar",
+        "share_percent": 100,
+        "wallet_address": "demo:sanjay.tomar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2080,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2015-06-19",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51018,
+        28.48809
+      ],
+      [
+        77.5108,
+        28.48809
+      ],
+      [
+        77.5108,
+        28.4884
+      ],
+      [
+        77.51018,
+        28.4884
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Divya Sharma",
+        "date": "2004-12-12",
+        "doc_hash": "0x2656685ec84811e7"
+      },
+      {
+        "from": "Divya Sharma",
+        "to": "Sanjay Tomar",
+        "date": "2015-06-19",
+        "doc_hash": "0x9a2f6adac6ae807d"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0062-CLEAN",
+    "survey_number": "SN-932-E",
+    "current_owner": "Rohit Gupta",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Rohit Gupta",
+        "share_percent": 100,
+        "wallet_address": "demo:rohit.gupta",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2430,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2023-01-09",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51085,
+        28.46946
+      ],
+      [
+        77.51151,
+        28.46946
+      ],
+      [
+        77.51151,
+        28.4698
+      ],
+      [
+        77.51085,
+        28.4698
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Jyoti Gupta",
+        "date": "2005-07-07",
+        "doc_hash": "0xd6f933eb0fb8c0f7"
+      },
+      {
+        "from": "Jyoti Gupta",
+        "to": "Pankaj Malik",
+        "date": "2015-05-27",
+        "doc_hash": "0xfd6b582e20ffea30"
+      },
+      {
+        "from": "Pankaj Malik",
+        "to": "Rohit Gupta",
+        "date": "2023-01-09",
+        "doc_hash": "0xaf2c91d67c96d85d"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0063-CLEAN",
+    "survey_number": "SN-335-C",
+    "current_owner": "Karan Malik",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Karan Malik",
+        "share_percent": 100,
+        "wallet_address": "demo:karan.malik",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2790,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2018-12-02",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51412,
+        28.4668
+      ],
+      [
+        77.51468,
+        28.4668
+      ],
+      [
+        77.51468,
+        28.46726
+      ],
+      [
+        77.51412,
+        28.46726
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Karan Malik",
+        "date": "2018-12-02",
+        "doc_hash": "0x78867d7767117c5b"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0064-CLEAN",
+    "survey_number": "SN-867-D",
+    "current_owner": "Seema Chauhan",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Seema Chauhan",
+        "share_percent": 40,
+        "wallet_address": "demo:seema.chauhan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Ramesh Chauhan",
+        "share_percent": 30,
+        "wallet_address": "demo:ramesh.chauhan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Harpreet Chauhan",
+        "share_percent": 30,
+        "wallet_address": "demo:harpreet.chauhan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4970,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2014-03-17",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51419,
+        28.47323
+      ],
+      [
+        77.51509,
+        28.47323
+      ],
+      [
+        77.51509,
+        28.47374
+      ],
+      [
+        77.51419,
+        28.47374
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Seema Chauhan",
+        "date": "2014-03-17",
+        "doc_hash": "0xfc1d0715e4e7dc9a"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0065-CLEAN",
+    "survey_number": "SN-267-E",
+    "current_owner": "Fatima Yadav",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Fatima Yadav",
+        "share_percent": 100,
+        "wallet_address": "demo:fatima.yadav",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 1820,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2023-04-05",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50358,
+        28.48
+      ],
+      [
+        77.50406,
+        28.48
+      ],
+      [
+        77.50406,
+        28.48035
+      ],
+      [
+        77.50358,
+        28.48035
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Geeta Yadav",
+        "date": "2004-07-22",
+        "doc_hash": "0xe4a698e1bb11cdb1"
+      },
+      {
+        "from": "Geeta Yadav",
+        "to": "Rajesh Saini",
+        "date": "2018-10-13",
+        "doc_hash": "0xeff348cbb70d13d1"
+      },
+      {
+        "from": "Rajesh Saini",
+        "to": "Fatima Yadav",
+        "date": "2023-04-05",
+        "doc_hash": "0xb444ec4b225602af"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0066-CLEAN",
+    "survey_number": "SN-338-B",
+    "current_owner": "Poonam Kumar",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Poonam Kumar",
+        "share_percent": 100,
+        "wallet_address": "demo:poonam.kumar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Arjun Kumar",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2670,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2019-09-07",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51884,
+        28.46445
+      ],
+      [
+        77.5194,
+        28.46445
+      ],
+      [
+        77.5194,
+        28.46489
+      ],
+      [
+        77.51884,
+        28.46489
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Devendra Singh",
+        "date": "2004-12-27",
+        "doc_hash": "0xfc5998138adcd0e0"
+      },
+      {
+        "from": "Devendra Singh",
+        "to": "Ritu Verma",
+        "date": "2012-03-07",
+        "doc_hash": "0x968434dd855ae403"
+      },
+      {
+        "from": "Ritu Verma",
+        "to": "Poonam Kumar",
+        "date": "2019-09-07",
+        "doc_hash": "0x8e0a3928abae353c"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0067-ENCUMBRANCE",
+    "survey_number": "SN-511-A",
+    "current_owner": "Sachin Yadav",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Sachin Yadav",
+        "share_percent": 100,
+        "wallet_address": "demo:sachin.yadav",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Seema Yadav",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2020-8664",
+        "type": "TAX_LIEN",
+        "holder": "Ganga Nagar Cooperative Bank",
+        "amount_inr": 8700000,
+        "registered_date": "2023-03-31",
+        "expiry_date": "2032-03-31",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2690,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2017-04-07",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.52169,
+        28.48243
+      ],
+      [
+        77.5224,
+        28.48243
+      ],
+      [
+        77.5224,
+        28.48278
+      ],
+      [
+        77.52169,
+        28.48278
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Jyoti Tomar",
+        "date": "2012-03-04",
+        "doc_hash": "0xf21cec8fbaba1b01"
+      },
+      {
+        "from": "Jyoti Tomar",
+        "to": "Sachin Yadav",
+        "date": "2017-04-07",
+        "doc_hash": "0xfcc1a27c31d0cb0b"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0068-CLEAN",
+    "survey_number": "SN-470-A",
+    "current_owner": "Radha Pandey",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Radha Pandey",
+        "share_percent": 50,
+        "wallet_address": "demo:radha.pandey",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Lokesh Pandey",
+        "share_percent": 50,
+        "wallet_address": "demo:lokesh.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2790,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2009-11-01",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.4857,
+        28.48592
+      ],
+      [
+        77.48653,
+        28.48592
+      ],
+      [
+        77.48653,
+        28.48623
+      ],
+      [
+        77.4857,
+        28.48623
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Vivek Khan",
+        "date": "2008-08-03",
+        "doc_hash": "0x4badd9bd7d9fb37d"
+      },
+      {
+        "from": "Vivek Khan",
+        "to": "Radha Pandey",
+        "date": "2009-11-01",
+        "doc_hash": "0x653af492c6c8cf16"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0069-CLEAN",
+    "survey_number": "SN-980-C",
+    "current_owner": "Komal Singh",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Komal Singh",
+        "share_percent": 100,
+        "wallet_address": "demo:komal.singh",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2700,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2023-09-08",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51105,
+        28.4591
+      ],
+      [
+        77.51183,
+        28.4591
+      ],
+      [
+        77.51183,
+        28.45942
+      ],
+      [
+        77.51105,
+        28.45942
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Sarita Malik",
+        "date": "2008-05-05",
+        "doc_hash": "0x122fe7d7f7540c8b"
+      },
+      {
+        "from": "Sarita Malik",
+        "to": "Komal Singh",
+        "date": "2023-09-08",
+        "doc_hash": "0xb7b79b63b980e250"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0070-CLEAN",
+    "survey_number": "SN-211-C",
+    "current_owner": "Yogesh Joshi",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Yogesh Joshi",
+        "share_percent": 50,
+        "wallet_address": "demo:yogesh.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Pooja Joshi",
+        "share_percent": 30,
+        "wallet_address": "demo:pooja.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Kavita Joshi",
+        "share_percent": 20,
+        "wallet_address": "demo:kavita.joshi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Deepak Joshi",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2650,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2011-04-14",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50518,
+        28.4696
+      ],
+      [
+        77.50568,
+        28.4696
+      ],
+      [
+        77.50568,
+        28.47009
+      ],
+      [
+        77.50518,
+        28.47009
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Yogesh Joshi",
+        "date": "2011-04-14",
+        "doc_hash": "0x37bca62340f313bd"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0071-CLEAN",
+    "survey_number": "SN-837-B",
+    "current_owner": "Rekha Khan",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Rekha Khan",
+        "share_percent": 50,
+        "wallet_address": "demo:rekha.khan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Renu Khan",
+        "share_percent": 50,
+        "wallet_address": "demo:renu.khan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3600,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2010-06-24",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49349,
+        28.46593
+      ],
+      [
+        77.4943,
+        28.46593
+      ],
+      [
+        77.4943,
+        28.46634
+      ],
+      [
+        77.49349,
+        28.46634
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Neha Kumar",
+        "date": "2006-08-08",
+        "doc_hash": "0x36d25533cfb17ca9"
+      },
+      {
+        "from": "Neha Kumar",
+        "to": "Fatima Khan",
+        "date": "2008-09-26",
+        "doc_hash": "0x82548f20fdb73621"
+      },
+      {
+        "from": "Fatima Khan",
+        "to": "Rekha Khan",
+        "date": "2010-06-24",
+        "doc_hash": "0xbcc5707367173277"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0072-CLEAN",
+    "survey_number": "SN-750-F",
+    "current_owner": "Fatima Dagar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Fatima Dagar",
+        "share_percent": 70,
+        "wallet_address": "demo:fatima.dagar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mukesh Malik",
+        "share_percent": 30,
+        "wallet_address": "demo:mukesh.malik",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Manoj Dagar",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2190,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2019-12-30",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.506,
+        28.48218
+      ],
+      [
+        77.50647,
+        28.48218
+      ],
+      [
+        77.50647,
+        28.48261
+      ],
+      [
+        77.506,
+        28.48261
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rajesh Mishra",
+        "date": "2005-01-12",
+        "doc_hash": "0xd7d5148a4943e768"
+      },
+      {
+        "from": "Rajesh Mishra",
+        "to": "Arjun Yadav",
+        "date": "2010-06-26",
+        "doc_hash": "0x850535d86330721b"
+      },
+      {
+        "from": "Arjun Yadav",
+        "to": "Fatima Dagar",
+        "date": "2019-12-30",
+        "doc_hash": "0x5334c85fb01b65d4"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0073-CLEAN",
+    "survey_number": "SN-841-A",
+    "current_owner": "Shweta Malik",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Shweta Malik",
+        "share_percent": 100,
+        "wallet_address": "demo:shweta.malik",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4100,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2020-06-01",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51776,
+        28.47675
+      ],
+      [
+        77.51862,
+        28.47675
+      ],
+      [
+        77.51862,
+        28.47719
+      ],
+      [
+        77.51776,
+        28.47719
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Shweta Rana",
+        "date": "2009-09-20",
+        "doc_hash": "0x66aded6c67670efb"
+      },
+      {
+        "from": "Shweta Rana",
+        "to": "Shweta Malik",
+        "date": "2020-06-01",
+        "doc_hash": "0x46a235510a1ce627"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0074-ENCUMBRANCE",
+    "survey_number": "SN-926-A",
+    "current_owner": "Meena Mishra",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Meena Mishra",
+        "share_percent": 60,
+        "wallet_address": "demo:meena.mishra",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mohit Mishra",
+        "share_percent": 40,
+        "wallet_address": "demo:mohit.mishra",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Radha Mishra",
+        "status": "DORMANT",
+        "relationship": "Sister"
+      }
+    ],
+    "encumbrances": [
+      {
+        "encumbrance_id": "ENC-2020-7368",
+        "type": "LEASE",
+        "holder": "Demo National Bank",
+        "amount_inr": 6400000,
+        "registered_date": "2026-06-09",
+        "expiry_date": "2034-06-09",
+        "status": "ACTIVE"
+      }
+    ],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2470,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2019-08-11",
+    "title_status": "VERIFIED_WITH_ENCUMBRANCE",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.52238,
+        28.46735
+      ],
+      [
+        77.52298,
+        28.46735
+      ],
+      [
+        77.52298,
+        28.46773
+      ],
+      [
+        77.52238,
+        28.46773
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Vivek Tyagi",
+        "date": "2009-12-10",
+        "doc_hash": "0x82438d76340d60b0"
+      },
+      {
+        "from": "Vivek Tyagi",
+        "to": "Meena Mishra",
+        "date": "2019-08-11",
+        "doc_hash": "0xed2f2e9d77322a6b"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0075-VELOCITY-TARGET",
+    "survey_number": "SN-354-E",
+    "current_owner": "Suresh Chauhan",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Suresh Chauhan",
+        "share_percent": 100,
+        "wallet_address": "demo:suresh.chauhan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Mohit Chauhan",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 3260,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2026-06-17",
+    "title_status": "FROZEN",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.50674,
+        28.47623
+      ],
+      [
+        77.50741,
+        28.47623
+      ],
+      [
+        77.50741,
+        28.47668
+      ],
+      [
+        77.50674,
+        28.47668
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Kavita Tyagi",
+        "date": "2014-06-10",
+        "doc_hash": "0xad8c0479fd5e0d69"
+      },
+      {
+        "from": "Kavita Tyagi",
+        "to": "Renu Khan",
+        "date": "2026-06-08",
+        "doc_hash": "0x010e7bfaeb0c398a"
+      },
+      {
+        "from": "Renu Khan",
+        "to": "Suresh Chauhan",
+        "date": "2026-06-17",
+        "doc_hash": "0x6381b64356ca9a3c"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0076-CLEAN",
+    "survey_number": "SN-112-D",
+    "current_owner": "Kunal Joshi",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Kunal Joshi",
+        "share_percent": 50,
+        "wallet_address": "demo:kunal.joshi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sachin Joshi",
+        "share_percent": 50,
+        "wallet_address": "demo:sachin.joshi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2350,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2017-10-29",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49185,
+        28.46256
+      ],
+      [
+        77.49226,
+        28.46256
+      ],
+      [
+        77.49226,
+        28.46309
+      ],
+      [
+        77.49185,
+        28.46309
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Amit Kumar",
+        "date": "2005-12-25",
+        "doc_hash": "0x8483203291984aa0"
+      },
+      {
+        "from": "Amit Kumar",
+        "to": "Suresh Sisodia",
+        "date": "2015-03-01",
+        "doc_hash": "0xc92af804993892c8"
+      },
+      {
+        "from": "Suresh Sisodia",
+        "to": "Kunal Joshi",
+        "date": "2017-10-29",
+        "doc_hash": "0x6858ef3f7ff19a9d"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0077-DUPLICATE-TARGET",
+    "survey_number": "SN-894-D",
+    "current_owner": "Shweta Tomar",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Shweta Tomar",
+        "share_percent": 100,
+        "wallet_address": "demo:shweta.tomar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2023-7215",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Geeta Saini",
+        "filed_date": "2023-12-03",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 2910,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2023-10-13",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.52182,
+        28.46093
+      ],
+      [
+        77.5223,
+        28.46093
+      ],
+      [
+        77.5223,
+        28.46149
+      ],
+      [
+        77.52182,
+        28.46149
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Geeta Khan",
+        "date": "2005-11-09",
+        "doc_hash": "0x7f8e3656fd3cdfda"
+      },
+      {
+        "from": "Geeta Khan",
+        "to": "Geeta Saini",
+        "date": "2023-10-02",
+        "doc_hash": "0x24b8094f84379d60"
+      },
+      {
+        "from": "Geeta Khan",
+        "to": "Shweta Tomar",
+        "date": "2023-10-13",
+        "doc_hash": "0xb3b381d80d1aa1c1"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0078-CLEAN",
+    "survey_number": "SN-877-C",
+    "current_owner": "Komal Pandey",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Komal Pandey",
+        "share_percent": 100,
+        "wallet_address": "demo:komal.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Rohit Pandey",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2980,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2018-01-31",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50382,
+        28.4557
+      ],
+      [
+        77.50436,
+        28.4557
+      ],
+      [
+        77.50436,
+        28.45621
+      ],
+      [
+        77.50382,
+        28.45621
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Amit Tomar",
+        "date": "2008-08-28",
+        "doc_hash": "0x797be450b2ef16e3"
+      },
+      {
+        "from": "Amit Tomar",
+        "to": "Komal Pandey",
+        "date": "2018-01-31",
+        "doc_hash": "0x7080350de722e967"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0079-CLEAN",
+    "survey_number": "SN-704-B",
+    "current_owner": "Mamta Ahmad",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Mamta Ahmad",
+        "share_percent": 100,
+        "wallet_address": "demo:mamta.ahmad",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Rohit Ahmad",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2140,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2013-11-07",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.52242,
+        28.4843
+      ],
+      [
+        77.52288,
+        28.4843
+      ],
+      [
+        77.52288,
+        28.48473
+      ],
+      [
+        77.52242,
+        28.48473
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ritu Mishra",
+        "date": "2006-12-27",
+        "doc_hash": "0xebb4cc678822f62f"
+      },
+      {
+        "from": "Ritu Mishra",
+        "to": "Naveen Sharma",
+        "date": "2012-11-02",
+        "doc_hash": "0x9352174f9774068f"
+      },
+      {
+        "from": "Naveen Sharma",
+        "to": "Mamta Ahmad",
+        "date": "2013-11-07",
+        "doc_hash": "0xcc31b44d090f28c6"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0080-CLEAN",
+    "survey_number": "SN-157-D",
+    "current_owner": "Harpreet Tyagi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Harpreet Tyagi",
+        "share_percent": 100,
+        "wallet_address": "demo:harpreet.tyagi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Alka Tyagi",
+        "status": "DORMANT",
+        "relationship": "Son"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4130,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2025-07-31",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.52225,
+        28.47431
+      ],
+      [
+        77.52297,
+        28.47431
+      ],
+      [
+        77.52297,
+        28.47484
+      ],
+      [
+        77.52225,
+        28.47484
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Amit Yadav",
+        "date": "2008-03-24",
+        "doc_hash": "0xedd1b049be4f6604"
+      },
+      {
+        "from": "Amit Yadav",
+        "to": "Neha Bhati",
+        "date": "2021-04-06",
+        "doc_hash": "0x173eca1e7d248017"
+      },
+      {
+        "from": "Neha Bhati",
+        "to": "Harpreet Tyagi",
+        "date": "2025-07-31",
+        "doc_hash": "0xaa3075b45f152e63"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0081-CLEAN",
+    "survey_number": "SN-726-C",
+    "current_owner": "Pankaj Saini",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Pankaj Saini",
+        "share_percent": 40,
+        "wallet_address": "demo:pankaj.saini",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sunita Saini",
+        "share_percent": 40,
+        "wallet_address": "demo:sunita.saini",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mukesh Saini",
+        "share_percent": 20,
+        "wallet_address": "demo:mukesh.saini",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Tarun Saini",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3640,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2013-08-22",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51333,
+        28.45939
+      ],
+      [
+        77.51389,
+        28.45939
+      ],
+      [
+        77.51389,
+        28.45999
+      ],
+      [
+        77.51333,
+        28.45999
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pankaj Saini",
+        "date": "2013-08-22",
+        "doc_hash": "0xcbf86766dc250650"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0082-FLAGGED-TARGET",
+    "survey_number": "SN-575-E",
+    "current_owner": "Usha Ansari",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Usha Ansari",
+        "share_percent": 25,
+        "wallet_address": "demo:usha.ansari",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sachin Mavi",
+        "share_percent": 25,
+        "wallet_address": "demo:sachin.mavi",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Anil Kumar",
+        "share_percent": 25,
+        "wallet_address": "demo:anil.kumar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sunil Pal",
+        "share_percent": 25,
+        "wallet_address": "demo:sunil.pal",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 4,
+      "total_owners": 4
+    },
+    "nominees": [
+      {
+        "name": "Tarun Ansari",
+        "status": "CONTESTED",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2870,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-04-20",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.50691,
+        28.47493
+      ],
+      [
+        77.50744,
+        28.47493
+      ],
+      [
+        77.50744,
+        28.47543
+      ],
+      [
+        77.50691,
+        28.47543
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Amit Ansari",
+        "date": "2012-03-08",
+        "doc_hash": "0x35012eed1c8ac736"
+      },
+      {
+        "from": "Amit Ansari",
+        "to": "Karan Ansari",
+        "date": "2026-04-15",
+        "doc_hash": "0x3cf43a4bcd63db90"
+      },
+      {
+        "from": "Karan Ansari",
+        "to": "Usha Ansari",
+        "date": "2026-04-20",
+        "doc_hash": "0xccb3d69810610cd1"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0083-CLEAN",
+    "survey_number": "SN-487-A",
+    "current_owner": "Rekha Chauhan",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Rekha Chauhan",
+        "share_percent": 100,
+        "wallet_address": "demo:rekha.chauhan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3520,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2024-11-05",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51002,
+        28.46632
+      ],
+      [
+        77.51059,
+        28.46632
+      ],
+      [
+        77.51059,
+        28.46689
+      ],
+      [
+        77.51002,
+        28.46689
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Geeta Tomar",
+        "date": "2019-10-03",
+        "doc_hash": "0x0ff0e2d3120471f8"
+      },
+      {
+        "from": "Geeta Tomar",
+        "to": "Deepak Kumar",
+        "date": "2021-06-16",
+        "doc_hash": "0x93560ec51d5dd930"
+      },
+      {
+        "from": "Deepak Kumar",
+        "to": "Rekha Chauhan",
+        "date": "2024-11-05",
+        "doc_hash": "0xf5906542b5475cb6"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0084-CLEAN",
+    "survey_number": "SN-767-A",
+    "current_owner": "Ashok Dagar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Ashok Dagar",
+        "share_percent": 40,
+        "wallet_address": "demo:ashok.dagar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Shweta Dagar",
+        "share_percent": 40,
+        "wallet_address": "demo:shweta.dagar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Deepak Dagar",
+        "share_percent": 20,
+        "wallet_address": "demo:deepak.dagar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2230,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2011-11-16",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51182,
+        28.47306
+      ],
+      [
+        77.51224,
+        28.47306
+      ],
+      [
+        77.51224,
+        28.47355
+      ],
+      [
+        77.51182,
+        28.47355
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ashok Dagar",
+        "date": "2011-11-16",
+        "doc_hash": "0x92512dd74a6d85c2"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0085-DUPLICATE-TARGET",
+    "survey_number": "SN-198-D",
+    "current_owner": "Geeta Mavi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Geeta Mavi",
+        "share_percent": 100,
+        "wallet_address": "demo:geeta.mavi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2023-4772",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Seema Ahmad",
+        "filed_date": "2023-06-18",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 4130,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2023-05-31",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.50684,
+        28.48897
+      ],
+      [
+        77.50756,
+        28.48897
+      ],
+      [
+        77.50756,
+        28.4895
+      ],
+      [
+        77.50684,
+        28.4895
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Vikram Nagar",
+        "date": "2007-06-05",
+        "doc_hash": "0x4c80363bca3beebe"
+      },
+      {
+        "from": "Vikram Nagar",
+        "to": "Seema Ahmad",
+        "date": "2023-05-27",
+        "doc_hash": "0x3896449c2dcde658"
+      },
+      {
+        "from": "Vikram Nagar",
+        "to": "Geeta Mavi",
+        "date": "2023-05-31",
+        "doc_hash": "0xa04e0e6c7c54dd83"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0086-FLAGGED-TARGET",
+    "survey_number": "SN-633-D",
+    "current_owner": "Ramesh Nagar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Ramesh Nagar",
+        "share_percent": 50,
+        "wallet_address": "demo:ramesh.nagar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Priya Nagar",
+        "share_percent": 30,
+        "wallet_address": "demo:priya.nagar",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Seema Nagar",
+        "share_percent": 20,
+        "wallet_address": "demo:seema.nagar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Radha Nagar",
+        "status": "CONTESTED",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2020,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-06-15",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.52035,
+        28.48787
+      ],
+      [
+        77.52084,
+        28.48787
+      ],
+      [
+        77.52084,
+        28.48825
+      ],
+      [
+        77.52035,
+        28.48825
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rekha Nagar",
+        "date": "2008-06-27",
+        "doc_hash": "0xd9a00678859d5988"
+      },
+      {
+        "from": "Rekha Nagar",
+        "to": "Anil Nagar",
+        "date": "2026-05-18",
+        "doc_hash": "0xea14681e5a915715"
+      },
+      {
+        "from": "Anil Nagar",
+        "to": "Ramesh Nagar",
+        "date": "2026-06-15",
+        "doc_hash": "0xbfcb6abc6ff595f3"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0087-DUPLICATE-TARGET",
+    "survey_number": "SN-128-D",
+    "current_owner": "Mukesh Sharma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Mukesh Sharma",
+        "share_percent": 70,
+        "wallet_address": "demo:mukesh.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mamta Sharma",
+        "share_percent": 30,
+        "wallet_address": "demo:mamta.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Deepak Sharma",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [
+      {
+        "dispute_id": "DSP-2024-6030",
+        "type": "DUPLICATE_SALE_CLAIM",
+        "claimant": "Poonam Nagar",
+        "filed_date": "2024-07-25",
+        "status": "ACTIVE"
+      }
+    ],
+    "frozen": false,
+    "area_sqm": 4380,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2024-06-08",
+    "title_status": "DISPUTED",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.49996,
+        28.4662
+      ],
+      [
+        77.50067,
+        28.4662
+      ],
+      [
+        77.50067,
+        28.46677
+      ],
+      [
+        77.49996,
+        28.46677
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Mohit Bansal",
+        "date": "2003-07-15",
+        "doc_hash": "0xa528966162c27100"
+      },
+      {
+        "from": "Mohit Bansal",
+        "to": "Poonam Nagar",
+        "date": "2024-04-28",
+        "doc_hash": "0x8a6f22429f10a226"
+      },
+      {
+        "from": "Mohit Bansal",
+        "to": "Mukesh Sharma",
+        "date": "2024-06-08",
+        "doc_hash": "0x1ee0934ba86dc766"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0088-BACKDATE-TARGET",
+    "survey_number": "SN-766-F",
+    "current_owner": "Kunal Pandey",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Kunal Pandey",
+        "share_percent": 100,
+        "wallet_address": "demo:kunal.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2050,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2026-08-14",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.52133,
+        28.48897
+      ],
+      [
+        77.52177,
+        28.48897
+      ],
+      [
+        77.52177,
+        28.4894
+      ],
+      [
+        77.52133,
+        28.4894
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Pankaj Dagar",
+        "date": "2013-10-27",
+        "doc_hash": "0x89a07dc21283246a"
+      },
+      {
+        "from": "Pankaj Dagar",
+        "to": "Mamta Joshi",
+        "date": "2022-08-10",
+        "doc_hash": "0x4eeded6802d63100"
+      },
+      {
+        "from": "Mamta Joshi",
+        "to": "Kunal Pandey",
+        "date": "2011-12-27",
+        "doc_hash": "0xcbac2dfcbdbae3c0"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0089-FLAGGED-TARGET",
+    "survey_number": "SN-806-C",
+    "current_owner": "Vivek Tomar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Vivek Tomar",
+        "share_percent": 40,
+        "wallet_address": "demo:vivek.tomar",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Sunil Tomar",
+        "share_percent": 30,
+        "wallet_address": "demo:sunil.tomar",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Seema Tomar",
+        "share_percent": 30,
+        "wallet_address": "demo:seema.tomar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Radha Tomar",
+        "status": "CONTESTED",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2940,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-08-02",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.50405,
+        28.47651
+      ],
+      [
+        77.50464,
+        28.47651
+      ],
+      [
+        77.50464,
+        28.47697
+      ],
+      [
+        77.50405,
+        28.47697
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Renu Tomar",
+        "date": "2006-03-09",
+        "doc_hash": "0xc27f36d8fce05774"
+      },
+      {
+        "from": "Renu Tomar",
+        "to": "Yogesh Tomar",
+        "date": "2026-07-03",
+        "doc_hash": "0x82db68741c567a9b"
+      },
+      {
+        "from": "Yogesh Tomar",
+        "to": "Vivek Tomar",
+        "date": "2026-08-02",
+        "doc_hash": "0xbabd27560f7d0bf9"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0090-CLEAN",
+    "survey_number": "SN-623-C",
+    "current_owner": "Rajesh Khan",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Rajesh Khan",
+        "share_percent": 50,
+        "wallet_address": "demo:rajesh.khan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Usha Khan",
+        "share_percent": 30,
+        "wallet_address": "demo:usha.khan",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Sachin Khan",
+        "share_percent": 20,
+        "wallet_address": "demo:sachin.khan",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Geeta Khan",
+        "status": "DORMANT",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3990,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2022-06-07",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51029,
+        28.46351
+      ],
+      [
+        77.51096,
+        28.46351
+      ],
+      [
+        77.51096,
+        28.46406
+      ],
+      [
+        77.51029,
+        28.46406
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Suresh Yadav",
+        "date": "2016-05-27",
+        "doc_hash": "0x5e015f83acb3000f"
+      },
+      {
+        "from": "Suresh Yadav",
+        "to": "Rajesh Khan",
+        "date": "2022-06-07",
+        "doc_hash": "0xa0122208e406b3f0"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0091-BACKDATE-TARGET",
+    "survey_number": "SN-843-F",
+    "current_owner": "Lokesh Sisodia",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Lokesh Sisodia",
+        "share_percent": 100,
+        "wallet_address": "demo:lokesh.sisodia",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Yogesh Sisodia",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3720,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-01-06",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.51064,
+        28.47876
+      ],
+      [
+        77.51152,
+        28.47876
+      ],
+      [
+        77.51152,
+        28.47915
+      ],
+      [
+        77.51064,
+        28.47915
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Alka Verma",
+        "date": "2013-02-20",
+        "doc_hash": "0x58515859a5c8ecd5"
+      },
+      {
+        "from": "Alka Verma",
+        "to": "Sunita Ahmad",
+        "date": "2022-01-12",
+        "doc_hash": "0x7d8219e751059153"
+      },
+      {
+        "from": "Sunita Ahmad",
+        "to": "Lokesh Sisodia",
+        "date": "2017-08-02",
+        "doc_hash": "0x694d3a2656c031f9"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0092-FLAGGED-TARGET",
+    "survey_number": "SN-169-D",
+    "current_owner": "Divya Mavi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Divya Mavi",
+        "share_percent": 100,
+        "wallet_address": "demo:divya.mavi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Deepak Mavi",
+        "status": "CONTESTED",
+        "relationship": "Brother"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3500,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2026-06-10",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.506,
+        28.48462
+      ],
+      [
+        77.50685,
+        28.48462
+      ],
+      [
+        77.50685,
+        28.485
+      ],
+      [
+        77.506,
+        28.485
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Poonam Mavi",
+        "date": "2009-03-20",
+        "doc_hash": "0x8bd4382d8a6b3d09"
+      },
+      {
+        "from": "Poonam Mavi",
+        "to": "Shweta Mavi",
+        "date": "2026-06-02",
+        "doc_hash": "0x7e72589ab9394f4a"
+      },
+      {
+        "from": "Shweta Mavi",
+        "to": "Divya Mavi",
+        "date": "2026-06-10",
+        "doc_hash": "0x56c19fcc80921172"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0093-FLAGGED-TARGET",
+    "survey_number": "SN-917-C",
+    "current_owner": "Renu Singh",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Renu Singh",
+        "share_percent": 60,
+        "wallet_address": "demo:renu.singh",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Rajesh Singh",
+        "share_percent": 40,
+        "wallet_address": "demo:rajesh.singh",
+        "credential_status": "UNDER_REVIEW"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [
+      {
+        "name": "Anil Singh",
+        "status": "CONTESTED",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3190,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-07-29",
+    "title_status": "SUCCESSION_PENDING",
+    "risk_status": "FLAGGED",
+    "boundary": [
+      [
+        77.51464,
+        28.47755
+      ],
+      [
+        77.51531,
+        28.47755
+      ],
+      [
+        77.51531,
+        28.47799
+      ],
+      [
+        77.51464,
+        28.47799
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Harpreet Singh",
+        "date": "2003-10-31",
+        "doc_hash": "0x0dfc87e79df86a20"
+      },
+      {
+        "from": "Harpreet Singh",
+        "to": "Kunal Singh",
+        "date": "2026-07-16",
+        "doc_hash": "0xc4568a023459d8e0"
+      },
+      {
+        "from": "Kunal Singh",
+        "to": "Renu Singh",
+        "date": "2026-07-29",
+        "doc_hash": "0x74d0abf653a02dbe"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0094-CLEAN",
+    "survey_number": "SN-513-D",
+    "current_owner": "Devendra Verma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Devendra Verma",
+        "share_percent": 40,
+        "wallet_address": "demo:devendra.verma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Neha Verma",
+        "share_percent": 30,
+        "wallet_address": "demo:neha.verma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Geeta Verma",
+        "share_percent": 30,
+        "wallet_address": "demo:geeta.verma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [
+      {
+        "name": "Amit Verma",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2180,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2015-11-27",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.51916,
+        28.46693
+      ],
+      [
+        77.51972,
+        28.46693
+      ],
+      [
+        77.51972,
+        28.46729
+      ],
+      [
+        77.51916,
+        28.46729
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Kunal Sharma",
+        "date": "2007-02-25",
+        "doc_hash": "0xc4857af1507931f5"
+      },
+      {
+        "from": "Kunal Sharma",
+        "to": "Anita Bhati",
+        "date": "2008-04-13",
+        "doc_hash": "0xfc3f9ae21fbb68ce"
+      },
+      {
+        "from": "Anita Bhati",
+        "to": "Devendra Verma",
+        "date": "2015-11-27",
+        "doc_hash": "0x4661eb87bb239c77"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0095-CLEAN",
+    "survey_number": "SN-599-D",
+    "current_owner": "Mamta Pal",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Mamta Pal",
+        "share_percent": 100,
+        "wallet_address": "demo:mamta.pal",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Radha Pal",
+        "status": "DORMANT",
+        "relationship": "Daughter"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 3830,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2014-10-31",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49213,
+        28.48903
+      ],
+      [
+        77.49272,
+        28.48903
+      ],
+      [
+        77.49272,
+        28.48963
+      ],
+      [
+        77.49213,
+        28.48963
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Arjun Rana",
+        "date": "2005-09-11",
+        "doc_hash": "0x236204dc3205e71e"
+      },
+      {
+        "from": "Arjun Rana",
+        "to": "Mamta Pal",
+        "date": "2014-10-31",
+        "doc_hash": "0x1757d5da39586939"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0096-VELOCITY-TARGET",
+    "survey_number": "SN-399-A",
+    "current_owner": "Karan Kumar",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Karan Kumar",
+        "share_percent": 40,
+        "wallet_address": "demo:karan.kumar",
+        "credential_status": "UNDER_REVIEW"
+      },
+      {
+        "name": "Anil Kumar",
+        "share_percent": 40,
+        "wallet_address": "demo:anil.kumar",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Mohit Kumar",
+        "share_percent": 20,
+        "wallet_address": "demo:mohit.kumar",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 3,
+      "total_owners": 3
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": true,
+    "area_sqm": 5140,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2026-05-09",
+    "title_status": "FROZEN",
+    "risk_status": "REVIEW",
+    "boundary": [
+      [
+        77.48592,
+        28.47118
+      ],
+      [
+        77.4868,
+        28.47118
+      ],
+      [
+        77.4868,
+        28.47172
+      ],
+      [
+        77.48592,
+        28.47172
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rohit Nagar",
+        "date": "2011-09-23",
+        "doc_hash": "0x5637971e32654e66"
+      },
+      {
+        "from": "Rohit Nagar",
+        "to": "Renu Gupta",
+        "date": "2026-04-24",
+        "doc_hash": "0x17dacb4b9391e432"
+      },
+      {
+        "from": "Renu Gupta",
+        "to": "Usha Verma",
+        "date": "2026-05-04",
+        "doc_hash": "0xc36c1dbce685810c"
+      },
+      {
+        "from": "Usha Verma",
+        "to": "Karan Kumar",
+        "date": "2026-05-09",
+        "doc_hash": "0x827095ceeb436d88"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0097-BACKDATE-TARGET",
+    "survey_number": "SN-284-D",
+    "current_owner": "Devendra Pandey",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Devendra Pandey",
+        "share_percent": 100,
+        "wallet_address": "demo:devendra.pandey",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [
+      {
+        "name": "Yogesh Pandey",
+        "status": "DORMANT",
+        "relationship": "Spouse"
+      }
+    ],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2380,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-04-22",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.48775,
+        28.4606
+      ],
+      [
+        77.48819,
+        28.4606
+      ],
+      [
+        77.48819,
+        28.4611
+      ],
+      [
+        77.48775,
+        28.4611
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Rohit Ansari",
+        "date": "2009-07-12",
+        "doc_hash": "0x061678552651337c"
+      },
+      {
+        "from": "Rohit Ansari",
+        "to": "Anita Sharma",
+        "date": "2021-01-14",
+        "doc_hash": "0xb87fe983ce6a061c"
+      },
+      {
+        "from": "Anita Sharma",
+        "to": "Devendra Pandey",
+        "date": "2015-04-14",
+        "doc_hash": "0x4c4f35b2b59f9aed"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0098-BACKDATE-TARGET",
+    "survey_number": "SN-195-F",
+    "current_owner": "Sachin Joshi",
+    "ownership_type": "SOLE",
+    "owners": [
+      {
+        "name": "Sachin Joshi",
+        "share_percent": 100,
+        "wallet_address": "demo:sachin.joshi",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 1,
+      "total_owners": 1
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2950,
+    "registration_office": "Sub-Registrar Greater Noida",
+    "last_registered_date": "2026-08-05",
+    "title_status": "REVIEW",
+    "risk_status": "HIGH_RISK",
+    "boundary": [
+      [
+        77.49848,
+        28.47001
+      ],
+      [
+        77.49906,
+        28.47001
+      ],
+      [
+        77.49906,
+        28.47048
+      ],
+      [
+        77.49848,
+        28.47048
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Ashok Mishra",
+        "date": "2008-08-30",
+        "doc_hash": "0xfefb1aa60c6982d5"
+      },
+      {
+        "from": "Ashok Mishra",
+        "to": "Jyoti Ahmad",
+        "date": "2019-12-29",
+        "doc_hash": "0x5c61c9f3b640d936"
+      },
+      {
+        "from": "Jyoti Ahmad",
+        "to": "Sachin Joshi",
+        "date": "2008-03-17",
+        "doc_hash": "0x8a03f4cc256d9494"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0099-CLEAN",
+    "survey_number": "SN-509-F",
+    "current_owner": "Arjun Sharma",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Arjun Sharma",
+        "share_percent": 70,
+        "wallet_address": "demo:arjun.sharma",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Nitin Sharma",
+        "share_percent": 30,
+        "wallet_address": "demo:nitin.sharma",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 2640,
+    "registration_office": "Sub-Registrar Noida-II",
+    "last_registered_date": "2021-03-06",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.50004,
+        28.4801
+      ],
+      [
+        77.5007,
+        28.4801
+      ],
+      [
+        77.5007,
+        28.48047
+      ],
+      [
+        77.50004,
+        28.48047
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Naveen Pal",
+        "date": "2014-01-30",
+        "doc_hash": "0x349da1912b679d1e"
+      },
+      {
+        "from": "Naveen Pal",
+        "to": "Arjun Sharma",
+        "date": "2021-03-06",
+        "doc_hash": "0x4474bb23d8f71d21"
+      }
+    ]
+  },
+  {
+    "ulpin": "UP-0100-CLEAN",
+    "survey_number": "SN-731-B",
+    "current_owner": "Vivek Yadav",
+    "ownership_type": "JOINT",
+    "owners": [
+      {
+        "name": "Vivek Yadav",
+        "share_percent": 70,
+        "wallet_address": "demo:vivek.yadav",
+        "credential_status": "ACTIVE"
+      },
+      {
+        "name": "Komal Yadav",
+        "share_percent": 30,
+        "wallet_address": "demo:komal.yadav",
+        "credential_status": "ACTIVE"
+      }
+    ],
+    "ownership_policy": {
+      "required_approvals": 2,
+      "total_owners": 2
+    },
+    "nominees": [],
+    "encumbrances": [],
+    "disputes": [],
+    "frozen": false,
+    "area_sqm": 4020,
+    "registration_office": "Sub-Registrar Noida-I",
+    "last_registered_date": "2021-10-13",
+    "title_status": "VERIFIED",
+    "risk_status": "LOW_RISK",
+    "boundary": [
+      [
+        77.49525,
+        28.47292
+      ],
+      [
+        77.49595,
+        28.47292
+      ],
+      [
+        77.49595,
+        28.47345
+      ],
+      [
+        77.49525,
+        28.47345
+      ]
+    ],
+    "transfer_history": [
+      {
+        "from": "Government Grant",
+        "to": "Vivek Yadav",
+        "date": "2021-10-13",
+        "doc_hash": "0x572a068afdffef41"
+      }
+    ]
+  }
+]
