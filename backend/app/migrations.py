@@ -242,7 +242,7 @@ BASE_SCHEMA_TABLES = [
         binding_signature text
     )""",
     """CREATE TABLE IF NOT EXISTS chain_wallet_challenges (
-        user_id uuid,
+        user_id uuid PRIMARY KEY,
         address text NOT NULL,
         message jsonb NOT NULL,
         expires_at timestamptz NOT NULL,
@@ -295,9 +295,11 @@ SAFE_ALTERS = [
     "ALTER TABLE chain_wallets ADD COLUMN IF NOT EXISTS binding_message jsonb",
     "ALTER TABLE chain_wallets ADD COLUMN IF NOT EXISTS binding_signature text",
     "ALTER TABLE identity_link_requests ADD COLUMN IF NOT EXISTS reviewed_by_operator text",
+    "ALTER TABLE chain_wallet_challenges ADD PRIMARY KEY (user_id)",
 ]
 
 BASE_SCHEMA_INDEXES = [
+    "CREATE UNIQUE INDEX IF NOT EXISTS chain_wallet_challenges_user_idx ON chain_wallet_challenges(user_id)",
     "CREATE UNIQUE INDEX IF NOT EXISTS auth_email_unique ON auth_accounts (lower(email))",
     "CREATE UNIQUE INDEX IF NOT EXISTS auth_username_unique ON auth_accounts (lower(username))",
     "CREATE INDEX IF NOT EXISTS auth_sessions_user_idx ON auth_sessions (user_id)",
