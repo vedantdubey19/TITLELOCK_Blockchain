@@ -102,17 +102,6 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     app.include_router(risk_router)
     app.include_router(succession_router)
 
-    dist = Path(settings.frontend_dist)
-    if settings.frontend_dist and dist.is_dir():
-        @app.get('/{path:path}', include_in_schema=False)
-        def frontend(path: str):
-            if path.startswith('api/'):
-                raise HTTPException(404, 'Not found')
-            candidate=(dist/path).resolve()
-            if candidate.is_relative_to(dist.resolve()) and candidate.is_file():
-                return FileResponse(candidate)
-            return FileResponse(dist/'index.html')
-
     @app.exception_handler(RequestValidationError)
     async def invalid_request(request, exc):
         # FastAPI's default validation response echoes input, including passwords.
@@ -137,6 +126,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         status = 'ready' if all(value in ('ok', 'not-required') for value in dependencies.values()) else 'degraded'
         return JSONResponse(status_code=200 if status == 'ready' else 503,
                             content={'status': status, 'service': 'titlelock-api', 'dependencies': dependencies})
+
+    dist = Path(settings.frontend_dist)
+    if settings.frontend_dist and dist.is_dir():
+        @app.get('/{path:path}', include_in_schema=False)
+        def frontend(path: str):
+            if path.startswith('api/'):
+                raise HTTPException(404, 'Not found')
+            candidate = (dist / path).resolve()
+            if candidate.is_relative_to(dist.resolve()) and candidate.is_file():
+                return FileResponse(candidate)
+            return FileResponse(dist / 'index.html')
 
     return app
 
