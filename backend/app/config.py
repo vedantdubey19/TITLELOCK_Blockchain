@@ -6,12 +6,13 @@ Invalid values fail at startup (pydantic validation), not halfway through a requ
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from typing import Literal
 from urllib.parse import urlsplit
 import re
 import ipaddress
 
-from psycopg.conninfo import conninfo_to_dict
+from psycopg.conninfo import conninfo_to_dict, make_conninfo
 
 from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -81,6 +82,13 @@ class Settings(BaseSettings):
                 raise ValueError('Production cannot use a demo or test database/schema')
             if database.get('sslmode') != 'verify-full':
                 raise ValueError('Production DATABASE_URL requires sslmode=verify-full and a trusted database CA')
+            # psycopg-binary ships libpq separately from the OS package. On Debian,
+            # give it the actual system bundle instead of relying on libpq's `system`
+            # shortcut, while preserving full hostname and CA verification.
+            system_bundle = Path('/etc/ssl/certs/ca-certificates.crt')
+            if database.get('sslrootcert') == 'system' and system_bundle.is_file():
+                database['sslrootcert'] = str(system_bundle)
+                self.database_url = make_conninfo(**database)
             if self.chain_mode != 'live' or self.chain_id != 11155111 or not re.fullmatch(r'0x[0-9a-fA-F]{40}', self.chain_contract_address) or int(self.chain_contract_address,16) == 0:
                 raise ValueError('Production requires the deployed Sepolia contract with CHAIN_MODE=live')
             if self.otp_test_recipient_email:
