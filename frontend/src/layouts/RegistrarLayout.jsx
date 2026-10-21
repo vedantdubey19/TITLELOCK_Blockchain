@@ -13,7 +13,6 @@ import {
   UserCheck, 
   Compass, 
   LogOut, 
-  RotateCcw,
   Scale,
   Award,
   ChevronDown,
@@ -30,7 +29,7 @@ import {
 } from 'lucide-react';
 
 export function RegistrarLayout() {
-  const { currentUser, authLoading, logout, resetDemoState, toast } = useAuth();
+  const { currentUser, authLoading, logout, toast } = useAuth();
   const navigate = useNavigate();
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -228,17 +227,6 @@ export function RegistrarLayout() {
             
             {/* Theme Appearance Mode Toggle */}
             <ThemeToggle />
-
-            {/* Reset Demo State button */}
-            <button
-              type="button"
-              onClick={resetDemoState}
-              className="hidden lg:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-2xl text-xs font-semibold text-slate-600 dark:text-slate-300 bg-white/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors shadow-xs cursor-pointer"
-              title="Reset sample registry data to defaults"
-            >
-              <RotateCcw className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />
-              <span>Reset State</span>
-            </button>
 
           <button type="button" onClick={() => navigate('/registrar/notifications')} title="Sale notifications" className="p-2 rounded-xl border bg-white dark:bg-slate-800">
             <Bell className="w-4 h-4" />

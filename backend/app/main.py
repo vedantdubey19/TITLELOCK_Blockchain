@@ -13,6 +13,9 @@ import logging
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
+from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.httpsredirect import HTTPSRedirectMiddleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
 from psycopg import OperationalError
 from psycopg.errors import UndefinedTable
 
@@ -56,8 +59,29 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         lifespan=lifespan,
         title="TitleLock API",
         version="0.1.0",
-        description="AI-assisted, blockchain-backed land title verification and fraud prevention.",
+        description="Blockchain-backed land title verification and rule-based risk screening.",
+        docs_url=None if settings.app_env == 'production' else '/docs',
+        redoc_url=None if settings.app_env == 'production' else '/redoc',
+        openapi_url=None if settings.app_env == 'production' else '/openapi.json',
     )
+    app.add_middleware(CORSMiddleware, allow_origins=settings.frontend_origins, allow_credentials=True,
+                       allow_methods=['GET', 'POST', 'PATCH'], allow_headers=['Content-Type', 'Authorization'])
+    if settings.app_env == 'production':
+        app.add_middleware(HTTPSRedirectMiddleware)
+        app.add_middleware(TrustedHostMiddleware, allowed_hosts=settings.trusted_hosts, www_redirect=False)
+
+    @app.middleware('http')
+    async def response_security(request, call_next):
+        response = await call_next(request)
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'DENY'
+        response.headers['Referrer-Policy'] = 'no-referrer'
+        if request.url.path.startswith('/api/'):
+            response.headers['Cache-Control'] = 'no-store'
+        if settings.app_env == 'production' and request.url.scheme == 'https':
+            response.headers['Strict-Transport-Security'] = 'max-age=31536000'
+        return response
+
     app.state.settings = settings
     app.include_router(auth_router)
     app.include_router(parcels_router)

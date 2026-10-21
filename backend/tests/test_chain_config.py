@@ -38,3 +38,11 @@ def test_chain_id_from_environment(monkeypatch):
     monkeypatch.setenv('CHAIN_CONFIRMATIONS', '3')
     monkeypatch.setenv('CHAIN_RPC_URL', 'https://example.com')
     assert Settings(_env_file=None).chain_id == 11155111
+
+
+def test_deployed_sepolia_requires_a_verified_start_block():
+    values=dict(_env_file=None,chain_id=11155111,chain_confirmations=3,
+                chain_rpc_url='https://example.com',chain_contract_address='0x'+'12'*20)
+    with pytest.raises(ValidationError):
+        Settings(**values)
+    assert Settings(**values,chain_deployment_block=100).chain_deployment_block==100

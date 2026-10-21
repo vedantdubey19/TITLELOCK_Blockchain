@@ -2,9 +2,8 @@
 import argparse
 import secrets
 from pathlib import Path
-from pydantic import SecretStr
 import psycopg
-from dotenv import set_key
+from dotenv import set_key, dotenv_values
 from fastapi.testclient import TestClient
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -21,13 +20,30 @@ SCHEMA = 'titlelock_sepolia_demo'
 
 def setup():
     existing = Settings(_env_file=ENV)
+    if existing.app_env == 'production':
+        raise RuntimeError('Synthetic demo setup is disabled in production')
     if existing.database_url:
-        print('Sepolia database already configured; no records changed.')
-        return
-    params = conninfo_to_dict(get_settings().database_url)
-    params['dbname'] = 'titlelock_auth_test'
-    base = make_conninfo(**params)
-    scoped = make_conninfo(base, options=f'-c search_path={SCHEMA}')
+        params=conninfo_to_dict(existing.database_url)
+        if params.get('dbname')!='titlelock_auth_test' or params.get('options')!=f'-c search_path={SCHEMA}':
+            raise RuntimeError('Refusing to modify a database outside the isolated Sepolia test schema')
+        if dotenv_values(ENV).get('SEPOLIA_DEMO_SETUP_COMPLETE')=='true':
+            print('Sepolia demo already configured; no records changed.')
+            return
+        scoped=existing.database_url
+        base=make_conninfo(scoped,options='')
+    else:
+        params=conninfo_to_dict(get_settings().database_url)
+        params['dbname']='titlelock_auth_test'
+        base=make_conninfo(**params)
+        scoped=make_conninfo(base,options=f'-c search_path={SCHEMA}')
+    # Save stable secrets before any account is created so an interrupted setup resumes.
+    for key,value in {'DATABASE_URL':scoped,'SECRET_KEY':existing.secret_key or secrets.token_urlsafe(48),
+                      'SALE_TOKEN_SECRET':existing.sale_token_secret.get_secret_value() or secrets.token_urlsafe(48),
+                      'REGISTRAR_SIGNUP_CODE':existing.registrar_signup_code.get_secret_value() or secrets.token_urlsafe(32),
+                      'LOGIN_OTP_ENABLED':'false','FRONTEND_ORIGINS':'["http://localhost:5003","http://127.0.0.1:5003"]'}.items():
+        set_key(ENV,key,value)
+    ENV.chmod(0o600)
+    settings=Settings(_env_file=ENV)
     with psycopg.connect(base, autocommit=True) as conn:
         conn.execute(f'CREATE SCHEMA IF NOT EXISTS {SCHEMA}')
     with psycopg.connect(scoped, autocommit=True) as conn:
@@ -40,12 +56,16 @@ def setup():
             user_id uuid REFERENCES users(id),share_bps integer CHECK(share_bps>0 AND share_bps<=10000),active boolean NOT NULL);
             CREATE TABLE IF NOT EXISTS encumbrances(id uuid PRIMARY KEY DEFAULT gen_random_uuid(),parcel_id text REFERENCES parcels(ulpin),status text,details jsonb,created_at timestamptz DEFAULT now());
             CREATE TABLE IF NOT EXISTS disputes(LIKE encumbrances INCLUDING ALL);''')
-        for migration in sorted((ENV.parent / 'migrations').glob('*.sql')):
+        for migration in sorted((Path(__file__).parents[2] / 'migrations').glob('*.sql')):
             conn.execute(migration.read_text())
-    secret, code = secrets.token_urlsafe(48), secrets.token_urlsafe(32)
-    settings = existing.model_copy(update={'database_url':scoped, 'secret_key':secret,
-        'sale_token_secret':SecretStr(secrets.token_urlsafe(48)), 'registrar_signup_code':SecretStr(code),
-        'login_otp_enabled':False, 'frontend_origins':['http://localhost:5003','http://127.0.0.1:5003']})
+    repo=AuthRepository(scoped)
+    with repo.connect() as conn:
+        complete=conn.execute("SELECT EXISTS(SELECT 1 FROM parcels p JOIN ownerships o ON o.parcel_id=p.ulpin WHERE p.ulpin='DEMO-SEPOLIA-001' AND o.active) AND (SELECT count(*) FROM auth_accounts WHERE username IN ('vedant_sepolia','yash_sepolia','rahul_sepolia'))=3 AS complete").fetchone()['complete']
+    if complete:
+        set_key(ENV,'SEPOLIA_DEMO_SETUP_COMPLETE','true')
+        print('Existing Sepolia fixture preserved, including completed transfers.')
+        return
+    code=settings.registrar_signup_code.get_secret_value()
     client = TestClient(create_app(settings))
     ids = {}
     for name, display, role in [('vedant_sepolia','Vedant (Synthetic Seller)','CITIZEN'),
@@ -63,14 +83,12 @@ def setup():
             raise RuntimeError(f'Synthetic account setup failed: {response.status_code}')
         ids[name] = AuthRepository(scoped).find_user(name)['user_id']
     repo = AuthRepository(scoped)
-    review(repo,'rahul_sepolia','APPROVED','SYNTHETIC-SEPOLIA-TEST-ONLY',secret,'SYNTHETIC-SEPOLIA-OFFICER')
+    review(repo,'rahul_sepolia','APPROVED','SYNTHETIC-SEPOLIA-TEST-ONLY',settings.secret_key,'SYNTHETIC-SEPOLIA-OFFICER')
     with repo.connect() as conn:
         conn.execute('''INSERT INTO parcels(ulpin,current_owner_user_id,survey_number,area_sqm,registration_office,ownership_type,title_status,risk_status)
             VALUES ('DEMO-SEPOLIA-001',%s,'SYNTHETIC-SURVEY-001',100,'Synthetic test office','SOLE','VERIFIED','LOW')''',(ids['vedant_sepolia'],))
         conn.execute("INSERT INTO ownerships(parcel_id,user_id,share_bps,active) VALUES ('DEMO-SEPOLIA-001',%s,10000,true)",(ids['vedant_sepolia'],))
-    for key, value in {'DATABASE_URL':scoped,'SECRET_KEY':secret,'SALE_TOKEN_SECRET':settings.sale_token_secret.get_secret_value(),
-                       'REGISTRAR_SIGNUP_CODE':code,'LOGIN_OTP_ENABLED':'false','FRONTEND_ORIGINS':'["http://localhost:5003","http://127.0.0.1:5003"]'}.items():
-        set_key(ENV,key,value)
+    set_key(ENV,'SEPOLIA_DEMO_SETUP_COMPLETE','true')
     ENV.chmod(0o600)
     print('Created isolated synthetic accounts and DEMO-SEPOLIA-001. Main and Anvil records unchanged.')
 
@@ -84,6 +102,8 @@ def main():
         return
     import uvicorn
     settings = Settings(_env_file=ENV)
+    if settings.app_env == 'production':
+        raise RuntimeError('Synthetic demo server is disabled in production')
     if f'search_path={SCHEMA}' not in settings.database_url or settings.chain_id!=11155111:
         raise RuntimeError('Configure the isolated Sepolia schema before starting this demo')
     app = create_app(settings)

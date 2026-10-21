@@ -60,7 +60,12 @@ def owners(ulpin: str,response: Response,user=Depends(current_user),repository=D
     response.headers['Cache-Control']='no-store'
     with repository.connect() as conn:
         rows=conn.execute('''SELECT o.user_id AS registry_user_id,u.display_name,o.share_bps FROM ownerships o
-            JOIN users u ON u.id=o.user_id WHERE o.parcel_id=%s AND o.active ORDER BY o.user_id''',(ulpin,)).fetchall()
+            JOIN users u ON u.id=o.user_id WHERE o.parcel_id=%s AND o.active AND
+            (%s='REGISTRAR' OR EXISTS(SELECT 1 FROM ownerships own WHERE own.parcel_id=o.parcel_id AND own.active
+                AND (own.user_id=%s OR own.user_id IN (SELECT registry_user_id FROM account_identity_links WHERE account_user_id=%s)))
+            OR EXISTS(SELECT 1 FROM succession_cases c WHERE c.parcel_id=o.parcel_id AND
+                (c.applicant_user_id=%s OR EXISTS(SELECT 1 FROM jsonb_array_elements(c.heirs) h WHERE h->>'user_id'=%s))))
+            ORDER BY o.user_id''',(ulpin,user.role,user.id,user.id,user.id,user.id)).fetchall()
     if not rows:
         raise HTTPException(404,'Active property ownership unavailable')
     return rows

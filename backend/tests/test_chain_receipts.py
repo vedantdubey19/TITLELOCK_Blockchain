@@ -44,3 +44,47 @@ def test_event_provider_disagreement_fails_closed():
     with pytest.raises(HTTPException) as failure:
         chain.transfer_logs({})
     assert failure.value.status_code==503
+
+
+def test_event_cursor_resumes_bounded_scans_and_rechecks_reorgs():
+    from app.chain.service import _event_history
+    _event_history.cache_clear()
+    chain=Registry.__new__(Registry)
+    chain.address='0x'+'12'*20
+    chain.settings=SimpleNamespace(chain_id=31337,chain_rpc_url='primary',chain_logs_rpc_url='events',
+        chain_deployment_block=10,chain_log_block_range=5,chain_confirmations=3)
+    fork={'version':0}
+    block=lambda number:SimpleNamespace(hash=f"{fork['version']}:{number}".encode())
+    chain.w3=SimpleNamespace(eth=SimpleNamespace(block_number=75,get_block=block))
+    chain.logs_w3=SimpleNamespace(eth=SimpleNamespace(block_number=75,get_block=block))
+    reads=[]
+    def get_logs(**query):
+        reads.append((query['from_block'],query['to_block']))
+        return []
+    chain.logs_contract=SimpleNamespace(events=SimpleNamespace(OwnershipTransferred=lambda:SimpleNamespace(get_logs=get_logs)))
+    for _ in range(3):
+        with pytest.raises(HTTPException) as failure:
+            chain.transfer_logs({'parcelId':'parcel'})
+        assert failure.value.status_code==503
+    assert chain.transfer_logs({'parcelId':'parcel'})==[]
+    assert reads==[(n,min(n+4,73)) for n in range(10,74,5)]
+    previous=len(reads)
+    assert chain.transfer_logs({'parcelId':'parcel'})==[]
+    assert len(reads)==previous  # Confirmed ranges are not scanned again.
+    fork['version']=1
+    with pytest.raises(HTTPException):
+        chain.transfer_logs({'parcelId':'parcel'})
+    assert reads[previous:]==[(10,14),(15,19),(20,24),(25,29)]
+
+
+def test_event_head_outage_is_503_without_leaking_provider_details():
+    class Offline:
+        @property
+        def block_number(self):
+            raise ConnectionError('private-provider-credential')
+    chain=Registry.__new__(Registry)
+    chain.w3=SimpleNamespace(eth=Offline())
+    with pytest.raises(HTTPException) as failure:
+        chain.transfer_logs({})
+    assert failure.value.status_code==503
+    assert 'private-provider-credential' not in str(failure.value.detail)

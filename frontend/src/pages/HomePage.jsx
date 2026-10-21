@@ -347,7 +347,7 @@ export function HomePage() {
                 <div className="flex items-center gap-2.5 pr-4 border-r border-white/10">
                   <Database className="w-4 h-4 text-sky-400" />
                   <div>
-                    <span className="font-bold text-white block">{allParcels.length} Verified Deeds</span>
+                    <span className="font-bold text-white block">{allParcels.length} Loaded registry records</span>
                     <span className="text-[10px] text-slate-400">National Cadastre Database</span>
                   </div>
                 </div>
@@ -492,7 +492,7 @@ export function HomePage() {
                   <div className="p-2 rounded-lg bg-white/5 border border-white/10">
                     <span className="text-slate-400 block text-[10px]">Title Status</span>
                     <span className={`font-semibold ${selectedParcel.frozen ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {selectedParcel.titleStatus || 'VERIFIED'}
+                      {selectedParcel.titleStatus || 'Not recorded'}
                     </span>
                   </div>
                   <div className="p-2 rounded-lg bg-white/5 border border-white/10">

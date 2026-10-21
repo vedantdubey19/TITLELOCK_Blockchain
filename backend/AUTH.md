@@ -497,3 +497,94 @@ and an exact OwnershipTransferred event from this registry, matching the entire
 signed deal. A pending routed transaction is not accepted as execution proof; the
 worker independently reconciles confirmed registry events. Database ownership
 updates still require the configured confirmation count and matching prior state.
+
+
+Sepolia verification caches confirmed event ranges in bounded process memory,
+checks the cached checkpoint against the canonical chain on each request, and
+invalidates the cache after a reorg. A cold request scans at most four configured
+ranges, then returns 503 while later retries resume the verified cursor. Restarting
+the process rebuilds this cache; it is not trusted database state. Deployed Sepolia
+configuration requires a positive verified deployment block.
+
+The succession owner lookup is private to verified registrars, current owners
+(including approved identity links), and existing case participants. An initial
+heir applicant can obtain the deceased owner's registry reference from the
+registrar/evidence intake; arbitrary authenticated citizens cannot enumerate
+co-owner identities and shares through this endpoint.
+
+
+### Production configuration baseline
+
+`backend/.env.production.example` is a blank deployment template, not active credentials.
+Keep the frontend and `/api` behind the same HTTPS origin: existing browser requests use
+same-origin credentials and the session cookie is HttpOnly, Secure in production,
+SameSite=Strict, host-only, with path `/api`.
+
+Production startup rejects short/repeated/shared secrets, missing or wildcard hosts,
+non-HTTPS frontend origins, database administrator usernames, demo/test database names
+or search paths, and PostgreSQL connections without `sslmode=verify-full`. Configure
+the hosting provider's CA through `sslrootcert`; actual TLS connectivity and database
+role privileges still need verification on the chosen host. Blank registrar signup
+code disables registrar signup. Generate each enabled secret independently using
+`python -c "import secrets; print(secrets.token_urlsafe(48))"` in a private terminal.
+Never put server secrets in `VITE_*` variables or Git. Preserve existing HMAC keys when
+moving an existing database: replacing them requires a planned identity/token migration.
+
+Production disables Swagger, ReDoc and OpenAPI endpoints, known demo logins and the
+synthetic demo CLI. Production uses only the deployed Sepolia test contract with at
+least three confirmations; this does not authorize mainnet transactions. Login OTP
+remains optional and off unless complete provider configuration is supplied.
+
+The API checks exact browser origins, hostnames and HTTPS, adds HSTS on HTTPS responses,
+and disables caching on API responses. CORS has explicit origins, methods and headers.
+Cookie-authenticated mutations require a browser Origin; non-browser Bearer clients
+can operate without one. Disallowed cross-site mutations are rejected.
+
+Hosting must terminate TLS and proxy `/api` to a private Uvicorn listener. For a proxy
+on the same machine, run from `backend/`:
+`uvicorn app.main:app --host 127.0.0.1 --port 5001 --proxy-headers --forwarded-allow-ips=127.0.0.1 --no-server-header`.
+Trust only the actual proxy IP if the topology differs; never trust all forwarded
+headers or expose the API's plain HTTP listener publicly. These changes do not install
+a certificate, deploy a website, validate a hosted database, or configure backups and
+monitoring; those remain deployment steps.
+
+### Database backup and offline recovery
+
+Requires PostgreSQL `pg_dump` and `pg_restore` compatible with the server version.
+From `backend/`, run:
+`python -m app.cli.database_backup backup backups/registry-2026-10-21.pgdump`.
+By default the source follows normal application configuration (environment over `.env`).
+Use `--env-file` to select an explicit source file; its `DATABASE_URL` takes priority
+over an exported URL, while production settings validation still runs. The command backs up the
+whole database, including every non-system schema, not only a DSN's search_path.
+
+Each custom-format archive has a private `.json` manifest containing its SHA-256,
+creation time and table row counts. An exported repeatable-read snapshot keeps counts
+and the archive consistent during concurrent writes. Existing files are never replaced;
+failed backups remove their own incomplete files. Files are mode 600 in a mode-700
+backup directory and archives are ignored by Git. Credentials use temporary private
+libpq service/password files, never process arguments or raw error output.
+
+These archives are **not encrypted by this command**. They contain personal data and
+password hashes. Store them on encrypted storage, copy them to protected off-site
+storage, and configure a host-managed schedule/retention policy before public hosting.
+The command is schedulable but does not create a scheduler or delete older backups.
+Checksums detect corruption, not a maliciously replaced archive and manifest: restore
+only archives from your trusted backup storage.
+
+Create a new empty database named `titlelock_restore_<unique_suffix>`. In a private,
+git-ignored `.env.restore` file (mode 600), set its explicit `DATABASE_URL`. Then run:
+`python -m app.cli.database_backup restore backups/registry-2026-10-21.pgdump --target-env-file .env.restore`.
+The target must be offline with no application traffic. Existing databases are never
+cleaned or overwritten. Restore uses one PostgreSQL transaction, verifies row counts,
+and then invalidates restored sessions and pending login/wallet challenges. A failed
+verification leaves a recovery database that must remain offline; recreate a fresh
+empty target before retrying.
+
+The archive preserves registry, sale, audit and blockchain-reference tables, but does
+not back up Ethereum, uploaded files, database roles, or server secrets. Recover HMAC
+keys separately from protected secret storage. Before directing the API to the restored
+database, verify migrations/privileges, application ownership records and canonical
+Sepolia state, and reconcile prepared/submitted deals. Never reset blockchain baselines
+to make an old database snapshot appear current. A successful SQL restore alone is not
+permission to reopen transfers.

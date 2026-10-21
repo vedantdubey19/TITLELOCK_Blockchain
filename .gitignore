@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.production.example
 
 # Python
 __pycache__/
@@ -32,3 +33,8 @@ blockchain/out/
 blockchain/cache/
 blockchain/state/
 /lib/
+
+# Private PostgreSQL archives and restore credentials
+backend/backups/
+*.pgdump
+*.pgdump.json

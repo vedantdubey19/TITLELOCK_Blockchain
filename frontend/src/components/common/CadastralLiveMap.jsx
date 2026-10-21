@@ -21,6 +21,8 @@ import {
   Satellite
 } from 'lucide-react';
 
+const escapeText = (value) => String(value ?? '').replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character]);
+
 // Free Tile providers (No API key required)
 export const FREE_MAP_PROVIDERS = {
   esriSatellite: {
@@ -100,13 +102,7 @@ export function CadastralLiveMap({
       // In properties.json coordinates are stored as [lng, lat]. Leaflet expects [lat, lng].
       return activeParcel.boundary.map(([lng, lat]) => [lat, lng]);
     }
-    // Default polygon for UP-0001 Greater Noida
-    return [
-      [28.46306, 77.51454],
-      [28.46306, 77.51502],
-      [28.46352, 77.51502],
-      [28.46352, 77.51454]
-    ];
+    return [];
   }, [activeParcel]);
 
   const centerLatLng = useMemo(() => {
@@ -296,10 +292,10 @@ export function CadastralLiveMap({
 
       activePolygon.bindTooltip(
         `<div style="font-family: inherit; font-size: 11px;">
-           <div style="font-weight: 700; color: #0284c7;">${activeParcel?.id || 'UP-0001'}</div>
-           <div>${activeParcel?.currentOwner || 'Certified Titleholder'}</div>
+           <div style="font-weight: 700; color: #0284c7;">${escapeText(activeParcel?.id || 'No property selected')}</div>
+           <div>${escapeText(activeParcel?.currentOwner || 'Owner not recorded')}</div>
            <div style="color: #64748b; font-size: 10px;">
-             ${activeParcel?.areaSqm ? activeParcel.areaSqm.toLocaleString() : '2,390'} m² • <span style="font-weight:600; color:${activeColors.stroke}">${activeParcel?.status || 'VERIFIED'}</span>
+             ${escapeText(activeParcel?.areaSqm?.toLocaleString() ?? 'Area not recorded')} m² • <span style="font-weight:600; color:${activeColors.stroke}">${escapeText(activeParcel?.status || 'Status not recorded')}</span>
            </div>
          </div>`,
         { permanent: false, direction: 'top', className: 'cadastre-tooltip' }
@@ -366,10 +362,10 @@ export function CadastralLiveMap({
 
         poly.bindTooltip(
           `<div style="font-family: inherit; font-size: 11px;">
-             <div style="font-weight: 700; color: #0284c7;">${p.id}</div>
-             <div>${p.currentOwner || 'Registered Titleholder'}</div>
+             <div style="font-weight: 700; color: #0284c7;">${escapeText(p.id)}</div>
+             <div>${escapeText(p.currentOwner || 'Owner not recorded')}</div>
              <div style="color: #64748b; font-size: 10px;">
-               ${p.areaSqm?.toLocaleString()} m² • <span style="font-weight:600; color:${pColors.stroke}">${p.titleStatus || p.status || 'VERIFIED'}</span>
+               ${escapeText(p.areaSqm?.toLocaleString() ?? 'Area not recorded')} m² • <span style="font-weight:600; color:${pColors.stroke}">${escapeText(p.titleStatus || p.status || 'Status not recorded')}</span>
              </div>
            </div>`,
           { permanent: false, direction: 'center', className: 'cadastre-tooltip' }
@@ -766,8 +762,8 @@ export function CadastralLiveMap({
         </>
       ) : null}
 
-      {/* BOTTOM LEFT PARCEL PILL (Matches user reference screenshot: • UP-0001 (2,390 m²)) */}
-      {showParcelPill && (
+      {/* Active registry parcel summary */}
+      {showParcelPill && activeParcel && (
         <div className="absolute bottom-4 left-4 z-20 flex items-center gap-2">
           <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-black/85 backdrop-blur-md border border-white/20 text-white text-xs font-medium shadow-xl">
             <span className={`w-2.5 h-2.5 rounded-full animate-pulse ${
@@ -778,11 +774,11 @@ export function CadastralLiveMap({
               'bg-emerald-400'
             }`} />
             <span className="font-mono font-bold tracking-tight">
-              {activeParcel?.id || 'UP-0001-CLEAN'}
+              {activeParcel?.id || 'No property selected'}
             </span>
-            <span className="text-slate-300 font-normal">
-              ({activeParcel?.areaSqm ? activeParcel.areaSqm.toLocaleString() : '2,390'} m²)
-            </span>
+            {activeParcel.areaSqm != null && <span className="text-slate-300 font-normal">
+              ({activeParcel.areaSqm.toLocaleString()} m²)
+            </span>}
             <span className={`text-[9px] font-bold px-1.5 py-0.2 rounded ml-1 ${
               Boolean(activeParcel?.frozen) || activeParcel?.statusVariant === 'danger' ? 'bg-rose-500/30 text-rose-300' :
               activeParcel?.titleStatus === 'DISPUTED' ? 'bg-orange-500/30 text-orange-300' :
@@ -790,7 +786,7 @@ export function CadastralLiveMap({
               activeParcel?.titleStatus === 'REVIEW' || activeParcel?.statusVariant === 'warning' ? 'bg-amber-500/30 text-amber-300' :
               'bg-emerald-500/30 text-emerald-300'
             }`}>
-              {activeParcel?.status || 'VERIFIED'}
+              {activeParcel?.status || 'Status not recorded'}
             </span>
           </div>
         </div>
@@ -826,7 +822,7 @@ export function CadastralLiveMap({
             onClick={() => {
               setSelectedTool('edit');
               setIsMeasuring(prev => !prev);
-              setMeasurementNotes(isMeasuring ? null : `Perimeter: ~${Math.round(Math.sqrt(activeParcel?.areaSqm || 2390) * 4)}m • Area: ${activeParcel?.areaSqm || 2390} m²`);
+              setMeasurementNotes(isMeasuring ? null : activeParcel?.areaSqm != null ? `Recorded area: ${activeParcel.areaSqm} m²` : 'No registered area is available.');
             }}
             className={`p-1 rounded-full transition-colors cursor-pointer ${isMeasuring ? 'text-emerald-400 scale-110' : 'text-slate-300 hover:text-white'}`}
             title="Measure parcel boundary"
@@ -838,7 +834,7 @@ export function CadastralLiveMap({
             type="button"
             onClick={() => {
               setSelectedTool('message');
-              setMeasurementNotes(prev => prev ? null : `Sub-Registrar: ${activeParcel?.registrationOffice || 'Greater Noida'} • Survey: ${activeParcel?.surveyNumber || 'SN-712-B'} • Distance: ${formatDistance(distanceFromUser)}`);
+              setMeasurementNotes(prev => prev ? null : `Sub-Registrar: ${activeParcel?.registrationOffice || 'Not recorded'} • Survey: ${activeParcel?.surveyNumber || 'Not recorded'} • Distance: ${formatDistance(distanceFromUser)}`);
             }}
             className={`p-1 rounded-full transition-colors cursor-pointer ${selectedTool === 'message' && measurementNotes ? 'text-emerald-400 scale-110' : 'text-slate-300 hover:text-white'}`}
             title="View cadastre survey notes and distance"

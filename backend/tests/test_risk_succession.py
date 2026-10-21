@@ -171,3 +171,15 @@ def test_only_inactive_registrar_assignments_can_be_taken_over(sales):
     assert api('otherregistrar','POST',f'/api/succession/{case}/review',decision).status_code==200
     actions=[e['action'] for e in api('buyer','GET',f'/api/succession/{case}/events').json()]
     assert actions==['REJECTED','REASSIGNED','IN_REVIEW','SUBMITTED']
+
+
+def test_succession_owner_lookup_is_private_to_participants(sales):
+    repo,accounts,_,_=sales;api=api_for(repo,accounts)
+    path='/api/succession/properties/LAND-1/owners'
+    assert api('buyer','GET',path).status_code==404
+    for name in ('owner','coowner','registrar'):
+        result=api(name,'GET',path)
+        assert result.status_code==200 and len(result.json())==2
+        assert result.headers['cache-control']=='no-store'
+    assert api('buyer','POST','/api/succession',claim(accounts)).status_code==201
+    assert api('buyer','GET',path).status_code==200

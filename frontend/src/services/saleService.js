@@ -2,14 +2,17 @@ export async function saleApi(path = '', data) {
   return activityApi(`/api/sales${path}`, data);
 }
 
-export async function activityApi(path, data) {
+export async function activityApi(path, data, method) {
   const response = await fetch(path, {
-    method: data === undefined ? 'GET' : 'POST', credentials: 'same-origin',
+    method: method || (data === undefined ? 'GET' : 'POST'), credentials: 'same-origin',
     headers: data === undefined ? {} : { 'Content-Type': 'application/json' },
     body: data === undefined ? undefined : JSON.stringify(data),
   });
   const body = await response.json().catch(() => ({ detail: 'Server unavailable. Please try again.' }));
-  if (!response.ok) throw new Error(typeof body.detail === 'string' ? body.detail : 'Please check the request fields');
+  if (!response.ok) {
+    const detail = Array.isArray(body.detail) ? body.detail.map((item) => `${item.loc.at(-1)}: ${item.msg}`).join('. ') : body.detail?.message || body.detail;
+    throw new Error(typeof detail === 'string' ? detail : 'Please check the request fields');
+  }
   return body;
 }
 

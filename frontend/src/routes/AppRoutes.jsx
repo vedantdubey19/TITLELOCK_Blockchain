@@ -14,8 +14,6 @@ import CitizenNomineesPage from '../pages/CitizenNomineesPage';
 import CitizenTokensPage from '../pages/CitizenTokensPage';
 import CitizenRecoveryPage from '../pages/CitizenRecoveryPage';
 import CitizenNotificationsPage from '../pages/CitizenNotificationsPage';
-import CitizenTransfersPage from '../pages/CitizenTransfersPage';
-import CitizenDeedsPage from '../pages/CitizenDeedsPage';
 import CitizenProfilePage from '../pages/CitizenProfilePage';
 import CitizenSettingsPage from '../pages/CitizenSettingsPage';
 import HomePage from '../pages/HomePage';

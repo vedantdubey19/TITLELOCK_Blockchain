@@ -15,10 +15,20 @@ from .identity import officer_fingerprint, officer_suffix
 from psycopg.types.json import Jsonb
 
 def check_origin(request: Request):
+    if request.method in ('GET', 'HEAD', 'OPTIONS'):
+        return
+    settings = request.app.state.settings
     origin = request.headers.get('origin')
-    allowed = request.app.state.settings.frontend_origins + [str(request.base_url).rstrip('/')]
-    if request.method != 'GET' and origin and origin not in allowed:
+    allowed = settings.frontend_origins
+    if settings.app_env != 'production':
+        allowed = allowed + [str(request.base_url).rstrip('/')]
+    if origin and origin not in allowed:
         raise HTTPException(403, 'Untrusted request origin')
+    if settings.app_env == 'production' and (
+        request.headers.get('sec-fetch-site') == 'cross-site' or
+        (request.cookies.get(COOKIE_NAME) and not origin and not request.headers.get('authorization'))
+    ):
+        raise HTTPException(403, 'Trusted browser origin required')
 
 
 router = APIRouter(prefix='/api/auth', tags=['auth'], dependencies=[Depends(check_origin)],
@@ -26,6 +36,12 @@ router = APIRouter(prefix='/api/auth', tags=['auth'], dependencies=[Depends(chec
                               403: {'description': 'Access denied'}})
 bearer = HTTPBearer(auto_error=False)
 COOKIE_NAME = 'titlelock_session'
+DEMO_USERNAMES = {'property_demo', 'registrar_demo', 'vedant_sepolia', 'yash_sepolia', 'rahul_sepolia'}
+
+
+def production_demo(request, account):
+    return request.app.state.settings.app_env == 'production' and account['username'].lower() in DEMO_USERNAMES
+
 passwords = PasswordHash.recommended()
 dummy_hash = passwords.hash(secrets.token_urlsafe(32))
 
@@ -64,6 +80,8 @@ def public_user(account):
 
 
 def issue_session(account, request, response, repository, mfa_verified=False):
+    if production_demo(request, account):
+        raise HTTPException(403,'Demonstration accounts are disabled in production')
     if account['role']=='REGISTRAR' and not account.get('officer_verified_at'):
         raise HTTPException(403,'Registrar identity approval is required')
     token = secrets.token_urlsafe(32)
@@ -98,7 +116,7 @@ def current_user(
     repository=Depends(get_repository),
 ):
     account = repository.session_user(token_hash(token)) if token else None
-    if not account or account['status'] != 'ACTIVE' or (request.app.state.settings.login_otp_enabled and not account.get('mfa_verified')):
+    if not account or production_demo(request, account) or account['status'] != 'ACTIVE' or (request.app.state.settings.login_otp_enabled and not account.get('mfa_verified')):
         raise HTTPException(401, 'Invalid or expired session', headers={'WWW-Authenticate': 'Bearer'})
     if account['role'] == 'REGISTRAR' and not account.get('officer_verified_at'):
         raise HTTPException(403, 'Registrar identity approval is required')
@@ -117,6 +135,8 @@ def require_role(*roles):
 def signup(data: Signup, request: Request, response: Response, repository=Depends(get_repository)):
     response.headers['Cache-Control'] = 'no-store'
     check_attempts(request, repository)
+    if production_demo(request, {'username': data.username}):
+        raise HTTPException(403, 'Reserved demonstration username')
     if data.role == 'REGISTRAR':
         expected = request.app.state.settings.registrar_signup_code.get_secret_value()
         provided = data.registrarCode.get_secret_value()
@@ -147,7 +167,7 @@ def login(data: Login, request: Request, response: Response, repository=Depends(
     check_attempts(request, repository, data.identifier)
     account = repository.find_user(data.identifier)
     valid = passwords.verify(data.password.get_secret_value(), account['password_hash'] if account else dummy_hash)
-    if not account or not valid or account['status'] != 'ACTIVE':
+    if not account or not valid or production_demo(request, account) or account['status'] != 'ACTIVE':
         raise HTTPException(401, 'Invalid credentials', headers={'WWW-Authenticate': 'Bearer'})
     if account['role'] == 'REGISTRAR' and not account.get('officer_verified_at'):
         raise HTTPException(403, 'Registrar identity approval is required')
