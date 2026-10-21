@@ -214,23 +214,13 @@ def run_migrations(database_url: str) -> None:
                 except Exception as exc:
                     logger.warning("Migration %s notice: %s", migration.name, exc)
 
-        logger.info("Database schema applied. Checking property seed...")
-        seed_properties(conn)
+        logger.info("Database schema applied.")
+    seed_properties(database_url)
 
 
-def seed_properties(conn) -> None:
-    try:
-        row = conn.execute("SELECT count(*) FROM parcels").fetchone()
-        if row and row[0] >= 100:
-            logger.info("Parcels already populated (%s records), checking geometries...", row[0])
-            geom_row = conn.execute("SELECT count(*) FROM parcel_map_geometry").fetchone()
-            if geom_row and geom_row[0] >= 100:
-                logger.info("Geometries already populated (%s records), skipping seed", geom_row[0])
-                return
-    except Exception as exc:
-        logger.warning("Could not check parcels count: %s", exc)
+def seed_properties(database_url: str) -> None:
+    if not database_url:
         return
-
     seed_file = Path(__file__).resolve().parent / "seed_properties.json"
     if not seed_file.is_file():
         seed_file = Path(__file__).resolve().parents[2] / "Database" / "properties.json"
@@ -243,51 +233,64 @@ def seed_properties(conn) -> None:
 
     try:
         properties = json.loads(seed_file.read_text())
-        logger.info("Seeding %s properties and cadastre boundaries into database...", len(properties))
-        for p in properties:
-            owner_name = p.get("current_owner", "").strip() or "Cadastre Owner"
-            owner_ref = "seed:owner:" + owner_name.lower().replace(" ", "_")
-            
-            user = conn.execute("SELECT id FROM users WHERE identity_reference = %s", (owner_ref,)).fetchone()
-            if not user:
-                user = conn.execute(
-                    "INSERT INTO users (identity_reference, display_name, account_status) VALUES (%s, %s, 'ACTIVE') RETURNING id",
-                    (owner_ref, owner_name),
-                ).fetchone()
-            user_id = user[0]
+        logger.info("Checking if properties need to be seeded into database...")
+        with psycopg.connect(database_url, autocommit=True) as conn:
+            row = conn.execute("SELECT count(*) FROM parcels").fetchone()
+            if row and row[0] >= 100:
+                logger.info("Parcels already populated (%s records), checking geometries...", row[0])
+                geom_row = conn.execute("SELECT count(*) FROM parcel_map_geometry").fetchone()
+                if geom_row and geom_row[0] >= 100:
+                    logger.info("Geometries already populated (%s records), skipping seed", geom_row[0])
+                    return
 
-            parcel = conn.execute("SELECT ulpin FROM parcels WHERE ulpin = %s", (p["ulpin"],)).fetchone()
-            if not parcel:
-                conn.execute(
-                    """INSERT INTO parcels (ulpin, current_owner_user_id, survey_number, area_sqm,
-                                           registration_office, ownership_type, title_status, risk_status,
-                                           frozen, last_registered_date, transfer_history)
-                       VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
-                    (
-                        p["ulpin"], user_id, p.get("survey_number"), p.get("area_sqm"),
-                        p.get("registration_office"), p.get("ownership_type", "SOLE"),
-                        p.get("title_status", "VERIFIED"), p.get("risk_status", "LOW_RISK"),
-                        bool(p.get("frozen", False)), p.get("last_registered_date"),
-                        Jsonb(p.get("transfer_history") or []),
-                    ),
-                )
+            logger.info("Seeding %s properties and cadastre boundaries into database...", len(properties))
+            for p in properties:
+                try:
+                    owner_name = p.get("current_owner", "").strip() or "Cadastre Owner"
+                    owner_ref = "seed:owner:" + owner_name.lower().replace(" ", "_")
 
-            if p.get("boundary"):
-                geom = conn.execute("SELECT parcel_id FROM parcel_map_geometry WHERE parcel_id = %s", (p["ulpin"],)).fetchone()
-                if not geom:
-                    conn.execute(
-                        """INSERT INTO parcel_map_geometry (parcel_id, boundary, source_reference)
-                           VALUES (%s, %s, %s)""",
-                        (p["ulpin"], Jsonb(p["boundary"]), "cadastre-survey-2026"),
-                    )
+                    user = conn.execute("SELECT id FROM users WHERE identity_reference = %s", (owner_ref,)).fetchone()
+                    if not user:
+                        user = conn.execute(
+                            "INSERT INTO users (identity_reference, display_name, account_status) VALUES (%s, %s, 'ACTIVE') RETURNING id",
+                            (owner_ref, owner_name),
+                        ).fetchone()
+                    user_id = user[0]
 
-            ownership = conn.execute("SELECT 1 FROM ownerships WHERE parcel_id = %s AND user_id = %s", (p["ulpin"], user_id)).fetchone()
-            if not ownership:
-                conn.execute(
-                    """INSERT INTO ownerships (parcel_id, user_id, share_bps, active)
-                       VALUES (%s, %s, 10000, true)""",
-                    (p["ulpin"], user_id),
-                )
-        logger.info("Successfully seeded %s properties and cadastre boundaries.", len(properties))
+                    parcel = conn.execute("SELECT ulpin FROM parcels WHERE ulpin = %s", (p["ulpin"],)).fetchone()
+                    if not parcel:
+                        conn.execute(
+                            """INSERT INTO parcels (ulpin, current_owner_user_id, survey_number, area_sqm,
+                                                   registration_office, ownership_type, title_status, risk_status,
+                                                   frozen, last_registered_date, transfer_history)
+                               VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)""",
+                            (
+                                p["ulpin"], user_id, p.get("survey_number"), p.get("area_sqm"),
+                                p.get("registration_office"), p.get("ownership_type", "SOLE"),
+                                p.get("title_status", "VERIFIED"), p.get("risk_status", "LOW_RISK"),
+                                bool(p.get("frozen", False)), p.get("last_registered_date"),
+                                Jsonb(p.get("transfer_history") or []),
+                            ),
+                        )
+
+                    if p.get("boundary"):
+                        geom = conn.execute("SELECT parcel_id FROM parcel_map_geometry WHERE parcel_id = %s", (p["ulpin"],)).fetchone()
+                        if not geom:
+                            conn.execute(
+                                """INSERT INTO parcel_map_geometry (parcel_id, boundary, source_reference)
+                                   VALUES (%s, %s, %s)""",
+                                (p["ulpin"], Jsonb(p["boundary"]), "cadastre-survey-2026"),
+                            )
+
+                    ownership = conn.execute("SELECT 1 FROM ownerships WHERE parcel_id = %s AND user_id = %s", (p["ulpin"], user_id)).fetchone()
+                    if not ownership:
+                        conn.execute(
+                            """INSERT INTO ownerships (parcel_id, user_id, share_bps, active)
+                               VALUES (%s, %s, 10000, true)""",
+                            (p["ulpin"], user_id),
+                        )
+                except Exception as item_err:
+                    logger.warning("Error seeding property %s: %s", p.get("ulpin"), item_err)
+            logger.info("Completed property seed check.")
     except Exception as exc:
-        logger.exception("Error while seeding properties: %s", exc)
+        logger.exception("Error in seed_properties: %s", exc)
