@@ -44,6 +44,8 @@ class Settings(BaseSettings):
     chain_log_block_range: int = Field(default=10000, ge=1, le=50000)
     chain_deployment_block: int = Field(default=0, ge=0)
     chain_rpc_url: str = Field(default="http://127.0.0.1:8545", repr=False)
+    # Server-operated Sepolia test wallet. Never expose this key to the frontend or database.
+    chain_service_private_key: SecretStr = SecretStr('')
     frontend_dist: str = ''
 
     @model_validator(mode="after")

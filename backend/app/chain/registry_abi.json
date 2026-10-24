@@ -612,5 +612,38 @@
         "internalType": "string"
       }
     ]
+  },
+  {
+    "type": "function",
+    "name": "recordTransfer",
+    "inputs": [
+      {
+        "name": "dealId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "parcelId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "previousHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "documentHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   }
 ]

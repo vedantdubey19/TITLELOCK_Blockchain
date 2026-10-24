@@ -100,6 +100,25 @@ class Registry:
         except Exception:
             raise HTTPException(503,'Unable to read the blockchain') from None
 
+    def submit_receipt(self, deal_id, parcel_id, previous_hash, new_hash, document_hash):
+        """Submit a hash-only receipt from the protected TitleLock service wallet."""
+        key=self.settings.chain_service_private_key.get_secret_value()
+        if not key:
+            raise HTTPException(503,'Blockchain service wallet is not configured')
+        try:
+            operator=Account.from_key(key)
+            if not self.contract.functions.hasRole(self.contract.functions.REGISTRAR_ROLE().call(),operator.address).call():
+                raise HTTPException(503,'Blockchain service wallet is not authorized')
+            tx=self.contract.functions.recordTransfer(deal_id,parcel_id,previous_hash,new_hash,document_hash).build_transaction({
+                'from':operator.address,'nonce':self.w3.eth.get_transaction_count(operator.address),'chainId':self.settings.chain_id,
+            })
+            signed=operator.sign_transaction(tx)
+            return Web3.to_hex(self.w3.eth.send_raw_transaction(signed.raw_transaction))
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(503,'Blockchain receipt submission failed') from None
+
     def check(self, conn, parcel_id):
         digest, wallets = self.state(parcel_id)
         if digest == '0x'+'00'*32:
