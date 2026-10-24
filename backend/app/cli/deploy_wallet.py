@@ -19,6 +19,8 @@ def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--admin',help='Reviewed administrator address for a new deployment')
     parser.add_argument('--transactions',help='JSON file of reviewed unsigned Sepolia transactions')
+    parser.add_argument('--bytecode-file',help='Compiled creation bytecode for a reviewed replacement deployment')
+    parser.add_argument('--replace',action='store_true',help='Allow a new deployment when an older Sepolia record exists')
     args=parser.parse_args()
     if args.transactions:
         transactions=json.loads(Path(args.transactions).read_text())
@@ -27,11 +29,18 @@ def main():
                 parser.error('Only Sepolia transactions are supported')
         page=Path(__file__).with_name('wallet_transactions.html').read_text().replace('__TRANSACTIONS__',json.dumps(transactions).replace('<','\\u003c'))
     else:
-        if (Path(__file__).parents[3]/'blockchain/deployments/sepolia.json').exists():
-            parser.error('Sepolia is already deployed; use the existing contract')
+        if (Path(__file__).parents[3]/'blockchain/deployments/sepolia.json').exists() and not args.replace:
+            parser.error('Sepolia is already deployed; pass --replace only for a reviewed contract upgrade')
         if not args.admin or not Web3.is_address(args.admin):
             parser.error('New deployment requires a valid --admin wallet address')
-        page = Path(__file__).with_name('deploy_wallet.html').read_text().replace('__BYTECODE__', json.dumps(deployment_bytecode())).replace('__ADMIN__',json.dumps(Web3.to_checksum_address(args.admin)))
+        if args.bytecode_file:
+            bytecode=Path(args.bytecode_file).read_text().strip()
+            if not bytecode or any(character not in '0123456789abcdefABCDEF' for character in bytecode.removeprefix('0x')):
+                parser.error('Bytecode file is not hexadecimal')
+            bytecode='0x'+bytecode.removeprefix('0x')
+        else:
+            bytecode=deployment_bytecode()
+        page = Path(__file__).with_name('deploy_wallet.html').read_text().replace('__BYTECODE__', json.dumps(bytecode)).replace('__ADMIN__',json.dumps(Web3.to_checksum_address(args.admin)))
     class Handler(BaseHTTPRequestHandler):
         def do_GET(self):
             if self.headers.get('Host') != '127.0.0.1:8766' or self.path != '/':
