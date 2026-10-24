@@ -128,13 +128,10 @@ class Registry:
             raise HTTPException(409,'Database and blockchain ownership mismatch; transfers blocked')
         if not self.history_matches(conn,parcel_id):
             raise HTTPException(409,'Database transfer history differs from the blockchain; transfers blocked')
-        expected = [linked_wallet(conn,owner[0],self.settings).lower() for owner in state['owners']]
-        if expected != [address.lower() for address in wallets]:
-            raise HTTPException(409,'Ownership wallet mapping differs from the blockchain')
         return state
 
     def history_matches(self, conn, parcel_id, ignore_deal=None):
-        logs=self.transfer_logs({'parcelId':hexhash(parcel_id)})
+        logs=self.receipt_logs({'parcelId':hexhash(parcel_id)})
         rows=conn.execute('SELECT s.id,s.document_hash,s.buyer_user_id,s.completed_at,c.old_state,c.new_state,c.tx_hash FROM sale_requests s JOIN sale_chain_payloads c ON c.sale_id=s.id WHERE s.parcel_id=%s', (parcel_id,)).fetchall()
         known={hexhash(str(row['id'])):row for row in rows}
         parcel=conn.execute('SELECT transfer_history,last_registered_date FROM parcels WHERE ulpin=%s',(parcel_id,)).fetchone()
@@ -161,7 +158,7 @@ class Registry:
                 return False
         return True
 
-    def transfer_logs(self, filters):
+    def receipt_logs(self, filters):
         try:
             head=self.w3.eth.block_number
             if self.logs_w3.eth.block_number<head:
@@ -186,7 +183,7 @@ class Registry:
                     checkpoint=self.w3.eth.get_block(end).hash
                     additions=[]
                     for block in range(start,end+1,self.settings.chain_log_block_range):
-                        additions.extend(self.logs_contract.events.OwnershipTransferred().get_logs(
+                        additions.extend(self.logs_contract.events.TransferRecorded().get_logs(
                             from_block=block,to_block=min(end,block+self.settings.chain_log_block_range-1),argument_filters=filters))
                     if self.w3.eth.get_block(end).hash!=checkpoint or self.logs_w3.eth.get_block(end).hash!=checkpoint:
                         raise HTTPException(503,'Chain changed during history verification; retry')
