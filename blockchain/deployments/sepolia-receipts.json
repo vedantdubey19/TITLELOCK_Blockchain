@@ -1,0 +1,13 @@
+{
+  "chain_id": 11155111,
+  "contract": "TitleLockRegistry",
+  "address": "0xA08dB330AD2455edcA09bA6E34E58003b0A9D989",
+  "transaction_hash": "0xba695b8770e4848ada4311b1c5cfd21950dd1fe1b35cdae5d7fa9c2d550e6abb",
+  "deployment_block": 11985609,
+  "admin": "0xa32720531Ee306E8cf5A13A957724C2377380347",
+  "compiler": "solc 0.8.37",
+  "source_sha256": "106d5ce2e8ba62a3a79b16ff8448c348fce0d01d3735f111b1c42338256307e2",
+  "bytecode_sha256": "5322466d9576f26a5c714716cc0c1512bf01e14e8dfb70a3104f8d92e2982243",
+  "required_confirmations": 3,
+  "purpose": "Server-signed hash-only transfer receipts"
+}
