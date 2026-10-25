@@ -257,6 +257,18 @@ BASE_SCHEMA_TABLES = [
         evidence_reference text NOT NULL,
         created_at timestamptz NOT NULL DEFAULT now()
     )""",
+    """CREATE TABLE IF NOT EXISTS chain_baseline_revisions (
+        id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+        parcel_id text NOT NULL,
+        chain_id bigint NOT NULL,
+        contract_address text NOT NULL,
+        state_hash text NOT NULL,
+        tx_hash text NOT NULL,
+        evidence_reference text NOT NULL,
+        replaced_at timestamptz NOT NULL DEFAULT now(),
+        replacement_contract_address text NOT NULL,
+        replacement_tx_hash text NOT NULL
+    )""",
     """CREATE TABLE IF NOT EXISTS account_review_events (
         id bigint GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
         account_user_id uuid NOT NULL,

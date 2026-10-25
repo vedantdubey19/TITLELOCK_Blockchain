@@ -6,6 +6,7 @@ from web3 import Web3
 from ..config import Settings
 from ..auth.repository import AuthRepository
 from ..chain.service import Registry, ownership_state, state_hash, hexhash
+from ..migrations import run_migrations
 
 
 def main():
@@ -21,10 +22,12 @@ def main():
     confirm.add_argument('transaction_hash')
     confirm.add_argument('--parcel',required=True)
     confirm.add_argument('--evidence',required=True)
+    confirm.add_argument('--replace-retired-baseline',action='store_true')
     args=parser.parse_args()
     settings=Settings(_env_file=args.env_file)
     if settings.chain_id!=11155111 or not settings.database_url:
         parser.error('A separate Sepolia database and deployed registry are required')
+    run_migrations(settings.database_url)
     chain=Registry(settings)
     repo=AuthRepository(settings.database_url)
     with repo.connect() as conn:
@@ -72,10 +75,18 @@ def main():
             parser.error('Confirmed ownership differs from the reviewed database')
         baseline=conn.execute('SELECT chain_id,contract_address,state_hash,tx_hash FROM chain_baselines WHERE parcel_id=%s',(args.parcel,)).fetchone()
         if baseline and (baseline['chain_id']!=settings.chain_id or baseline['contract_address'].lower()!=chain.address.lower() or baseline['state_hash']!=digest or baseline['tx_hash'].lower()!=args.transaction_hash.lower()):
-            parser.error('A different baseline is already recorded; manual review required')
-        conn.execute('''INSERT INTO chain_baselines(parcel_id,chain_id,contract_address,state_hash,tx_hash,evidence_reference)
-            VALUES (%s,%s,%s,%s,%s,%s) ON CONFLICT(parcel_id) DO NOTHING''',
-            (args.parcel,settings.chain_id,chain.address,digest,args.transaction_hash,args.evidence.strip()))
+            if not args.replace_retired_baseline or baseline['chain_id']!=settings.chain_id or baseline['contract_address'].lower()==chain.address.lower():
+                parser.error('A different baseline is already recorded; manual review required')
+            conn.execute('''INSERT INTO chain_baseline_revisions
+                (parcel_id,chain_id,contract_address,state_hash,tx_hash,evidence_reference,replacement_contract_address,replacement_tx_hash)
+                SELECT parcel_id,chain_id,contract_address,state_hash,tx_hash,evidence_reference,%s,%s
+                FROM chain_baselines WHERE parcel_id=%s''',(chain.address,args.transaction_hash,args.parcel))
+            conn.execute('''UPDATE chain_baselines SET chain_id=%s,contract_address=%s,state_hash=%s,tx_hash=%s,evidence_reference=%s,created_at=now()
+                WHERE parcel_id=%s''',(settings.chain_id,chain.address,digest,args.transaction_hash,args.evidence.strip(),args.parcel))
+        elif not baseline:
+            conn.execute('''INSERT INTO chain_baselines(parcel_id,chain_id,contract_address,state_hash,tx_hash,evidence_reference)
+                VALUES (%s,%s,%s,%s,%s,%s)''',
+                (args.parcel,settings.chain_id,chain.address,digest,args.transaction_hash,args.evidence.strip()))
     print('Confirmed initial anchor recorded:',args.parcel)
 
 
