@@ -111,9 +111,9 @@ def property_details(ulpin: str, response: Response, user=Depends(require_role('
                     ORDER BY o.id) FROM ownerships o JOIN users cu ON cu.id=o.user_id
                     WHERE o.parcel_id=p.ulpin AND o.active), '[]'::jsonb) AS owners,
                 COALESCE((SELECT jsonb_agg(jsonb_build_object('id',e.id,'status',e.status,'details',e.details)
-                    ORDER BY e.created_at,e.id) FROM encumbrances e WHERE e.parcel_id=p.ulpin), '[]'::jsonb) AS encumbrances,
+                    ORDER BY e.id) FROM encumbrances e WHERE e.parcel_id=p.ulpin), '[]'::jsonb) AS encumbrances,
                 COALESCE((SELECT jsonb_agg(jsonb_build_object('id',d.id,'status',d.status,'details',d.details)
-                    ORDER BY d.created_at,d.id) FROM disputes d WHERE d.parcel_id=p.ulpin), '[]'::jsonb) AS disputes
+                    ORDER BY d.id) FROM disputes d WHERE d.parcel_id=p.ulpin), '[]'::jsonb) AS disputes
             FROM parcels p LEFT JOIN users u ON u.id=p.current_owner_user_id
             WHERE p.ulpin=%s AND EXISTS (SELECT 1 FROM ownerships own WHERE own.parcel_id=p.ulpin AND own.active
                 AND (own.user_id=%s OR own.user_id IN
