@@ -1,11 +1,11 @@
-"""Prepare wallet-signed Sepolia admin transactions; record confirmed initial anchors."""
+"""Prepare administrator-signed Sepolia anchors; record confirmed initial anchors."""
 import argparse
 import json
 from pathlib import Path
 from web3 import Web3
 from ..config import Settings
 from ..auth.repository import AuthRepository
-from ..chain.service import Registry, linked_wallet, ownership_state, state_hash, hexhash
+from ..chain.service import Registry, ownership_state, state_hash, hexhash
 
 
 def main():
@@ -29,10 +29,8 @@ def main():
     repo=AuthRepository(settings.database_url)
     with repo.connect() as conn:
         conn.execute('SELECT ulpin FROM parcels WHERE ulpin=%s FOR UPDATE',(args.parcel,))
-        conn.execute('SELECT id FROM ownerships WHERE parcel_id=%s AND active FOR UPDATE',(args.parcel,))
         state=ownership_state(conn,args.parcel)
-        wallets=[linked_wallet(conn,owner[0],settings) for owner in state['owners']]
-        if not wallets or sum(owner[1] for owner in state['owners'])!=10000:
+        if not state['owners'] or sum(owner[1] for owner in state['owners'])!=10000:
             parser.error('Reviewed full ownership shares are required')
         digest=state_hash(state)
         if args.command=='prepare':
@@ -42,17 +40,15 @@ def main():
             registrar=conn.execute("SELECT a.user_id FROM auth_accounts a JOIN users u ON u.id=a.user_id WHERE a.username=%s AND a.role='REGISTRAR' AND a.officer_verified_at IS NOT NULL AND u.account_status='ACTIVE'",(args.registrar.strip().lower(),)).fetchone()
             if not registrar:
                 parser.error('Reviewed registrar required')
-            address=linked_wallet(conn,str(registrar['user_id']),settings)
-            role=chain.contract.functions.REGISTRAR_ROLE().call()
             transactions=[]
             def add(label,data):
                 transactions.append({'label':label,'transaction':{'from':admin,'to':chain.address,'chainId':hex(settings.chain_id),'value':'0x0','data':data}})
-            if not chain.contract.functions.hasRole(role,address).call():
-                add('Authorize reviewed test registrar '+args.registrar,chain.contract.encode_abi('grantRole',args=[role,address]))
             existing, owners=chain.state(args.parcel)
             if existing=='0x'+'00'*32:
-                add('Anchor reviewed synthetic property '+args.parcel,chain.contract.encode_abi('anchor',args=[hexhash(args.parcel),digest,wallets]))
-            elif existing!=digest or [w.lower() for w in wallets]!=[w.lower() for w in owners]:
+                # The contract retains an address array for legacy compatibility.  The
+                # administrator address is a technical placeholder, not an owner's wallet.
+                add('Anchor reviewed property '+args.parcel,chain.contract.encode_abi('anchor',args=[hexhash(args.parcel),digest,[admin]]))
+            elif existing!=digest:
                 parser.error('Existing anchor differs; refusing to overwrite it')
             Path(args.output).write_text(json.dumps(transactions,indent=2)+'\n')
             print('Prepared public unsigned transactions:',len(transactions))
@@ -71,8 +67,8 @@ def main():
             parser.error('Transaction lacks the exact registry anchor event from an authorized administrator')
         if chain.w3.eth.block_number-receipt.blockNumber+1<settings.chain_confirmations or chain.w3.eth.get_block(receipt.blockNumber).hash!=receipt.blockHash:
             parser.error('Anchor needs canonical confirmations')
-        existing,owners=chain.state(args.parcel)
-        if existing!=digest or [w.lower() for w in wallets]!=[w.lower() for w in owners]:
+        existing,_owners=chain.state(args.parcel)
+        if existing!=digest:
             parser.error('Confirmed ownership differs from the reviewed database')
         baseline=conn.execute('SELECT chain_id,contract_address,state_hash,tx_hash FROM chain_baselines WHERE parcel_id=%s',(args.parcel,)).fetchone()
         if baseline and (baseline['chain_id']!=settings.chain_id or baseline['contract_address'].lower()!=chain.address.lower() or baseline['state_hash']!=digest or baseline['tx_hash'].lower()!=args.transaction_hash.lower()):
