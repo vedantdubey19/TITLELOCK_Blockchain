@@ -1,5 +1,6 @@
 """Local EVM adapter and deterministic ownership commitments."""
 import json
+import logging
 from functools import lru_cache
 from threading import Lock
 from decimal import Decimal
@@ -10,6 +11,9 @@ from fastapi import HTTPException
 from eth_account import Account
 from eth_account.messages import encode_typed_data
 from web3 import Web3
+
+
+logger = logging.getLogger(__name__)
 
 
 TRANSFER_FIELDS = [
@@ -117,6 +121,7 @@ class Registry:
         except HTTPException:
             raise
         except Exception:
+            logger.exception("Blockchain receipt submission failed")
             raise HTTPException(503,'Blockchain receipt submission failed') from None
 
     def submit_anchor(self, parcel_id, digest):
@@ -136,6 +141,8 @@ class Registry:
         except HTTPException:
             raise
         except Exception:
+            # Provider details remain in protected server logs rather than the API.
+            logger.exception("Blockchain baseline submission failed")
             raise HTTPException(503,'Blockchain baseline submission failed') from None
 
     def check(self, conn, parcel_id):
