@@ -61,6 +61,13 @@ export function SaleRequestsPanel({ readOnly = false }) {
         <p>{lookup.ulpin} · Owner: {lookup.current_owner || 'Not recorded'} · {lookup.title_status}</p>
         <p>{lookup.for_sale ? 'All owners agreed to list for sale' : 'Not advertised for sale'} · Frozen: {lookup.frozen ? 'Yes' : 'No'}</p>
         <ChainVerification key={lookup.ulpin} ulpin={lookup.ulpin} />
+        {registrar && <button disabled={busy} className="border rounded-lg p-2" onClick={async () => {
+          setBusy(true); setError(''); setNotice('');
+          try {
+            const result = await activityApi(`/api/chain/properties/${encodeURIComponent(lookup.ulpin)}/anchor`, {});
+            setNotice(result.tx_hash ? `Baseline submitted: ${result.tx_hash}` : 'Property is already anchored.');
+          } catch (failure) { setError(failure.message); } finally { setBusy(false); }
+        }}>Anchor reviewed property on Sepolia</button>}
       </div>}
       {issued && <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl space-y-2">
         <p className="font-bold">Your {side} key · shown once</p>
