@@ -119,6 +119,25 @@ class Registry:
         except Exception:
             raise HTTPException(503,'Blockchain receipt submission failed') from None
 
+    def submit_anchor(self, parcel_id, digest):
+        """Submit a reviewed initial ownership commitment from the service admin."""
+        key=self.settings.chain_service_private_key.get_secret_value()
+        if not key:
+            raise HTTPException(503,'Blockchain service wallet is not configured')
+        try:
+            operator=Account.from_key(key)
+            if not self.contract.functions.hasRole(bytes(32),operator.address).call():
+                raise HTTPException(503,'Blockchain service wallet is not a registry administrator')
+            tx=self.contract.functions.anchor(hexhash(parcel_id),digest,[operator.address]).build_transaction({
+                'from':operator.address,'nonce':self.w3.eth.get_transaction_count(operator.address),'chainId':self.settings.chain_id,
+            })
+            signed=operator.sign_transaction(tx)
+            return Web3.to_hex(self.w3.eth.send_raw_transaction(signed.raw_transaction))
+        except HTTPException:
+            raise
+        except Exception:
+            raise HTTPException(503,'Blockchain baseline submission failed') from None
+
     def check(self, conn, parcel_id):
         digest, wallets = self.state(parcel_id)
         if digest == '0x'+'00'*32:

@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from psycopg.types.json import Jsonb
 from web3 import Web3
 
-from ..auth.routes import check_origin, current_user, get_repository
+from ..auth.routes import check_origin, current_user, get_repository, require_role
 from ..audit.sales import can_view, record_event
 from .service import Registry, DOMAIN_FIELDS, hexhash, linked_wallet, ownership_state, state_hash
 
@@ -101,6 +101,29 @@ def verify_property(ulpin: str,request: Request,response: Response,user=Depends(
             else:
                 status='MISMATCH'
     return {'status':status,'database_hash':state_hash(state),'blockchain_hash':digest,'chain_id':chain.settings.chain_id,'contract':chain.address}
+
+
+@router.post('/properties/{ulpin}/anchor', status_code=202)
+def anchor_property(ulpin: str, request: Request, response: Response,
+                    user=Depends(require_role('REGISTRAR')), repository=Depends(get_repository)):
+    """Anchor a reviewed property once; only the service wallet signs the test-chain receipt."""
+    response.headers['Cache-Control']='no-store'
+    chain=registry(request)
+    with repository.connect() as conn:
+        parcel=conn.execute('SELECT ulpin FROM parcels WHERE ulpin=%s FOR UPDATE',(ulpin,)).fetchone()
+        if not parcel:
+            raise HTTPException(404,'Property unavailable')
+        if conn.execute("SELECT 1 FROM sale_requests WHERE parcel_id=%s AND status='PENDING'",(ulpin,)).fetchone():
+            raise HTTPException(409,'Pending sale requests must be resolved before anchoring')
+        digest,_owners=chain.state(ulpin)
+        state=ownership_state(conn,ulpin)
+        expected=state_hash(state)
+        if digest!='0x'+'00'*32:
+            if digest!=expected:
+                raise HTTPException(409,'Blockchain ownership differs from the reviewed database')
+            return {'status':'ALREADY_ANCHORED','blockchain_hash':digest}
+        tx_hash=chain.submit_anchor(ulpin,expected)
+    return {'status':'SUBMITTED','tx_hash':tx_hash,'message':'TitleLock submitted the reviewed baseline; wait for confirmations before starting a sale.'}
 
 
 @router.get('/sales/{sale_id}/signing-data')
