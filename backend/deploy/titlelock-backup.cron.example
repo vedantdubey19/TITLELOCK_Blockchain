@@ -1,0 +1,4 @@
+# Install on the hosting machine as root or the dedicated application operator.
+# Create /run/secrets/titlelock_backup_passphrase with chmod 600 outside Git.
+# Retain encrypted archives in private, encrypted off-site object storage.
+17 2 * * * cd /srv/titlelock/backend && /srv/titlelock/backend/.venv/bin/python -m app.cli.database_backup encrypted-backup /srv/titlelock/backups/titlelock-$(date +\%Y\%m\%dT\%H\%M\%SZ).pgdump.enc --env-file /run/secrets/titlelock.env --encryption-passphrase-file /run/secrets/titlelock_backup_passphrase

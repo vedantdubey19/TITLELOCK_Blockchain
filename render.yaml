@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: titlelock-demo
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /api/readiness

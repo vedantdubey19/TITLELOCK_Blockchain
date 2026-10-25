@@ -3,6 +3,7 @@ import argparse
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import hashlib
+import hmac
 import json
 import os
 from pathlib import Path
@@ -19,6 +20,90 @@ from ..config import Settings
 def digest(path):
     with Path(path).open('rb') as stream:
         return hashlib.file_digest(stream, 'sha256').hexdigest()
+
+
+def private_secret(path):
+    path=Path(path)
+    if not path.is_file() or path.stat().st_mode & 0o077:
+        raise ValueError('Encryption passphrase file must exist and be chmod 600')
+    value=path.read_text().strip()
+    if len(value)<24:
+        raise ValueError('Encryption passphrase must contain at least 24 characters')
+    return value.encode()
+
+
+def encryption_key(secret, salt):
+    return hashlib.pbkdf2_hmac('sha256',secret,salt,600_000,dklen=32)
+
+
+def manifest_signature(metadata, secret):
+    unsigned={key:value for key,value in metadata.items() if key!='manifest_hmac_sha256'}
+    salt=bytes.fromhex(unsigned['salt'])
+    encoded=json.dumps(unsigned,sort_keys=True,separators=(',',':')).encode()
+    return hmac.new(encryption_key(secret,salt),encoded,hashlib.sha256).hexdigest()
+
+
+def run_openssl(arguments):
+    try:
+        result=subprocess.run(arguments,stdout=subprocess.DEVNULL,stderr=subprocess.PIPE,check=False)
+    except FileNotFoundError:
+        raise ValueError('Install OpenSSL for encrypted backups') from None
+    if result.returncode:
+        raise ValueError('Backup encryption or decryption failed; check archive integrity and the passphrase')
+
+
+def encrypt_archive(source, destination, secret):
+    """AES-256-CBC plus an independent HMAC; OpenSSL receives only a private file path."""
+    destination=Path(destination)
+    salt=os.urandom(16)
+    with tempfile.NamedTemporaryFile(prefix='titlelock-backup-key-',delete=False) as key_file:
+        key_path=Path(key_file.name)
+        os.chmod(key_path,0o600)
+        key_file.write(secret)
+    try:
+        with open(destination,'xb',opener=lambda path,flags: os.open(path,flags,0o600)):
+            pass
+        run_openssl(['openssl','enc','-aes-256-cbc','-md','sha256','-pbkdf2','-iter','600000','-salt',
+                     '-in',str(source),'-out',str(destination),'-pass',f'file:{key_path}'])
+        metadata={'version':2,'cipher':'aes-256-cbc-pbkdf2-hmac-sha256','salt':salt.hex(),
+                  'sha256':digest(source),'hmac_sha256':hmac.new(encryption_key(secret,salt),Path(destination).read_bytes(),hashlib.sha256).hexdigest()}
+        metadata['manifest_hmac_sha256']=manifest_signature(metadata,secret)
+        return metadata
+    except BaseException:
+        destination.unlink(missing_ok=True)
+        raise
+    finally:
+        key_path.unlink(missing_ok=True)
+
+
+def decrypt_archive(archive, destination, metadata, secret):
+    if metadata.get('version')!=2 or metadata.get('cipher')!='aes-256-cbc-pbkdf2-hmac-sha256':
+        raise ValueError('Encrypted backup manifest version does not match')
+    try:
+        salt=bytes.fromhex(metadata['salt'])
+    except (KeyError,ValueError,TypeError):
+        raise ValueError('Encrypted backup manifest is invalid') from None
+    if not hmac.compare_digest(manifest_signature(metadata,secret),metadata.get('manifest_hmac_sha256','')):
+        raise ValueError('Encrypted backup manifest integrity check failed; restore refused')
+    actual=hmac.new(encryption_key(secret,salt),Path(archive).read_bytes(),hashlib.sha256).hexdigest()
+    if not hmac.compare_digest(actual,metadata.get('hmac_sha256','')):
+        raise ValueError('Encrypted backup integrity check failed; restore refused')
+    with tempfile.NamedTemporaryFile(prefix='titlelock-backup-key-',delete=False) as key_file:
+        key_path=Path(key_file.name)
+        os.chmod(key_path,0o600)
+        key_file.write(secret)
+    try:
+        with open(destination,'xb',opener=lambda path,flags: os.open(path,flags,0o600)):
+            pass
+        run_openssl(['openssl','enc','-d','-aes-256-cbc','-md','sha256','-pbkdf2','-iter','600000',
+                     '-in',str(archive),'-out',str(destination),'-pass',f'file:{key_path}'])
+        if metadata.get('sha256')!=digest(destination):
+            raise ValueError('Encrypted backup plaintext checksum does not match')
+    except BaseException:
+        Path(destination).unlink(missing_ok=True)
+        raise
+    finally:
+        key_path.unlink(missing_ok=True)
 
 
 @contextmanager
@@ -96,6 +181,50 @@ def backup(url, destination):
         raise
 
 
+def encrypted_backup(url, destination, passphrase_file):
+    destination=Path(destination)
+    destination.parent.mkdir(mode=0o700,parents=True,exist_ok=True)
+    if destination.parent.stat().st_mode & 0o077:
+        raise ValueError('Backup directory must be private (chmod 700)')
+    manifest=destination.with_name(destination.name+'.json')
+    if destination.exists() or manifest.exists():
+        raise ValueError('Refusing to overwrite an existing backup')
+    if not passphrase_file:
+        raise ValueError('Encrypted backup requires --encryption-passphrase-file')
+    secret=private_secret(passphrase_file)
+    descriptor, raw_name=tempfile.mkstemp(prefix='titlelock-plain-',dir=destination.parent)
+    os.close(descriptor)
+    raw=Path(raw_name)
+    raw.unlink()
+    try:
+        metadata=backup(url,raw)
+        encrypted=encrypt_archive(raw,destination,secret)
+        encrypted['created_at']=metadata['created_at']
+        encrypted['tables']=metadata['tables']
+        encrypted['manifest_hmac_sha256']=manifest_signature(encrypted,secret)
+        with open(manifest,'x',opener=lambda path,flags: os.open(path,flags,0o600)) as stream:
+            json.dump(encrypted,stream); stream.flush(); os.fsync(stream.fileno())
+        return encrypted
+    except BaseException:
+        destination.unlink(missing_ok=True); manifest.unlink(missing_ok=True)
+        raise
+    finally:
+        raw.unlink(missing_ok=True)
+        raw.with_name(raw.name+'.json').unlink(missing_ok=True)
+
+
+def encrypted_restore(url, archive, passphrase_file):
+    archive=Path(archive)
+    metadata=json.loads(archive.with_name(archive.name+'.json').read_text())
+    secret=private_secret(passphrase_file)
+    with tempfile.TemporaryDirectory(prefix='titlelock-decrypt-') as directory:
+        raw=Path(directory)/'archive.pgdump'
+        decrypt_archive(archive,raw,metadata,secret)
+        raw_metadata={'version':1,'sha256':metadata['sha256'],'tables':metadata['tables']}
+        raw.with_name(raw.name+'.json').write_text(json.dumps(raw_metadata))
+        return restore(url,raw)
+
+
 def restore(url, archive):
     archive=Path(archive)
     metadata=json.loads(archive.with_name(archive.name+'.json').read_text())
@@ -143,15 +272,18 @@ def source_url(env_file=None):
 
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('action',choices=['backup','restore'])
+    parser.add_argument('action',choices=['backup','restore','encrypted-backup','encrypted-restore'])
     parser.add_argument('archive',type=Path)
     parser.add_argument('--env-file',type=Path,help='Explicit source file; otherwise use normal application configuration')
     parser.add_argument('--target-env-file',type=Path,help='Separate environment file containing the recovery DATABASE_URL')
+    parser.add_argument('--encryption-passphrase-file',type=Path,help='Private chmod-600 file containing the backup encryption passphrase')
     args=parser.parse_args()
     try:
-        if args.action=='backup':
+        if args.action in ('backup','encrypted-backup'):
             url=source_url(args.env_file)
-            metadata=backup(url,args.archive)
+            if args.action=='encrypted-backup' and not args.encryption_passphrase_file:
+                raise ValueError('Encrypted backup requires --encryption-passphrase-file')
+            metadata=(encrypted_backup(url,args.archive,args.encryption_passphrase_file) if args.action=='encrypted-backup' else backup(url,args.archive))
             print(f'Backup complete: {len(metadata["tables"])} tables. Keep the archive and its .json manifest together.')
         else:
             if not args.target_env_file or not args.target_env_file.is_file():
@@ -160,7 +292,12 @@ def main():
             url=dotenv_values(args.target_env_file).get('DATABASE_URL')
             if not url:
                 raise ValueError('Configure DATABASE_URL in the target environment file')
-            restore(url,args.archive)
+            if args.action=='encrypted-restore':
+                if not args.encryption_passphrase_file:
+                    raise ValueError('Encrypted restore requires --encryption-passphrase-file')
+                encrypted_restore(url,args.archive,args.encryption_passphrase_file)
+            else:
+                restore(url,args.archive)
             print('Restore verified; login sessions invalidated. Keep offline until chain reconciliation and application checks pass.')
     except (ValueError,OSError,psycopg.Error):
         # Never print connection strings, SQL rows, or raw provider errors.

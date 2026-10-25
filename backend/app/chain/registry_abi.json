@@ -457,6 +457,19 @@
   },
   {
     "type": "event",
+    "name": "TransferRecorded",
+    "inputs": [
+      {"name":"dealId","type":"bytes32","indexed":true,"internalType":"bytes32"},
+      {"name":"parcelId","type":"bytes32","indexed":true,"internalType":"bytes32"},
+      {"name":"previousHash","type":"bytes32","indexed":false,"internalType":"bytes32"},
+      {"name":"newHash","type":"bytes32","indexed":false,"internalType":"bytes32"},
+      {"name":"documentHash","type":"bytes32","indexed":false,"internalType":"bytes32"},
+      {"name":"operator","type":"address","indexed":true,"internalType":"address"}
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
     "name": "PropertyAnchored",
     "inputs": [
       {
@@ -612,5 +625,38 @@
         "internalType": "string"
       }
     ]
+  },
+  {
+    "type": "function",
+    "name": "recordTransfer",
+    "inputs": [
+      {
+        "name": "dealId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "parcelId",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "previousHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "newHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      },
+      {
+        "name": "documentHash",
+        "type": "bytes32",
+        "internalType": "bytes32"
+      }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
   }
 ]

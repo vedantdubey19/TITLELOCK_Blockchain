@@ -94,6 +94,49 @@ Login allows 10 attempts per normalized identifier per 15-minute window;
 signup/login share 100 attempts per client IP per window. IPs come from the
 server's client address: configure trusted proxy forwarding at deployment.
 
+## Monitoring and recovery
+
+`GET /api/health` is a liveness check. Configure the load balancer to poll
+`GET /api/readiness` instead: it returns 200 only when PostgreSQL and the
+configured blockchain are reachable, otherwise 503 with only dependency
+statuses (`ok`, `unavailable`, or `not-required`). It never returns URLs,
+credentials, keys, transaction payloads, or provider error text.
+
+Every response includes `X-Request-ID`. Unexpected server errors log only that
+ID, method, path, and error class; request bodies and secrets are excluded.
+Send alerts from the hosting provider when readiness stays non-200 for several
+minutes, and alert on its database/RPC provider availability separately.
+
+Pending prepared blockchain deals are reconciled on startup and every 30
+seconds. The database changes ownership only after an exact confirmed registry
+event, and row locks plus the contract replay guard make repeated reconciliation
+safe after restarts or RPC interruptions. A failed/unknown RPC response leaves
+the deal reserved; it never grants ownership. Back up PostgreSQL before upgrades
+with `python -m app.cli.database_backup backup ...`; restore into a separate
+recovery database first and reconcile it against the chain before serving it.
+
+For host automation, use `encrypted-backup` with a separate chmod-600
+passphrase file: `python -m app.cli.database_backup encrypted-backup
+backups/registry.pgdump.enc --encryption-passphrase-file /run/secrets/titlelock_backup_passphrase`.
+The archive is AES-256-CBC encrypted with PBKDF2 and authenticated with a
+separate derived HMAC before decryption. Restore only into a separate recovery
+database with `encrypted-restore ... --target-env-file ...
+--encryption-passphrase-file ...`. Copy the example schedules in
+`deploy/titlelock-backup.cron.example` and
+`deploy/titlelock-readiness.cron.example` into the host scheduler after
+replacing the URL and paths. Keep the encryption passphrase, database URL, and
+backup storage credentials outside Git and outside the same storage account as
+the archives.
+
+The included `backend/Dockerfile` runs FastAPI on port 8000, and the
+`frontend/Dockerfile` serves the compiled SPA on port 8080 and proxies `/api`
+to a `titlelock-api` service on the same private network. Put both behind the
+host's HTTPS reverse proxy, configure its exact trusted proxy address for
+Uvicorn, and inject the values from `.env.production.example` through the
+host's secret manager. Apply migrations and restore a tested PostgreSQL backup
+before routing traffic. Do not publish a container with development or Sepolia
+demo credentials.
+
 ## Integration boundaries
 
 Frontend signup, login, session restoration, and logout call these APIs

@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { 
   Home, 
   FileText, 
@@ -45,7 +45,7 @@ export function Sidebar({ mobileIsOpen = false, onClose = () => {} }) {
         <div>
           {/* Brand Header & Mobile Close Button */}
           <div className="flex items-center justify-between px-2 mb-8">
-            <div className="flex items-center gap-3">
+            <Link to="/" aria-label="TitleLock home" className="flex items-center gap-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-sky-500">
               <div className="w-10 h-10 rounded-2xl bg-white/90 dark:bg-[#1a1c20] backdrop-blur-md border border-white/80 dark:border-[#262930] shadow-[0_2px_10px_-2px_rgba(14,165,233,0.15)] flex items-center justify-center p-2">
                 <svg viewBox="0 0 32 32" fill="none" className="w-full h-full text-sky-500">
                   <path d="M16 4L4 10L16 16L28 10L16 4Z" stroke="#0ea5e9" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" />
@@ -61,7 +61,7 @@ export function Sidebar({ mobileIsOpen = false, onClose = () => {} }) {
                   Citizen Portal
                 </span>
               </div>
-            </div>
+            </Link>
 
             {/* Mobile Close 'X' Button */}
             <button

@@ -1,5 +1,6 @@
 """Local EVM adapter and deterministic ownership commitments."""
 import json
+import logging
 from functools import lru_cache
 from threading import Lock
 from decimal import Decimal
@@ -10,6 +11,9 @@ from fastapi import HTTPException
 from eth_account import Account
 from eth_account.messages import encode_typed_data
 from web3 import Web3
+
+
+logger = logging.getLogger(__name__)
 
 
 TRANSFER_FIELDS = [
@@ -100,6 +104,47 @@ class Registry:
         except Exception:
             raise HTTPException(503,'Unable to read the blockchain') from None
 
+    def submit_receipt(self, deal_id, parcel_id, previous_hash, new_hash, document_hash):
+        """Submit a hash-only receipt from the protected TitleLock service wallet."""
+        key=self.settings.chain_service_private_key.get_secret_value()
+        if not key:
+            raise HTTPException(503,'Blockchain service wallet is not configured')
+        try:
+            operator=Account.from_key(key)
+            if not self.contract.functions.hasRole(self.contract.functions.REGISTRAR_ROLE().call(),operator.address).call():
+                raise HTTPException(503,'Blockchain service wallet is not authorized')
+            tx=self.contract.functions.recordTransfer(deal_id,parcel_id,previous_hash,new_hash,document_hash).build_transaction({
+                'from':operator.address,'nonce':self.w3.eth.get_transaction_count(operator.address),'chainId':self.settings.chain_id,
+            })
+            signed=operator.sign_transaction(tx)
+            return Web3.to_hex(self.w3.eth.send_raw_transaction(signed.raw_transaction))
+        except HTTPException:
+            raise
+        except Exception:
+            logger.exception("Blockchain receipt submission failed")
+            raise HTTPException(503,'Blockchain receipt submission failed') from None
+
+    def submit_anchor(self, parcel_id, digest):
+        """Submit a reviewed initial ownership commitment from the service admin."""
+        key=self.settings.chain_service_private_key.get_secret_value()
+        if not key:
+            raise HTTPException(503,'Blockchain service wallet is not configured')
+        try:
+            operator=Account.from_key(key)
+            if not self.contract.functions.hasRole(bytes(32),operator.address).call():
+                raise HTTPException(503,'Blockchain service wallet is not a registry administrator')
+            tx=self.contract.functions.anchor(hexhash(parcel_id),digest,[operator.address]).build_transaction({
+                'from':operator.address,'nonce':self.w3.eth.get_transaction_count(operator.address),'chainId':self.settings.chain_id,
+            })
+            signed=operator.sign_transaction(tx)
+            return Web3.to_hex(self.w3.eth.send_raw_transaction(signed.raw_transaction))
+        except HTTPException:
+            raise
+        except Exception:
+            # Provider details remain in protected server logs rather than the API.
+            logger.exception("Blockchain baseline submission failed")
+            raise HTTPException(503,'Blockchain baseline submission failed') from None
+
     def check(self, conn, parcel_id):
         digest, wallets = self.state(parcel_id)
         if digest == '0x'+'00'*32:
@@ -109,13 +154,10 @@ class Registry:
             raise HTTPException(409,'Database and blockchain ownership mismatch; transfers blocked')
         if not self.history_matches(conn,parcel_id):
             raise HTTPException(409,'Database transfer history differs from the blockchain; transfers blocked')
-        expected = [linked_wallet(conn,owner[0],self.settings).lower() for owner in state['owners']]
-        if expected != [address.lower() for address in wallets]:
-            raise HTTPException(409,'Ownership wallet mapping differs from the blockchain')
         return state
 
     def history_matches(self, conn, parcel_id, ignore_deal=None):
-        logs=self.transfer_logs({'parcelId':hexhash(parcel_id)})
+        logs=self.receipt_logs({'parcelId':hexhash(parcel_id)})
         rows=conn.execute('SELECT s.id,s.document_hash,s.buyer_user_id,s.completed_at,c.old_state,c.new_state,c.tx_hash FROM sale_requests s JOIN sale_chain_payloads c ON c.sale_id=s.id WHERE s.parcel_id=%s', (parcel_id,)).fetchall()
         known={hexhash(str(row['id'])):row for row in rows}
         parcel=conn.execute('SELECT transfer_history,last_registered_date FROM parcels WHERE ulpin=%s',(parcel_id,)).fetchone()
@@ -142,7 +184,7 @@ class Registry:
                 return False
         return True
 
-    def transfer_logs(self, filters):
+    def receipt_logs(self, filters):
         try:
             head=self.w3.eth.block_number
             if self.logs_w3.eth.block_number<head:
@@ -167,7 +209,7 @@ class Registry:
                     checkpoint=self.w3.eth.get_block(end).hash
                     additions=[]
                     for block in range(start,end+1,self.settings.chain_log_block_range):
-                        additions.extend(self.logs_contract.events.OwnershipTransferred().get_logs(
+                        additions.extend(self.logs_contract.events.TransferRecorded().get_logs(
                             from_block=block,to_block=min(end,block+self.settings.chain_log_block_range-1),argument_filters=filters))
                     if self.w3.eth.get_block(end).hash!=checkpoint or self.logs_w3.eth.get_block(end).hash!=checkpoint:
                         raise HTTPException(503,'Chain changed during history verification; retry')

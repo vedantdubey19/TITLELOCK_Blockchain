@@ -165,12 +165,12 @@ export function HomePage() {
   };
 
   return (
-    <div className="relative w-screen h-screen overflow-hidden bg-[#070e1c] text-slate-100 flex flex-col font-sans select-none">
+    <div className="relative w-full min-h-screen overflow-hidden bg-[#070e1c] text-slate-100 flex flex-col font-sans select-none">
       
       {/* 1. Header Navigation Bar — Sits cleanly in flex flow so it NEVER overlaps child content */}
       <header className="h-16 flex-none px-4 sm:px-6 flex items-center justify-between border-b border-white/10 bg-slate-950/80 backdrop-blur-2xl z-30 transition-colors shadow-lg">
         {/* Brand Seal */}
-        <div className="flex items-center gap-3">
+        <button type="button" onClick={() => navigate('/')} aria-label="TitleLock home" className="flex items-center gap-3 rounded-xl text-left focus:outline-none focus:ring-2 focus:ring-sky-400">
           <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 flex items-center justify-center p-2 shadow-lg shadow-sky-500/30 text-white border border-white/20">
             <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
               <path d="M16 4L4 10L16 16L28 10L16 4Z" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
@@ -191,7 +191,7 @@ export function HomePage() {
               National Land Records • Spatial Ledger
             </p>
           </div>
-        </div>
+        </button>
 
         {/* Center Mode Switcher Capsule */}
         <div className="flex items-center gap-1 p-1 rounded-xl glass-pill">

@@ -31,6 +31,10 @@ contract TitleLockRegistry is AccessControl, EIP712 {
     event PropertyAnchored(bytes32 indexed parcelId, bytes32 stateHash);
     event OwnershipTransferred(bytes32 indexed dealId, bytes32 indexed parcelId,
         bytes32 previousHash, bytes32 newHash, bytes32 documentHash, address buyer, address registrar);
+    // Server-signed receipt for the no-wallet TitleLock workflow. All values are hashes;
+    // no names, phones, identity numbers, or deed contents are written on-chain.
+    event TransferRecorded(bytes32 indexed dealId, bytes32 indexed parcelId,
+        bytes32 previousHash, bytes32 newHash, bytes32 documentHash, address indexed operator);
 
     constructor() EIP712("TitleLock", "1") {
         _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -77,5 +81,17 @@ contract TitleLockRegistry is AccessControl, EIP712 {
         executedAt[data.dealId] = block.timestamp;
         emit OwnershipTransferred(data.dealId, data.parcelId, data.previousHash, data.newHash,
             data.documentHash, data.buyer, msg.sender);
+    }
+
+    function recordTransfer(bytes32 dealId, bytes32 parcelId, bytes32 previousHash,
+        bytes32 newHash, bytes32 documentHash) external onlyRole(REGISTRAR_ROLE) {
+        require(executedDeals[dealId] == bytes32(0), "Deal already used");
+        Parcel storage parcel = parcels[parcelId];
+        require(parcel.stateHash != bytes32(0) && parcel.stateHash == previousHash, "Ownership mismatch");
+        require(newHash != bytes32(0) && newHash != previousHash && documentHash != bytes32(0), "Invalid receipt");
+        parcel.stateHash = newHash;
+        executedDeals[dealId] = newHash;
+        executedAt[dealId] = block.timestamp;
+        emit TransferRecorded(dealId, parcelId, previousHash, newHash, documentHash, msg.sender);
     }
 }

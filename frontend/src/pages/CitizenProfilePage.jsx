@@ -1,8 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
-import { LocalWalletPanel } from '../components/LocalWalletPanel';
 const fields = [['name','Full name',120],['email','Email',254],['phone','Mobile number',32],['jurisdiction','Jurisdiction',200],['description','About you',500],['residentialAddress','Residential address',500],['primaryNomineeName','Preferred nominee name',120],['nomineeRelation','Nominee relationship',80],['emergencyContact','Emergency contact',32],['recoveryGuardian','Recovery contact',120]];
-const ignoreMode = () => {};
 export function CitizenProfilePage() {
   const { currentUser: user, updateProfile } = useAuth();
   const initial = () => Object.fromEntries(fields.map(([key]) => [key, user?.[key] ?? user?.profile?.[key] ?? '']));
@@ -43,7 +41,6 @@ export function CitizenProfilePage() {
       <button disabled={busy} className="border rounded-lg p-2">{busy ? 'Saving…' : 'Save profile'}</button>
       <button type="button" disabled={busy} onClick={() => { setForm(initial()); setPassword(''); setError(''); setSaved(false); }} className="underline ml-4">Discard edits</button>
     </form>
-    <LocalWalletPanel onMode={ignoreMode} />
   </section>;
 }
 export default CitizenProfilePage;

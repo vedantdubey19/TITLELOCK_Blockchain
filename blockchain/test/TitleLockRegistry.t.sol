@@ -63,4 +63,11 @@ contract TitleLockRegistryTest {
         TitleLockRegistry.Transfer memory d=data();(bytes[] memory owners,bytes memory reg)=proofs(d);
         vm.expectRevert();registry.executeTransfer(d,owners,reg);
     }
+    function testRegistrarCanRecordHashedReceiptWithoutWalletSignatures() public {
+        bytes32 deal=keccak256("server-deal");
+        vm.prank(registrar);
+        registry.recordTransfer(deal,PROPERTY,keccak256("old"),keccak256("new"),keccak256("document"));
+        (bytes32 state,)=registry.stateOf(PROPERTY);
+        require(state==keccak256("new") && registry.executedDeals(deal)==keccak256("new"),"Receipt missing");
+    }
 }

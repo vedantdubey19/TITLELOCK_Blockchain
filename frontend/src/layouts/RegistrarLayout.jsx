@@ -3,6 +3,7 @@ import { Outlet, NavLink, useNavigate, Navigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { ThemeToggle } from '../components/ui/ThemeToggle';
+import PortalFooter from '../components/common/PortalFooter';
 import { 
   Building2, 
   LayoutDashboard, 
@@ -74,7 +75,7 @@ export function RegistrarLayout() {
   }
 
   return (
-    <div className="h-screen w-full bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 overflow-hidden">
+    <div className="min-h-screen w-full min-w-0 bg-[#f8fafc] dark:bg-[#080f1d] bg-mesh-subtle flex flex-col md:flex-row font-sans text-slate-900 dark:text-slate-100 antialiased selection:bg-emerald-500/20 overflow-hidden">
       
       {/* Mobile Dark Backdrop Overlay */}
       {mobileMenuOpen && (
@@ -92,7 +93,7 @@ export function RegistrarLayout() {
         <div>
           {/* Brand Header & Mobile Close Button */}
           <div className="flex items-center justify-between px-2 mb-8">
-            <div className="flex items-center gap-3">
+            <button type="button" onClick={() => navigate('/')} aria-label="TitleLock home" className="flex items-center gap-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500">
               <div className="w-10 h-10 rounded-2xl bg-white/90 dark:bg-[#1a1c20] backdrop-blur-md border border-white/80 dark:border-[#262930] shadow-[0_2px_10px_-2px_rgba(11,107,78,0.18)] flex items-center justify-center p-2">
                 <Building2 className="w-5 h-5 text-[#0b6b4e] dark:text-emerald-400" />
               </div>
@@ -104,7 +105,7 @@ export function RegistrarLayout() {
                   Sub-Registrar
                 </span>
               </div>
-            </div>
+            </button>
 
             {/* Mobile Close Button */}
             <button
@@ -296,6 +297,7 @@ export function RegistrarLayout() {
         <main className="flex-1 px-4 sm:px-8 py-6 pb-16 max-w-[1500px] w-full mx-auto">
           <Outlet />
         </main>
+        <PortalFooter />
       </div>
 
       {/* Logout Confirmation Modal */}

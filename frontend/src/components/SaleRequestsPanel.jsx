@@ -2,8 +2,6 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
 
 import { saleApi } from '../services/saleService';
-import { LocalWalletPanel } from './LocalWalletPanel';
-import { signSale, sendLocalTransfer } from '../services/walletService';
 import { ChainVerification } from './ChainVerification';
 import { activityApi } from '../services/saleService';
 import { SaleTimeline } from './SaleTimeline';
@@ -11,7 +9,6 @@ import { SaleTimeline } from './SaleTimeline';
 export function SaleRequestsPanel({ readOnly = false }) {
   const { currentUser } = useAuth();
   const registrar = currentUser?.role === 'REGISTRAR';
-  const [chainEnabled, setChainEnabled] = useState(false);
   const [filter, setFilter] = useState('ALL');
   const [sales, setSales] = useState([]);
   const [error, setError] = useState('');
@@ -32,11 +29,7 @@ export function SaleRequestsPanel({ readOnly = false }) {
     setBusy(true); setError(''); setNotice('');
     try {
       const result = await saleApi(path, data);
-      if (result.transaction) {
-        const txHash = await sendLocalTransfer(result.transaction);
-        await activityApi(`/api/chain/sales/${path.split('/')[1]}/submitted`, { tx_hash: txHash });
-        setNotice(`Submitted to blockchain: ${txHash}. Refresh confirmation to update ownership.`);
-      } else if (result.key) setIssued({ key: result.key, sale, expires: result.expires_at, exchange: sales.find((row) => row.id === sale)?.key_exchange_version === 2 });
+      if (result.key) setIssued({ key: result.key, sale, expires: result.expires_at, exchange: sales.find((row) => row.id === sale)?.key_exchange_version === 2 });
       else { setIssued(null); setProofs({}); setNotice(result.message || 'Sale request created'); }
       await reload();
     } catch (failure) { setError(failure.message); }
@@ -46,8 +39,7 @@ export function SaleRequestsPanel({ readOnly = false }) {
   return (
     <section className="space-y-4 p-5 bg-white rounded-2xl border border-slate-200 text-sm">
       <h2 className="text-lg font-bold">{readOnly ? 'Transfer tracking & activity' : 'Sale requests · two-key approval'}</h2>
-      <p className="text-slate-600">A registrar starts the deal. Each owner enters the registrar’s key; the registrar enters each owner’s key. Both parties then sign the exact deal in MetaMask. Complete within 24 hours of the first owner key, or the property enters a seven-day sale cooldown.</p>
-      <LocalWalletPanel onMode={setChainEnabled} />
+      <p className="text-slate-600">A registrar starts the deal. Each owner enters the registrar’s key; the registrar enters each owner’s key. After both approvals, TitleLock records a hash-only receipt on the blockchain. Complete within 24 hours of the first owner key, or the property enters a seven-day sale cooldown.</p>
       {error && <p role="alert" className="text-red-700">{error}</p>}
       {notice && <p role="status">{notice}</p>}
       {registrar && !readOnly && <form className="flex flex-wrap gap-2" onSubmit={(event) => { event.preventDefault(); act('', form); }}>
@@ -69,6 +61,13 @@ export function SaleRequestsPanel({ readOnly = false }) {
         <p>{lookup.ulpin} · Owner: {lookup.current_owner || 'Not recorded'} · {lookup.title_status}</p>
         <p>{lookup.for_sale ? 'All owners agreed to list for sale' : 'Not advertised for sale'} · Frozen: {lookup.frozen ? 'Yes' : 'No'}</p>
         <ChainVerification key={lookup.ulpin} ulpin={lookup.ulpin} />
+        {registrar && <button type="button" disabled={busy} className="border rounded-lg p-2" onClick={async () => {
+          setBusy(true); setError(''); setNotice('');
+          try {
+            const result = await activityApi(`/api/chain/properties/${encodeURIComponent(lookup.ulpin)}/anchor`, {});
+            setNotice(result.tx_hash ? `Baseline submitted: ${result.tx_hash}` : 'Property is already anchored.');
+          } catch (failure) { setError(failure.message); } finally { setBusy(false); }
+        }}>Anchor reviewed property on Sepolia</button>}
       </div>}
       {issued && <div className="p-4 bg-amber-50 border border-amber-300 rounded-xl space-y-2">
         <p className="font-bold">Your {side} key · shown once</p>
@@ -102,22 +101,13 @@ export function SaleRequestsPanel({ readOnly = false }) {
           <p>Owners approved: {sale.approved_owners}/{sale.required_owners} · Registrar: {sale.registrar_approved ? 'Approved' : 'Pending'}</p>
           {sale.expires_at && <p>Deadline: {new Date(sale.expires_at).toLocaleString()}</p>}
           {sale.status === 'EXPIRED' && sale.cooldown_until && <p>New deals blocked until: {new Date(sale.cooldown_until).toLocaleString()}</p>}
-          {sale.chain_state && <p>Blockchain: {sale.chain_state} · Wallet signatures: {sale.wallet_signature_count || 0}</p>}
+          {sale.chain_state && <p>Blockchain receipt: {sale.chain_state}</p>}
           {sale.chain_tx_hash && <p className="break-all">Transaction hash: {sale.chain_tx_hash}</p>}
-          {chainEnabled && <button disabled={busy} className="underline" onClick={async () => {
+          {sale.chain_state && <button disabled={busy} className="underline" onClick={async () => {
             setBusy(true); setError('');
             try { const result = await activityApi(`/api/chain/sales/${sale.id}/refresh`, {}); setNotice(`Blockchain status: ${result.state}`); await reload(); }
             catch (failure) { setError(failure.message); } finally { setBusy(false); }
           }}>Refresh blockchain confirmation</button>}
-          {chainEnabled && !readOnly && registrar && sale.registrar_username === currentUser.username && sale.chain_state === 'PREPARED' && <button disabled={busy} className="border rounded-lg p-2" onClick={async () => {
-            setBusy(true); setError('');
-            try {
-              const prepared = await activityApi(`/api/chain/sales/${sale.id}/transaction`);
-              const tx_hash = await sendLocalTransfer(prepared.transaction);
-              await activityApi(`/api/chain/sales/${sale.id}/submitted`, { tx_hash });
-              setNotice(`Submitted: ${tx_hash}`); await reload();
-            } catch (failure) { setError(failure.message); } finally { setBusy(false); }
-          }}>Retry registrar wallet transaction</button>}
           <SaleTimeline saleId={sale.id} />
           {canAct && <div className="flex flex-wrap gap-2">
             {!generated && (!approved || exchange) && <button disabled={busy} onClick={() => act(`/${sale.id}/keys/${side}`, {}, sale.id)} className="border rounded-lg p-2">Generate my {side} key</button>}
@@ -125,12 +115,7 @@ export function SaleRequestsPanel({ readOnly = false }) {
               <input type="password" autoComplete="off" placeholder={receivedKeyLabel} aria-label={`${receivedKeyLabel} for ${sale.parcel_id}`} required minLength={40} value={proofs[sale.id] || ''} onChange={(event) => setProofs({ ...proofs, [sale.id]: event.target.value })} className="border rounded-lg p-2" />
               <button disabled={busy} className="border rounded-lg p-2">{exchange ? 'Verify received key' : 'Submit my key'}</button>
             </form>}
-            {chainEnabled && approved && <button disabled={busy} className="border rounded-lg p-2" onClick={async () => {
-              setBusy(true); setError('');
-              try { await signSale(sale.id); setNotice('Wallet approval signed for this exact deal.'); await reload(); }
-              catch (failure) { setError(failure.message); } finally { setBusy(false); }
-            }}>Sign my approval in MetaMask</button>}
-            {registrar && sale.registrar_approved && sale.approved_owners === sale.required_owners && <button disabled={busy} onClick={() => act(`/${sale.id}/complete`, {})} className="bg-blue-600 text-white rounded-lg p-2">{chainEnabled ? 'Send transfer to blockchain' : 'Complete database transfer'}</button>}
+            {registrar && sale.registrar_approved && sale.approved_owners === sale.required_owners && <button disabled={busy} onClick={() => act(`/${sale.id}/complete`, {})} className="bg-blue-600 text-white rounded-lg p-2">Submit transfer for confirmation</button>}
           </div>}
         </article>;
       })}
