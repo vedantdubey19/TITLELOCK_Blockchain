@@ -61,7 +61,7 @@ export function SaleRequestsPanel({ readOnly = false }) {
         <p>{lookup.ulpin} · Owner: {lookup.current_owner || 'Not recorded'} · {lookup.title_status}</p>
         <p>{lookup.for_sale ? 'All owners agreed to list for sale' : 'Not advertised for sale'} · Frozen: {lookup.frozen ? 'Yes' : 'No'}</p>
         <ChainVerification key={lookup.ulpin} ulpin={lookup.ulpin} />
-        {registrar && <button disabled={busy} className="border rounded-lg p-2" onClick={async () => {
+        {registrar && <button type="button" disabled={busy} className="border rounded-lg p-2" onClick={async () => {
           setBusy(true); setError(''); setNotice('');
           try {
             const result = await activityApi(`/api/chain/properties/${encodeURIComponent(lookup.ulpin)}/anchor`, {});
