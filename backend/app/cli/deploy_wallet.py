@@ -1,7 +1,7 @@
 """Loopback-only Sepolia deployment page. Signing stays in MetaMask."""
 import json
 import argparse
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from web3 import Web3
 
@@ -58,7 +58,7 @@ def main():
         def log_message(self, *args):
             pass
     print('Sepolia deployment page: http://127.0.0.1:8766/', flush=True)
-    HTTPServer(('127.0.0.1', 8766), Handler).serve_forever()
+    ThreadingHTTPServer(('127.0.0.1', 8766), Handler).serve_forever()
 
 
 if __name__ == '__main__':
