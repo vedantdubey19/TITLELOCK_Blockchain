@@ -1,472 +1,834 @@
 import React, { useEffect, useRef, useState, useMemo } from 'react';
-import L from 'leaflet';
+import * as maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import { 
-  Building2, 
-  Layers, 
   Compass, 
-  CheckCircle2, 
+  Mountain, 
+  Plus, 
+  Minus, 
   LocateFixed, 
-  Eye, 
+  Maximize2,
+  Layers,
   Sparkles,
-  Maximize2
+  Building2,
+  CheckCircle2,
+  Clock,
+  AlertTriangle,
+  Lock,
+  ChevronRight,
+  Shield
 } from 'lucide-react';
-import { 
-  getParcelCentroid, 
-  getParcelStatusColors,
-  calculateDistanceKm,
-  formatDistance
-} from '../../utils/cadastreUtils';
+import { getParcelCentroid } from '../../utils/cadastreUtils';
 
 /**
- * Cadastral3DMap
- * Hyperrealistic 3D Spatial Cadastre & Aerial Map with 3D Extruded Building Boxes
- * Features:
- * - Edge-to-edge true orthogonal aerial photographic map (Esri World Imagery + OSM Cadastre)
- * - True 3D isometric extruded plot boxes:
- *   1. Elevated 3D roof slab with specular highlight bevel
- *   2. Solid extruded vertical wall prism extending downward to cast ground shadows
- *   3. Volumetric ground ambient-occlusion shadow
- *   4. Holographic status pillar badge with zero-latency selection
- *   5. Zero lag, 60fps GPU-accelerated micro-animations (0ms response time)
- *   6. Real user GPS location pin with animated pulsing radar radius
+ * 100% Free, Keyless Tile Providers
  */
-export const MAP_PROVIDERS = {
+const BASE_MAP_STYLES = {
+  osmStandard: {
+    id: 'osmStandard',
+    name: 'OpenStreetMap Streets (Free)',
+    sublabel: 'Official OpenStreetMap vector roads',
+    style: {
+      version: 8,
+      sources: {
+        'osm-tiles': {
+          type: 'raster',
+          tiles: [
+            'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
+            'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+          ],
+          tileSize: 256,
+          maxzoom: 19,
+          attribution: '&copy; OpenStreetMap contributors'
+        }
+      },
+      layers: [
+        {
+          id: 'osm-layer',
+          type: 'raster',
+          source: 'osm-tiles',
+          minzoom: 0,
+          maxzoom: 24
+        }
+      ]
+    }
+  },
   esriSatellite: {
     id: 'esriSatellite',
-    name: 'Real Aerial Satellite',
-    sublabel: 'Esri World Imagery (High-Res 3D)',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    maxZoom: 19,
-    maxNativeZoom: 18,
-    subdomains: []
+    name: 'Esri World Satellite (Free)',
+    sublabel: 'High-Res Aerial Satellite Imagery',
+    style: {
+      version: 8,
+      sources: {
+        'esri-sat-tiles': {
+          type: 'raster',
+          tiles: [
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+          ],
+          tileSize: 256,
+          maxzoom: 19,
+          attribution: '&copy; Esri World Imagery'
+        }
+      },
+      layers: [
+        {
+          id: 'esri-sat-layer',
+          type: 'raster',
+          source: 'esri-sat-tiles',
+          minzoom: 0,
+          maxzoom: 24
+        }
+      ]
+    }
   },
-  osmStreets: {
-    id: 'osmStreets',
-    name: '3D Streets & Cadastre',
-    sublabel: 'OpenStreetMap Vector Roads & Numbers',
-    url: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-    maxZoom: 19,
-    maxNativeZoom: 19,
-    subdomains: ['a', 'b', 'c']
+  esriTopo: {
+    id: 'esriTopo',
+    name: 'Esri Topographic (Free)',
+    sublabel: 'Clean Cadastral Topo Map',
+    style: {
+      version: 8,
+      sources: {
+        'esri-topo-tiles': {
+          type: 'raster',
+          tiles: [
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+          ],
+          tileSize: 256,
+          maxzoom: 19,
+          attribution: '&copy; Esri Topo'
+        }
+      },
+      layers: [
+        {
+          id: 'esri-topo-layer',
+          type: 'raster',
+          source: 'esri-topo-tiles',
+          minzoom: 0,
+          maxzoom: 24
+        }
+      ]
+    }
   }
 };
+
+/**
+ * Status color resolver matching reference UI exactly:
+ * - Green (#10b981): Verified / Clean Title
+ * - Orange/Amber (#f59e0b): Review / Caution
+ * - Red (#ef4444): High Risk / Disputed
+ * - Slate (#475569): Frozen / Injunction
+ * - Blue (#3b82f6): Succession Pending
+ */
+function getStatusTheme(p) {
+  const status = (p.title_status || p.titleStatus || '').toUpperCase();
+  const risk = (p.risk_status || p.riskStatus || '').toUpperCase();
+  const isFrozen = Boolean(p.frozen) || status === 'FROZEN';
+  const isDisputed = status === 'DISPUTED' || (Array.isArray(p.disputes) && p.disputes.length > 0);
+  const isSuccession = status === 'SUCCESSION_PENDING' || status.includes('SUCCESSION');
+  const isReview = status === 'REVIEW' || 
+                   status === 'VERIFIED_WITH_ENCUMBRANCE' || 
+                   risk === 'REVIEW' || 
+                   risk === 'MODERATE_RISK' ||
+                   (Array.isArray(p.encumbrances) && p.encumbrances.length > 0);
+
+  if (isFrozen) {
+    return {
+      color: '#475569',
+      wallColor: '#334155',
+      roofBorder: '#94a3b8',
+      label: 'Frozen / Injunction',
+      icon: 'lock',
+      badgeClass: 'text-slate-300 bg-slate-800'
+    };
+  }
+
+  if (isDisputed || risk === 'HIGH_RISK') {
+    return {
+      color: '#ef4444',
+      wallColor: '#b91c1c',
+      roofBorder: '#fca5a5',
+      label: 'High Risk / Disputed',
+      icon: 'alert',
+      badgeClass: 'text-rose-400 bg-rose-950/60'
+    };
+  }
+
+  if (isSuccession) {
+    return {
+      color: '#3b82f6',
+      wallColor: '#1d4ed8',
+      roofBorder: '#93c5fd',
+      label: 'Succession Pending',
+      icon: 'clock',
+      badgeClass: 'text-blue-400 bg-blue-950/60'
+    };
+  }
+
+  if (isReview) {
+    return {
+      color: '#f59e0b',
+      wallColor: '#b45309',
+      roofBorder: '#fde68a',
+      label: 'Under Review / Caution',
+      icon: 'clock',
+      badgeClass: 'text-amber-400 bg-amber-950/60'
+    };
+  }
+
+  return {
+    color: '#10b981',
+    wallColor: '#047857',
+    roofBorder: '#a7f3d0',
+    label: 'Verified / Clean Title',
+    icon: 'check',
+    badgeClass: 'text-emerald-400 bg-emerald-950/60'
+  };
+}
+
+// Generate rich DOM marker for user location with high-contrast animated blue pulse
+function createUserLocationElement() {
+  const el = document.createElement('div');
+  el.className = 'live-user-gps-pulse-beacon';
+  el.style.position = 'relative';
+  el.style.width = '48px';
+  el.style.height = '48px';
+  el.style.cursor = 'pointer';
+  el.style.zIndex = '999999';
+
+  el.innerHTML = `
+    <div style="
+      position: absolute;
+      inset: 0px;
+      border-radius: 9999px;
+      background: rgba(14, 165, 233, 0.45);
+      animation: ping 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+    "></div>
+    <div style="
+      position: absolute;
+      inset: 6px;
+      border-radius: 9999px;
+      background: rgba(2, 132, 199, 0.35);
+      border: 2px solid rgba(56, 189, 248, 0.6);
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    "></div>
+    <div style="
+      position: absolute;
+      inset: 12px;
+      border-radius: 9999px;
+      background: #0284c7;
+      border: 3.5px solid #ffffff;
+      box-shadow: 0 0 16px rgba(14, 165, 233, 0.9), 0 4px 10px rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+      <div style="width: 6px; height: 6px; border-radius: 9999px; background: #ffffff;"></div>
+    </div>
+    <div style="
+      position: absolute;
+      bottom: -18px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #0d1527;
+      color: #38bdf8;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: ui-sans-serif, system-ui;
+      padding: 1px 6px;
+      border-radius: 9999px;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      white-space: nowrap;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      pointer-events: none;
+    ">
+      YOU ARE HERE
+    </div>
+  `;
+  return el;
+}
 
 export function Cadastral3DMap({
   parcels = [],
   activeParcel = null,
   onSelectParcel = null,
   userLocation = null,
-  flyToCoords = null, // [lng, lat]
-  targetZoom = 17.5,
+  flyToCoords = null,
+  targetZoom = 15.5,
+  is3DTilt = true,
+  onToggleTilt = null,
   className = '',
-  showControls = true,
+  showControls = true
 }) {
-  const mapContainerRef = useRef(null);
-  const mapInstanceRef = useRef(null);
-  const tileLayerRef = useRef(null);
-  const polygonLayersRef = useRef([]);
-  const htmlMarkersRef = useRef([]);
+  const containerRef = useRef(null);
+  const mapRef = useRef(null);
   const userMarkerRef = useRef(null);
-  const distLineRef = useRef(null);
+  const parcelMarkersRef = useRef([]);
 
-  const [activeProviderKey, setActiveProviderKey] = useState('esriSatellite');
+  // States
+  const [is3DMode, setIs3DMode] = useState(is3DTilt);
+  const [activeStyleKey, setActiveStyleKey] = useState('osmStandard');
   const [showLayerMenu, setShowLayerMenu] = useState(false);
-  const [renderTrigger, setRenderTrigger] = useState(0);
+  const [currentBearing, setCurrentBearing] = useState(-15);
+  const [geoLocating, setGeoLocating] = useState(false);
+  const [geoStatusMsg, setGeoStatusMsg] = useState('');
 
-  // Compute default center (from flyToCoords, or activeParcel, or first parcel)
-  const defaultCenter = useMemo(() => {
-    if (flyToCoords) return [flyToCoords[1], flyToCoords[0]]; // [lat, lng]
-    if (activeParcel) {
-      const c = getParcelCentroid(activeParcel);
-      return [c.lat, c.lng];
-    }
-    if (userLocation) return [userLocation.lat, userLocation.lng];
-    if (parcels.length > 0) {
-      const c = getParcelCentroid(parcels[0]);
-      return [c.lat, c.lng];
-    }
-    return [28.4633, 77.5148]; // Greater Noida
-  }, [flyToCoords, activeParcel, userLocation, parcels]);
+  // Sync external tilt
+  useEffect(() => {
+    setIs3DMode(is3DTilt);
+  }, [is3DTilt]);
 
-  // Helper to create tile layer with seamless graceful fallback
-  const createRobustTileLayer = (provider) => {
-    // Esri World Imagery fallback to OSM or lower zoom if unavailable
-    return L.tileLayer(provider.url, {
-      maxZoom: provider.maxZoom,
-      maxNativeZoom: provider.maxNativeZoom || 18,
-      subdomains: provider.subdomains || [],
-      crossOrigin: 'anonymous',
-      errorTileUrl: 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+  // Convert parcels into valid GeoJSON FeatureCollection
+  const parcelsGeoJson = useMemo(() => {
+    const features = parcels.map((p) => {
+      let coords = [];
+      if (Array.isArray(p.boundary) && p.boundary.length >= 3) {
+        coords = p.boundary.map(pt => [Number(pt[0]), Number(pt[1])]);
+        const first = coords[0];
+        const last = coords[coords.length - 1];
+        if (first[0] !== last[0] || first[1] !== last[1]) {
+          coords.push([first[0], first[1]]);
+        }
+      }
+
+      const area = Number(p.area_sqm || p.areaSqm) || 1500;
+      // Elegant architectural building box heights: 25m - 90m
+      const extrusionHeight = Math.min(Math.max(Math.sqrt(area) * 2.2, 22), 95);
+      const theme = getStatusTheme(p);
+      const isSelected = Boolean(activeParcel && (
+        (activeParcel.ulpin && activeParcel.ulpin === p.ulpin) ||
+        (activeParcel.id && activeParcel.id === p.id)
+      ));
+
+      return {
+        type: 'Feature',
+        id: p.ulpin || p.id,
+        geometry: {
+          type: 'Polygon',
+          coordinates: [coords]
+        },
+        properties: {
+          ulpin: p.ulpin || p.id,
+          surveyNumber: p.survey_number || p.surveyNumber || 'SN-CADASTRE',
+          currentOwner: p.current_owner || p.currentOwner || 'Certified Titleholder',
+          areaSqm: area,
+          titleStatus: p.title_status || p.titleStatus || 'VERIFIED',
+          statusLabel: theme.label,
+          color: isSelected ? '#0ea5e9' : theme.color,
+          roofBorder: isSelected ? '#ffffff' : theme.roofBorder,
+          height: is3DMode ? extrusionHeight : 1,
+          isSelected: isSelected,
+          tag: (p.survey_number || p.surveyNumber || p.ulpin || '').replace('SN-', '')
+        }
+      };
+    }).filter(f => f.geometry.coordinates[0].length >= 4);
+
+    return {
+      type: 'FeatureCollection',
+      features
+    };
+  }, [parcels, activeParcel, is3DMode]);
+
+  // Attach layers to MapLibre
+  const addCadastreLayers = (map) => {
+    if (!map) return;
+
+    if (!map.getSource('cadastre-source')) {
+      map.addSource('cadastre-source', {
+        type: 'geojson',
+        data: parcelsGeoJson
+      });
+    } else {
+      map.getSource('cadastre-source').setData(parcelsGeoJson);
+    }
+
+    // 1. 3D Volumetric Extrusion Building Boxes Layer
+    if (!map.getLayer('cadastre-extrusions')) {
+      map.addLayer({
+        id: 'cadastre-extrusions',
+        type: 'fill-extrusion',
+        source: 'cadastre-source',
+        paint: {
+          'fill-extrusion-color': ['get', 'color'],
+          'fill-extrusion-height': ['get', 'height'],
+          'fill-extrusion-base': 0,
+          'fill-extrusion-opacity': 0.92
+        }
+      });
+    }
+
+    // 2. Crisp 3D Roof Outline
+    if (!map.getLayer('cadastre-outlines')) {
+      map.addLayer({
+        id: 'cadastre-outlines',
+        type: 'line',
+        source: 'cadastre-source',
+        paint: {
+          'line-color': ['get', 'roofBorder'],
+          'line-width': ['case', ['get', 'isSelected'], 3.5, 1.8],
+          'line-opacity': 0.95
+        }
+      });
+    }
+
+    // Click handler for parcels
+    map.off('click', 'cadastre-extrusions');
+    map.on('click', 'cadastre-extrusions', (e) => {
+      if (e.features && e.features.length > 0) {
+        const feat = e.features[0];
+        const found = parcels.find(p => (p.ulpin || p.id) === feat.properties.ulpin);
+        if (found && onSelectParcel) {
+          onSelectParcel(found);
+        }
+      }
+    });
+
+    map.on('mouseenter', 'cadastre-extrusions', () => {
+      map.getCanvas().style.cursor = 'pointer';
+    });
+    map.on('mouseleave', 'cadastre-extrusions', () => {
+      map.getCanvas().style.cursor = '';
     });
   };
 
-  // 1. Initialize Map
-  useEffect(() => {
-    const container = mapContainerRef.current;
-    if (!container) return;
+  // Render HTML badges & icons above 3D building boxes
+  const updateHtmlTags = (map) => {
+    if (!map) return;
+    parcelMarkersRef.current.forEach(m => m.remove());
+    parcelMarkersRef.current = [];
 
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.remove();
-      mapInstanceRef.current = null;
+    // Render interactive micro badges for parcels
+    parcels.slice(0, 45).forEach((p) => {
+      const c = getParcelCentroid(p);
+      const isSelected = activeParcel && (activeParcel.ulpin === p.ulpin || activeParcel.id === p.id);
+      const theme = getStatusTheme(p);
+      const shortTag = (p.survey_number || p.surveyNumber || p.ulpin || '').replace('SN-', '');
+
+      const el = document.createElement('div');
+      el.className = 'cadastre-parcel-tag';
+      el.style.pointerEvents = 'auto';
+      el.style.cursor = 'pointer';
+      el.innerHTML = `
+        <div style="
+          background: ${isSelected ? '#0284c7' : '#0d1527'};
+          color: white;
+          padding: 2.5px 6px;
+          border-radius: 8px;
+          font-family: monospace;
+          font-size: 9.5px;
+          font-weight: 700;
+          border: 1.5px solid ${isSelected ? '#38bdf8' : theme.color};
+          box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+          white-space: nowrap;
+          transform: translate(-50%, -120%);
+          display: flex;
+          align-items: center;
+          gap: 4px;
+        ">
+          <span style="display:inline-block; width:6px; height:6px; border-radius:9999px; background:${theme.color};"></span>
+          <span>${shortTag}</span>
+        </div>
+      `;
+
+      el.addEventListener('click', () => {
+        if (onSelectParcel) onSelectParcel(p);
+      });
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([c.lng, c.lat])
+        .addTo(map);
+
+      parcelMarkersRef.current.push(marker);
+    });
+  };
+
+  // Helper to ensure user location blue beacon is active on map
+  const renderUserMarker = (map, lat, lng) => {
+    if (!map || lat == null || lng == null) return;
+
+    if (!userMarkerRef.current) {
+      const el = createUserLocationElement();
+      userMarkerRef.current = new maplibregl.Marker({ element: el, anchor: 'center' })
+        .setLngLat([lng, lat])
+        .addTo(map);
+    } else {
+      userMarkerRef.current.setLngLat([lng, lat]);
+      // Ensure marker is attached to map instance
+      if (!userMarkerRef.current._map) {
+        userMarkerRef.current.addTo(map);
+      }
     }
+  };
 
-    const provider = MAP_PROVIDERS[activeProviderKey] || MAP_PROVIDERS.esriSatellite;
+  // 1. Initialize MapLibre GL
+  useEffect(() => {
+    if (!containerRef.current || mapRef.current) return;
 
-    const map = L.map(container, {
-      center: defaultCenter,
-      zoom: targetZoom || 17.5,
-      zoomControl: false,
-      attributionControl: false,
-      fadeAnimation: true,
-      maxZoom: provider.maxZoom,
-      scrollWheelZoom: true,
-      preferCanvas: true
+    const initialStyleConfig = BASE_MAP_STYLES[activeStyleKey]?.style || BASE_MAP_STYLES.osmStandard.style;
+
+    const map = new maplibregl.Map({
+      container: containerRef.current,
+      style: initialStyleConfig,
+      center: [77.5148, 28.4633], // Greater Noida Cadastre Center
+      zoom: targetZoom || 15.5,
+      minZoom: 1,
+      maxZoom: 22,
+      maxTileCacheSize: 100,
+      pitch: is3DMode ? 52 : 0,
+      bearing: -15,
+      antialias: true,
+      attributionControl: false
     });
 
-    const tileLayer = createRobustTileLayer(provider).addTo(map);
+    mapRef.current = map;
 
-    tileLayerRef.current = tileLayer;
-    mapInstanceRef.current = map;
+    map.on('load', () => {
+      addCadastreLayers(map);
+      updateHtmlTags(map);
+      if (userLocation && userLocation.lat && userLocation.lng) {
+        renderUserMarker(map, userLocation.lat, userLocation.lng);
+      }
+      map.resize();
+    });
 
-    // Listen to zoomend for Level-of-Detail (LOD) marker display
-    const handleZoomEnd = () => {
-      // Re-trigger render logic via internal state or quick update
-      setRenderTrigger(prev => prev + 1);
-    };
-    map.on('zoomend', handleZoomEnd);
+    map.on('rotate', () => {
+      setCurrentBearing(Math.round(map.getBearing()));
+    });
 
-    // Instant & sequenced invalidateSize calls
-    map.invalidateSize();
-    const timer1 = setTimeout(() => { if (map) map.invalidateSize(); }, 60);
-    const timer2 = setTimeout(() => { if (map) map.invalidateSize(); }, 350);
+    // Resize invalidations
+    const t1 = setTimeout(() => { if (mapRef.current) mapRef.current.resize(); }, 100);
+    const t2 = setTimeout(() => { if (mapRef.current) mapRef.current.resize(); }, 400);
 
-    const handleResize = () => {
-      if (map) map.invalidateSize();
-    };
-    window.addEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver(() => {
+      if (mapRef.current) {
+        mapRef.current.resize();
+      }
+    });
+    resizeObserver.observe(containerRef.current);
 
     return () => {
-      clearTimeout(timer1);
-      clearTimeout(timer2);
-      window.removeEventListener('resize', handleResize);
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.off('zoomend', handleZoomEnd);
-        mapInstanceRef.current.remove();
-        mapInstanceRef.current = null;
+      clearTimeout(t1);
+      clearTimeout(t2);
+      resizeObserver.disconnect();
+      parcelMarkersRef.current.forEach(m => m.remove());
+      if (userMarkerRef.current) {
+        userMarkerRef.current.remove();
+        userMarkerRef.current = null;
+      }
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
       }
     };
   }, []);
 
-  // 2. Handle tile layer switch
+  // 2. Update GeoJSON Source data when parcels change
   useEffect(() => {
-    const map = mapInstanceRef.current;
+    const map = mapRef.current;
     if (!map) return;
 
-    const provider = MAP_PROVIDERS[activeProviderKey] || MAP_PROVIDERS.esriSatellite;
-
-    if (tileLayerRef.current) {
-      map.removeLayer(tileLayerRef.current);
+    if (map.isStyleLoaded()) {
+      const src = map.getSource('cadastre-source');
+      if (src) {
+        src.setData(parcelsGeoJson);
+      } else {
+        addCadastreLayers(map);
+      }
+      updateHtmlTags(map);
     }
+  }, [parcelsGeoJson]);
 
-    const newLayer = createRobustTileLayer(provider).addTo(map);
-
-    tileLayerRef.current = newLayer;
-  }, [activeProviderKey]);
-
-  // 3. Handle camera panning / flyTo
+  // 3. Switch Basemap Style
   useEffect(() => {
-    const map = mapInstanceRef.current;
+    const map = mapRef.current;
+    if (!map) return;
+
+    const selected = BASE_MAP_STYLES[activeStyleKey];
+    if (selected && selected.style) {
+      map.setStyle(selected.style);
+      map.once('style.load', () => {
+        addCadastreLayers(map);
+        updateHtmlTags(map);
+        if (userLocation && userLocation.lat && userLocation.lng) {
+          renderUserMarker(map, userLocation.lat, userLocation.lng);
+        }
+      });
+    }
+  }, [activeStyleKey]);
+
+  // 4. Toggle 2D / 3D Camera Tilt
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    map.easeTo({
+      pitch: is3DMode ? 52 : 0,
+      bearing: is3DMode ? -15 : 0,
+      duration: 650
+    });
+
+    if (map.isStyleLoaded()) {
+      addCadastreLayers(map);
+    }
+  }, [is3DMode]);
+
+  // 5. Handle flyTo coords or active parcel selection
+  useEffect(() => {
+    const map = mapRef.current;
     if (!map) return;
 
     if (flyToCoords) {
-      // If active parcel selected or near database parcel, zoom into 17.5-18;
-      // If general remote global location clicked (ocean, desert, etc.), zoom to 12-13
-      // where 100% of global aerial satellite tiles exist with zero missing tiles!
-      const targetZ = activeParcel ? 17.5 : 12;
-      map.flyTo([flyToCoords[1], flyToCoords[0]], targetZ, { 
-        duration: 1.2, 
-        easeLinearity: 0.25 
+      map.flyTo({
+        center: [flyToCoords[0], flyToCoords[1]],
+        zoom: 16.5,
+        pitch: is3DMode ? 52 : 0,
+        speed: 1.2
       });
     } else if (activeParcel) {
       const c = getParcelCentroid(activeParcel);
-      map.flyTo([c.lat, c.lng], 18, { duration: 0.8, easeLinearity: 0.25 });
+      map.flyTo({
+        center: [c.lng, c.lat],
+        zoom: 17,
+        pitch: is3DMode ? 52 : 0,
+        speed: 1.2
+      });
     }
-  }, [flyToCoords, activeParcel]);
+  }, [flyToCoords, activeParcel, is3DMode]);
 
-  // 4. Render True 3D Extruded Cadastre Plot Boxes & Volumetric Walls
+  // 6. Live User GPS Location Radar Marker Sync
   useEffect(() => {
-    const map = mapInstanceRef.current;
+    const map = mapRef.current;
     if (!map) return;
 
-    // Clear previous geometries
-    polygonLayersRef.current.forEach(layer => map.removeLayer(layer));
-    polygonLayersRef.current = [];
-    htmlMarkersRef.current.forEach(layer => map.removeLayer(layer));
-    htmlMarkersRef.current = [];
+    if (userLocation && userLocation.lat && userLocation.lng) {
+      renderUserMarker(map, userLocation.lat, userLocation.lng);
+    }
+  }, [userLocation]);
 
-    // Elevation height offset in degrees (~5-8 meters elevation in GPS space)
-    // Elevation height offset in degrees (~6-9 meters physical elevation in GPS space)
-    const ELEVATION_LAT = 0.000055;
-    const ELEVATION_LNG = -0.000045;
+  // Handlers
+  const handleToggle2D3D = () => {
+    const next = !is3DMode;
+    setIs3DMode(next);
+    if (onToggleTilt) onToggleTilt(next);
+  };
 
-    // Current map zoom level determines visual level of detail (LOD)
-    const currentZoom = map.getZoom();
+  const handleFitAllBounds = () => {
+    const map = mapRef.current;
+    if (!map || parcels.length === 0) return;
 
+    const bounds = new maplibregl.LngLatBounds();
     parcels.forEach((p) => {
-      if (!p.boundary || p.boundary.length < 3) return;
-
-      const groundLatLngs = p.boundary.map(([lng, lat]) => [lat, lng]);
-      const roofLatLngs = groundLatLngs.map(([lat, lng]) => [lat + ELEVATION_LAT, lng + ELEVATION_LNG]);
-      const isSelected = activeParcel?.id === p.id;
-      const colors = getParcelStatusColors(p);
-
-      // --- 1. Cast Ground Contact Ambient Occlusion Shadow ---
-      const shadowLatLngs = groundLatLngs.map(([lat, lng]) => [lat - 0.000040, lng + 0.000040]);
-      const shadowPolygon = L.polygon(shadowLatLngs, {
-        color: 'transparent',
-        fillColor: '#000000',
-        fillOpacity: isSelected ? 0.6 : 0.38,
-        weight: 0,
-        interactive: false
-      }).addTo(map);
-      polygonLayersRef.current.push(shadowPolygon);
-
-      // --- 2. Hyperrealistic Volumetric 3D Walls with Light Direction Angle ---
-      // Directional light from North-West highlights north/west walls and shades south/east walls
-      const baseWallColor = isSelected 
-        ? '#0284c7' 
-        : (p.frozen ? '#dc2626' : (p.titleStatus === 'DISPUTED' ? '#d97706' : '#059669'));
-
-      for (let i = 0; i < groundLatLngs.length; i++) {
-        const next = (i + 1) % groundLatLngs.length;
-        const p1 = groundLatLngs[i];
-        const p2 = groundLatLngs[next];
-
-        // Calculate wall normal direction to simulate sun illumination
-        const dLat = p2[0] - p1[0];
-        const dLng = p2[1] - p1[1];
-        // North-facing faces receive higher specular brightness
-        const isSunFaced = (dLng > 0);
-        const wallOpacity = isSelected ? 0.85 : (isSunFaced ? 0.68 : 0.45);
-
-        const wallQuad = [
-          groundLatLngs[i],
-          groundLatLngs[next],
-          roofLatLngs[next],
-          roofLatLngs[i]
-        ];
-
-        const wallPoly = L.polygon(wallQuad, {
-          color: isSelected ? '#38bdf8' : 'rgba(0, 0, 0, 0.4)',
-          weight: 1,
-          fillColor: baseWallColor,
-          fillOpacity: wallOpacity,
-          interactive: false
-        }).addTo(map);
-        polygonLayersRef.current.push(wallPoly);
-      }
-
-      // --- 3. Hyperrealistic Elevated 3D Roof Slab ---
-      const roofPoly = L.polygon(roofLatLngs, {
-        color: isSelected ? '#ffffff' : (p.frozen ? '#fca5a5' : (p.titleStatus === 'DISPUTED' ? '#fde68a' : '#a7f3d0')),
-        weight: isSelected ? 3.5 : 2,
-        opacity: 1,
-        fillColor: isSelected ? '#0ea5e9' : colors.fill,
-        fillOpacity: isSelected ? 0.72 : 0.48,
-        className: 'cadastre-plot-polygon'
-      }).addTo(map);
-
-      roofPoly.bindTooltip(
-        `<div style="font-family: inherit; font-size: 11px;">
-           <div style="font-weight: 700; color: #0284c7; margin-bottom: 2px;">${p.ulpin || p.id}</div>
-           <div>${p.currentOwner || 'Certified Titleholder'}</div>
-           <div style="color: #64748b; font-size: 10px; margin-top: 2px;">
-             ${p.areaSqm?.toLocaleString()} m² • <span style="font-weight:600; color:${colors.stroke}">${p.titleStatus || 'VERIFIED'}</span>
-           </div>
-         </div>`,
-        { permanent: false, direction: 'top', className: 'cadastre-tooltip' }
-      );
-
-      roofPoly.on('click', () => {
-        if (onSelectParcel) onSelectParcel(p);
-      });
-
-      polygonLayersRef.current.push(roofPoly);
-
-      // --- 4. Sleek Hyperrealistic 3D Pinnacle Pin (Zero Visual Clutter) ---
-      // We show pin labels prominently on selected parcels, and sleek minimal caps on high zoom
-      const centroid = getParcelCentroid(p);
-      const elevatedLat = centroid.lat + ELEVATION_LAT;
-      const elevatedLng = centroid.lng + ELEVATION_LNG;
-
-      const badgeColor = isSelected 
-        ? '#0284c7' 
-        : (p.frozen ? '#ef4444' : (p.titleStatus === 'DISPUTED' ? '#f59e0b' : '#10b981'));
-
-      // If selected or zoomed in (>=16), show the sleek 3D holographic cap with drop shadow
-      if (isSelected || currentZoom >= 16) {
-        const pinHtml = `
-          <div class="cadastre-3d-prism group">
-            <div class="cadastre-3d-cap" style="background: ${isSelected ? 'linear-gradient(135deg, #0284c7, #0369a1)' : badgeColor}; border-color: ${isSelected ? '#ffffff' : 'rgba(255,255,255,0.6)'};">
-              <span style="width: 5px; height: 5px; border-radius: 50%; background: #ffffff; box-shadow: 0 0 6px rgba(255,255,255,0.9);"></span>
-              <span>${p.ulpin || p.id}</span>
-            </div>
-            <div class="cadastre-3d-pillar"></div>
-            <div class="cadastre-3d-base-shadow"></div>
-          </div>
-        `;
-
-        const customIcon = L.divIcon({
-          className: 'custom-cadastre-3d-pin',
-          html: pinHtml,
-          iconSize: [84, 38],
-          iconAnchor: [42, 38]
+      if (Array.isArray(p.boundary)) {
+        p.boundary.forEach((coord) => {
+          bounds.extend([Number(coord[0]), Number(coord[1])]);
         });
-
-        const boxMarker = L.marker([elevatedLat, elevatedLng], { icon: customIcon }).addTo(map);
-        boxMarker.on('click', () => {
-          if (onSelectParcel) onSelectParcel(p);
-        });
-
-        htmlMarkersRef.current.push(boxMarker);
       }
     });
 
-    // --- 5. Real User Location Pin with 3D Radar Pulse ---
-    if (userLocation) {
-      if (userMarkerRef.current) map.removeLayer(userMarkerRef.current);
-      if (distLineRef.current) map.removeLayer(distLineRef.current);
+    map.fitBounds(bounds, {
+      padding: { top: 80, bottom: 80, left: 80, right: 80 },
+      pitch: is3DMode ? 52 : 0,
+      duration: 1000
+    });
+  };
 
-      const userIconHtml = `
-        <div class="relative flex items-center justify-center w-8 h-8">
-          <div class="absolute inset-0 rounded-full bg-sky-500/40 radar-pulse-ring"></div>
-          <div class="w-4 h-4 rounded-full bg-sky-500 border-2 border-white shadow-lg flex items-center justify-center">
-            <div class="w-1.5 h-1.5 rounded-full bg-white"></div>
-          </div>
-        </div>
-      `;
+  const handleResetOrientation = () => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.easeTo({
+      bearing: 0,
+      pitch: is3DMode ? 52 : 0,
+      duration: 500
+    });
+  };
 
-      const userIcon = L.divIcon({
-        className: 'user-radar-pin',
-        html: userIconHtml,
-        iconSize: [32, 32],
-        iconAnchor: [16, 16]
+  // High-Accuracy Live Location Redirect Handler
+  const handleLocateMe = () => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    setGeoLocating(true);
+    setGeoStatusMsg('Acquiring high-accuracy GPS coordinates...');
+
+    // If we already have live location in props, fly there immediately & render marker
+    if (userLocation && userLocation.lng && userLocation.lat) {
+      setGeoLocating(false);
+      setGeoStatusMsg('Redirected to live GPS location');
+      renderUserMarker(map, userLocation.lat, userLocation.lng);
+      setTimeout(() => setGeoStatusMsg(''), 3000);
+      map.flyTo({
+        center: [userLocation.lng, userLocation.lat],
+        zoom: 17,
+        pitch: is3DMode ? 52 : 0,
+        speed: 1.4
       });
-
-      const userPin = L.marker([userLocation.lat, userLocation.lng], { icon: userIcon }).addTo(map);
-      userPin.bindTooltip('<strong>Your Real Device GPS Location</strong>', { direction: 'bottom' });
-      userMarkerRef.current = userPin;
-
-      // Connecting 3D laser line to selected parcel
-      const targetParcel = activeParcel || parcels[0];
-      if (targetParcel) {
-        const c = getParcelCentroid(targetParcel);
-        const distKm = calculateDistanceKm(userLocation.lat, userLocation.lng, c.lat, c.lng);
-
-        const line = L.polyline([
-          [userLocation.lat, userLocation.lng],
-          [c.lat + ELEVATION_LAT, c.lng + ELEVATION_LNG]
-        ], {
-          color: '#38bdf8',
-          weight: 2.5,
-          opacity: 0.95,
-          dashArray: '8, 8'
-        }).addTo(map);
-
-        line.bindTooltip(`Distance: ${formatDistance(distKm)}`, { permanent: false });
-        distLineRef.current = line;
-      }
+      return;
     }
-  }, [parcels, activeParcel, userLocation, renderTrigger]);
+
+    if (!navigator.geolocation) {
+      setGeoLocating(false);
+      setGeoStatusMsg('Geolocation is not supported by your browser.');
+      setTimeout(() => setGeoStatusMsg(''), 4000);
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setGeoLocating(false);
+        const { latitude, longitude } = pos.coords;
+        setGeoStatusMsg('Redirected to live GPS location');
+        setTimeout(() => setGeoStatusMsg(''), 3000);
+
+        renderUserMarker(map, latitude, longitude);
+
+        map.flyTo({
+          center: [longitude, latitude],
+          zoom: 17,
+          pitch: is3DMode ? 52 : 0,
+          speed: 1.4
+        });
+      },
+      (err) => {
+        setGeoLocating(false);
+        setGeoStatusMsg('GPS permission denied or unavailable. Centered on registry district.');
+        setTimeout(() => setGeoStatusMsg(''), 4500);
+        map.flyTo({
+          center: [77.5148, 28.4633],
+          zoom: 16.5,
+          pitch: is3DMode ? 52 : 0,
+          speed: 1.2
+        });
+      },
+      { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
+    );
+  };
 
   return (
-    <div className={`relative w-full h-full overflow-hidden bg-[#0a1122] ${className}`}>
-      {/* 100% Edge-to-Edge Map Viewport */}
-      <div ref={mapContainerRef} className="w-full h-full z-0" />
+    <div className={`relative w-full h-full overflow-hidden bg-[#e5e7eb] ${className}`}>
+      {/* MapLibre 3D WebGL Canvas */}
+      <div ref={containerRef} className="w-full h-full z-0 cursor-grab active:cursor-grabbing" />
 
-      {/* Floating 3D HUD Controls */}
+      {/* Geolocation Toast Notification */}
+      {geoStatusMsg && (
+        <div className="absolute top-16 left-1/2 -translate-x-1/2 z-50 px-4 py-2 rounded-xl bg-slate-900/95 text-sky-300 text-xs border border-sky-500/30 shadow-2xl backdrop-blur-md flex items-center gap-2">
+          <LocateFixed className="w-3.5 h-3.5 text-sky-400 animate-spin" />
+          <span>{geoStatusMsg}</span>
+        </div>
+      )}
+
+      {/* Floating Right Map Controls */}
       {showControls && (
-        <div className="absolute top-4 right-4 z-20 flex flex-col gap-2 pointer-events-auto">
-          {/* Compass / Orientation Reset */}
+        <div className="absolute right-4 bottom-8 z-30 flex flex-col items-center bg-[#0d1527]/90 backdrop-blur-xl border border-white/15 rounded-2xl shadow-2xl p-1.5 space-y-1 text-slate-300 pointer-events-auto">
+          {/* 1. 2D / 3D Toggle */}
           <button
             type="button"
-            onClick={() => {
-              if (mapInstanceRef.current) {
-                mapInstanceRef.current.setView(defaultCenter, targetZoom || 17.5);
-              }
-            }}
-            title="Recenter Map"
-            className="w-10 h-10 rounded-xl bg-white/95 dark:bg-slate-900/95 hover:bg-white dark:hover:bg-slate-800 text-slate-800 dark:text-white border border-slate-200 dark:border-white/10 backdrop-blur-md shadow-md flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            onClick={handleToggle2D3D}
+            title={is3DMode ? "Switch to 2D Flat Mode" : "Switch to 3D Extruded Perspective"}
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all cursor-pointer ${
+              is3DMode ? 'bg-sky-600 text-white shadow-md shadow-sky-600/40' : 'hover:bg-white/10 text-slate-300'
+            }`}
           >
-            <Compass className="w-5 h-5 text-sky-600" />
+            <Mountain className="w-4 h-4" />
           </button>
 
-          {/* Map Layer Switcher */}
+          {/* 2. Basemap Style Switcher */}
           <div className="relative">
             <button
               type="button"
               onClick={() => setShowLayerMenu(prev => !prev)}
               title="Change Map Style"
-              className="w-10 h-10 rounded-xl bg-white/95 dark:bg-slate-900/95 hover:bg-white dark:hover:bg-slate-800 text-sky-600 border border-slate-200 dark:border-white/10 backdrop-blur-md shadow-md flex items-center justify-center transition-all hover:scale-105 cursor-pointer"
+              className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-white/10 text-slate-300 transition-all cursor-pointer"
             >
-              <Layers className="w-5 h-5" />
+              <Layers className="w-4 h-4" />
             </button>
 
             {showLayerMenu && (
-              <div className="absolute right-12 top-0 w-64 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 rounded-2xl p-2.5 shadow-xl z-30 space-y-1">
-                <div className="text-[11px] font-semibold text-slate-400 px-2 py-1 uppercase tracking-wider">
-                  Select Imagery
+              <div className="absolute right-12 bottom-0 w-64 bg-[#0d1527]/95 backdrop-blur-2xl border border-white/15 rounded-2xl p-2 shadow-2xl z-40 space-y-1">
+                <div className="text-[10px] font-bold text-slate-400 px-2 py-1 uppercase tracking-wider">
+                  Select Basemap (Free, No Keys)
                 </div>
-                {Object.values(MAP_PROVIDERS).map(p => (
+                {Object.values(BASE_MAP_STYLES).map(p => (
                   <button
                     key={p.id}
                     type="button"
                     onClick={() => {
-                      setActiveProviderKey(p.id);
+                      setActiveStyleKey(p.id);
                       setShowLayerMenu(false);
                     }}
-                    className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center justify-between transition-colors ${
-                      activeProviderKey === p.id
-                        ? 'bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 font-semibold'
-                        : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5'
+                    className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs flex items-center justify-between transition-colors cursor-pointer ${
+                      activeStyleKey === p.id
+                        ? 'bg-sky-600/20 text-sky-400 font-semibold border border-sky-500/30'
+                        : 'text-slate-300 hover:bg-white/5'
                     }`}
                   >
                     <div>
-                      <div className="font-semibold">{p.name}</div>
+                      <div className="font-medium">{p.name}</div>
                       <div className="text-[10px] text-slate-400">{p.sublabel}</div>
                     </div>
-                    {activeProviderKey === p.id && (
-                      <CheckCircle2 className="w-4 h-4 text-sky-600 flex-shrink-0" />
-                    )}
                   </button>
                 ))}
               </div>
             )}
           </div>
+
+          {/* 3. Compass / Heading Indicator */}
+          <button
+            type="button"
+            onClick={handleResetOrientation}
+            title={`Bearing: ${currentBearing}° - Click to reset North`}
+            className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-white/10 text-slate-300 transition-all cursor-pointer"
+          >
+            <Compass 
+              className="w-4 h-4 text-sky-400 transition-transform duration-200" 
+              style={{ transform: `rotate(${-currentBearing}deg)` }}
+            />
+          </button>
+
+          {/* 4. Auto-fit All Parcels Bounds */}
+          <button
+            type="button"
+            onClick={handleFitAllBounds}
+            title="Fit All Registered Parcels"
+            className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-white/10 text-slate-300 transition-all cursor-pointer"
+          >
+            <Maximize2 className="w-4 h-4" />
+          </button>
+
+          {/* 5. Live User GPS Locate (Redirect to live location) */}
+          <button
+            type="button"
+            onClick={handleLocateMe}
+            title="Redirect to My Current GPS Location"
+            className={`w-9 h-9 rounded-xl flex items-center justify-center hover:bg-white/10 text-slate-300 transition-all cursor-pointer ${
+              geoLocating ? 'animate-pulse text-sky-400 ring-2 ring-sky-500/50' : ''
+            }`}
+          >
+            <LocateFixed className="w-4 h-4 text-sky-400" />
+          </button>
+
+          <div className="w-5 h-[1px] bg-white/15 my-1" />
+
+          {/* 6. Zoom In (+) */}
+          <button
+            type="button"
+            onClick={() => mapRef.current && mapRef.current.zoomIn()}
+            title="Zoom In"
+            className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-white/10 text-slate-300 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+
+          {/* 7. Zoom Out (-) */}
+          <button
+            type="button"
+            onClick={() => mapRef.current && mapRef.current.zoomOut()}
+            title="Zoom Out"
+            className="w-9 h-9 rounded-xl flex items-center justify-center hover:bg-white/10 text-slate-300 transition-all cursor-pointer"
+          >
+            <Minus className="w-4 h-4" />
+          </button>
         </div>
       )}
-
-      {/* Cadastral Legend & Status Overlay */}
-      <div className="absolute bottom-4 left-4 z-20 pointer-events-auto">
-        <div className="px-3.5 py-2.5 rounded-2xl bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border border-slate-200 dark:border-white/10 shadow-lg flex items-center gap-3.5 text-xs text-slate-800 dark:text-white">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
-            <span className="text-slate-600 dark:text-slate-300 text-[11px]">Verified 3D Plot</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-sm shadow-amber-500/50"></span>
-            <span className="text-slate-600 dark:text-slate-300 text-[11px]">Encumbered</span>
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 shadow-sm shadow-rose-500/50"></span>
-            <span className="text-slate-600 dark:text-slate-300 text-[11px]">Frozen</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-1.5 pl-2 border-l border-slate-200 dark:border-white/10">
-            <Building2 className="w-3.5 h-3.5 text-sky-600" />
-            <span className="text-[11px] text-sky-700 dark:text-sky-300 font-mono font-bold">{parcels.length} Active 3D Deeds</span>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

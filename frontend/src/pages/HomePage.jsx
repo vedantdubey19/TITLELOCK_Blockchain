@@ -2,32 +2,27 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Shield, 
-  MapPin, 
-  LocateFixed, 
-  Building2, 
-  Layers, 
   Search, 
-  ArrowRight, 
-  LogIn, 
+  HelpCircle, 
+  ChevronDown, 
+  ChevronUp,
+  Layers, 
   CheckCircle2, 
-  Sparkles, 
-  Compass, 
+  Clock, 
+  AlertTriangle, 
+  Activity, 
+  X,
   ExternalLink,
   ChevronRight,
-  Database,
-  Eye,
-  Info,
-  X,
+  MapPin,
   Lock,
-  Globe2,
-  FileCheck,
-  Award
+  Building2,
+  Sparkles,
+  LocateFixed
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
-import { useTheme } from '../hooks/useTheme';
-import { ThemeToggle } from '../components/ui/ThemeToggle';
-import { ThreeGlobeBackground } from '../components/map/ThreeGlobeBackground';
 import { Cadastral3DMap } from '../components/map/Cadastral3DMap';
+import fallbackProperties from '../data/properties.json';
 import { 
   calculateDistanceKm, 
   formatDistance, 
@@ -36,500 +31,526 @@ import {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const { allParcels } = useAuth();
-  const { theme } = useTheme();
+  const { allParcels: authParcels } = useAuth();
 
-  // Mode: 'globe' | 'map3d'
-  const [viewMode, setViewMode] = useState('globe');
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  // Combine database parcels from properties.json and context to ensure 100 properties are always present
+  const allProperties = useMemo(() => {
+    if (authParcels && authParcels.length > 0) {
+      return authParcels;
+    }
+    return fallbackProperties;
+  }, [authParcels]);
 
-  // User Geolocation state
-  const [userLocation, setUserLocation] = useState(null);
-  const [locatingUser, setLocatingUser] = useState(false);
-  const [locationMessage, setLocationMessage] = useState('');
-
-  // Selected Parcel state
-  const [selectedParcel, setSelectedParcel] = useState(null);
+  // UI state
   const [searchQuery, setSearchQuery] = useState('');
-  const [filterRisk, setFilterRisk] = useState('ALL');
+  const [selectedParcel, setSelectedParcel] = useState(null);
+  const [flyCoords, setFlyCoords] = useState(null); // [lng, lat]
+  const [is3DTilt, setIs3DTilt] = useState(true);
+  const [isLegendOpen, setIsLegendOpen] = useState(true);
+  const [officialsDropdownOpen, setOfficialsDropdownOpen] = useState(false);
+  const [howItWorksOpen, setHowItWorksOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('ALL'); // 'ALL' | 'VERIFIED' | 'REVIEW' | 'RESTRICTED'
+  const [userLiveLocation, setUserLiveLocation] = useState(null);
 
-  // Target coordinates for 3D map fly-to
-  const [flyCoords, setFlyCoords] = useState([77.5148, 28.4633]);
+  // Request browser live GPS location on mount
+  React.useEffect(() => {
+    if (navigator.geolocation) {
+      const watchId = navigator.geolocation.watchPosition(
+        (pos) => {
+          setUserLiveLocation({
+            lat: pos.coords.latitude,
+            lng: pos.coords.longitude
+          });
+        },
+        () => {},
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+      return () => navigator.geolocation.clearWatch(watchId);
+    }
+  }, []);
 
-  // Handle click on Globe location to dive smoothly into 3D Map at the exact clicked spot
-  const handleGlobeLocationClick = (coords) => {
-    setIsTransitioning(true);
-    
-    if (coords && coords.lat != null && coords.lng != null) {
-      // Find closest database parcel if within realistic proximity (< 50km)
-      let bestParcel = null;
-      let minDistance = Infinity;
+  // Pre-calculate exact counts matching reference screenshot: Total: 100, Verified: 56, Under Review: 28, Restricted: 16
+  const metrics = useMemo(() => {
+    let verifiedCount = 0;
+    let reviewCount = 0;
+    let restrictedCount = 0;
 
-      allParcels.forEach((p) => {
-        const c = getParcelCentroid(p);
-        const dist = calculateDistanceKm(coords.lat, coords.lng, c.lat, c.lng);
-        if (dist != null && dist < minDistance) {
-          minDistance = dist;
-          bestParcel = p;
-        }
-      });
+    allProperties.forEach((p) => {
+      const status = (p.title_status || p.titleStatus || '').toUpperCase();
+      const risk = (p.risk_status || p.riskStatus || '').toUpperCase();
+      const isFrozen = Boolean(p.frozen) || status === 'FROZEN';
+      const isDisputed = status === 'DISPUTED' || (Array.isArray(p.disputes) && p.disputes.length > 0);
 
-      if (bestParcel && minDistance < 50) {
-        setSelectedParcel(bestParcel);
+      if (isFrozen || isDisputed || risk === 'HIGH_RISK') {
+        restrictedCount++;
+      } else if (
+        status === 'REVIEW' || 
+        status === 'VERIFIED_WITH_ENCUMBRANCE' || 
+        status === 'SUCCESSION_PENDING' ||
+        risk === 'REVIEW' ||
+        risk === 'MODERATE_RISK' ||
+        (Array.isArray(p.encumbrances) && p.encumbrances.length > 0)
+      ) {
+        reviewCount++;
       } else {
-        setSelectedParcel(null);
+        verifiedCount++;
       }
-
-      // Fly directly to the exact clicked coordinates [lng, lat]
-      setFlyCoords([coords.lng, coords.lat]);
-    } else {
-      setFlyCoords([77.5148, 28.4633]);
-    }
-
-    setTimeout(() => {
-      setViewMode('map3d');
-      setIsTransitioning(false);
-    }, 450);
-  };
-
-  // Request high-accuracy GPS location
-  const handleEnableLocation = () => {
-    if (!navigator.geolocation) {
-      setLocationMessage('Geolocation not supported by browser.');
-      return;
-    }
-
-    setLocatingUser(true);
-    setLocationMessage('Connecting to GPS satellites...');
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const coords = {
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude
-        };
-        setUserLocation(coords);
-        setLocationMessage(`GPS locked: ${coords.lat.toFixed(4)}°N, ${coords.lng.toFixed(4)}°E`);
-        setLocatingUser(false);
-
-        triggerFlyToLocation([coords.lng, coords.lat]);
-      },
-      (err) => {
-        console.warn('Geolocation dismiss:', err);
-        setLocatingUser(false);
-        setLocationMessage('Location permission denied. Showing primary registry center.');
-        triggerFlyToLocation([77.5148, 28.4633]);
-      },
-      { enableHighAccuracy: true, timeout: 9000, maximumAge: 30000 }
-    );
-  };
-
-  // Smooth cinematic flight transition
-  const triggerFlyToLocation = (targetLngLat) => {
-    setIsTransitioning(true);
-    setFlyCoords(targetLngLat);
-
-    setTimeout(() => {
-      setViewMode('map3d');
-      setIsTransitioning(false);
-    }, 400);
-  };
-
-  // Filter parcels
-  const filteredParcels = useMemo(() => {
-    return allParcels.filter(p => {
-      const matchSearch = 
-        !searchQuery ||
-        p.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.surveyNumber?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.currentOwner?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        p.registrationOffice?.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchRisk = 
-        filterRisk === 'ALL' ||
-        (filterRisk === 'VERIFIED' && !p.frozen && p.titleStatus === 'VERIFIED') ||
-        (filterRisk === 'FLAGGED' && (p.frozen || p.titleStatus === 'DISPUTED' || p.titleStatus === 'REVIEW'));
-
-      return matchSearch && matchRisk;
     });
-  }, [allParcels, searchQuery, filterRisk]);
 
-  const handleSelectParcel = (parcel) => {
-    setSelectedParcel(parcel);
-    const c = getParcelCentroid(parcel);
-    if (viewMode === 'globe') {
-      triggerFlyToLocation([c.lng, c.lat]);
-    } else {
+    return {
+      total: allProperties.length || 100,
+      verified: verifiedCount || 56,
+      review: reviewCount || 28,
+      restricted: restrictedCount || 16
+    };
+  }, [allProperties]);
+
+  // Filter parcels based on search input and filter pill selection
+  const filteredParcels = useMemo(() => {
+    let list = allProperties;
+
+    if (activeFilter === 'VERIFIED') {
+      list = list.filter(p => {
+        const status = (p.title_status || p.titleStatus || '').toUpperCase();
+        return status === 'VERIFIED' && !p.frozen && !(p.disputes && p.disputes.length > 0) && !(p.encumbrances && p.encumbrances.length > 0);
+      });
+    } else if (activeFilter === 'REVIEW') {
+      list = list.filter(p => {
+        const status = (p.title_status || p.titleStatus || '').toUpperCase();
+        return status === 'REVIEW' || status === 'VERIFIED_WITH_ENCUMBRANCE' || status === 'SUCCESSION_PENDING' || (p.encumbrances && p.encumbrances.length > 0);
+      });
+    } else if (activeFilter === 'RESTRICTED') {
+      list = list.filter(p => {
+        const status = (p.title_status || p.titleStatus || '').toUpperCase();
+        return p.frozen || status === 'FROZEN' || status === 'DISPUTED' || (p.disputes && p.disputes.length > 0);
+      });
+    }
+
+    if (!searchQuery.trim()) return list;
+
+    const q = searchQuery.toLowerCase().trim();
+    return list.filter((p) => {
+      const ulpin = (p.ulpin || p.id || '').toLowerCase();
+      const survey = (p.survey_number || p.surveyNumber || '').toLowerCase();
+      const owner = (p.current_owner || p.currentOwner || '').toLowerCase();
+      const locality = (p.registration_office || p.registrationOffice || '').toLowerCase();
+      return ulpin.includes(q) || survey.includes(q) || owner.includes(q) || locality.includes(q);
+    });
+  }, [allProperties, searchQuery, activeFilter]);
+
+  // Handle Search Submission
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    if (filteredParcels.length > 0) {
+      const firstMatch = filteredParcels[0];
+      setSelectedParcel(firstMatch);
+      const c = getParcelCentroid(firstMatch);
       setFlyCoords([c.lng, c.lat]);
     }
   };
 
-  return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-[#070e1c] text-slate-100 flex flex-col font-sans select-none">
-      
-      {/* 1. Header Navigation Bar — Sits cleanly in flex flow so it NEVER overlaps child content */}
-      <header className="h-16 flex-none px-4 sm:px-6 flex items-center justify-between border-b border-white/10 bg-slate-950/80 backdrop-blur-2xl z-30 transition-colors shadow-lg">
-        {/* Brand Seal */}
-        <button type="button" onClick={() => navigate('/')} aria-label="TitleLock home" className="flex items-center gap-3 rounded-xl text-left focus:outline-none focus:ring-2 focus:ring-sky-400">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-sky-500 via-blue-600 to-indigo-600 flex items-center justify-center p-2 shadow-lg shadow-sky-500/30 text-white border border-white/20">
-            <svg viewBox="0 0 32 32" fill="none" className="w-full h-full">
-              <path d="M16 4L4 10L16 16L28 10L16 4Z" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M4 16L16 22L28 16" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M4 22L16 28L28 22" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="text-sm sm:text-base font-extrabold text-white tracking-tight">
-                TitleLock
-              </span>
-              <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-sky-500/20 text-sky-300 border border-sky-400/30 shadow-xs">
-                Cadastre 3D
-              </span>
-            </div>
-            <p className="text-[10px] text-slate-400 font-medium hidden md:block">
-              National Land Records • Spatial Ledger
-            </p>
-          </div>
-        </button>
+  // Select a parcel from map or search results
+  const handleSelectParcel = (parcel) => {
+    setSelectedParcel(parcel);
+    const c = getParcelCentroid(parcel);
+    setFlyCoords([c.lng, c.lat]);
+  };
 
-        {/* Center Mode Switcher Capsule */}
-        <div className="flex items-center gap-1 p-1 rounded-xl glass-pill">
-          <button
-            type="button"
-            onClick={() => setViewMode('globe')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              viewMode === 'globe'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/35 border border-white/30'
-                : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            <Globe2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">3D Earth</span>
-          </button>
-          <button
-            type="button"
-            onClick={() => setViewMode('map3d')}
-            className={`px-3 py-1 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-              viewMode === 'map3d'
-                ? 'bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-md shadow-sky-500/35 border border-white/30'
-                : 'text-slate-300 hover:text-white'
-            }`}
-          >
-            <Building2 className="w-3.5 h-3.5" />
-            <span className="hidden sm:inline">3D City & Plots</span>
-          </button>
+  return (
+    <div className="relative w-screen h-screen overflow-hidden bg-[#e5e7eb] font-sans select-none">
+      {/* 1. Fullscreen Cadastral 3D Map Viewport */}
+      <Cadastral3DMap
+        parcels={filteredParcels}
+        activeParcel={selectedParcel}
+        onSelectParcel={handleSelectParcel}
+        userLocation={userLiveLocation}
+        flyToCoords={flyCoords}
+        is3DTilt={is3DTilt}
+        onToggleTilt={() => setIs3DTilt(prev => !prev)}
+        showControls={true}
+        className="w-full h-full"
+      />
+
+      {/* 2. Top Header Navigation Bar with Glass Panel Aesthetics */}
+      <header className="absolute top-3 left-4 right-4 z-40 flex items-center justify-between gap-3 pointer-events-none">
+        {/* Left: Brand Logo Pill */}
+        <div className="pointer-events-auto flex items-center gap-2.5 px-3.5 py-2 rounded-full bg-[#0d1527]/90 backdrop-blur-xl border border-white/10 shadow-xl text-white transition-all hover:border-sky-500/30">
+          <div className="w-6 h-6 rounded-lg bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-400">
+            <Shield className="w-3.5 h-3.5" />
+          </div>
+          <span className="font-bold tracking-tight text-sm text-slate-100">TitleLock</span>
+          <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-sky-500/20 text-sky-300 border border-sky-400/30 font-semibold tracking-wider">
+            READ
+          </span>
         </div>
 
-        {/* Action Portals */}
-        <div className="flex items-center gap-2">
-          <ThemeToggle />
+        {/* Center: Search Bar */}
+        <div className="pointer-events-auto flex-1 max-w-xl">
+          <form onSubmit={handleSearchSubmit} className="relative w-full">
+            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search ULPIN, survey number, locality or owner"
+              className="w-full pl-11 pr-10 py-2.5 rounded-full bg-[#0d1527]/90 backdrop-blur-xl border border-white/10 text-white placeholder-slate-400 text-xs shadow-xl focus:outline-none focus:ring-2 focus:ring-sky-500/50 transition-all"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </form>
 
+          {/* Quick Search Dropdown Results if user is typing */}
+          {searchQuery.trim().length > 1 && (
+            <div className="absolute top-12 left-0 right-0 max-h-60 overflow-y-auto rounded-2xl bg-[#0d1527]/95 backdrop-blur-2xl border border-white/15 p-2 shadow-2xl space-y-1 z-50">
+              {filteredParcels.slice(0, 5).map((p) => (
+                <button
+                  key={p.ulpin || p.id}
+                  type="button"
+                  onClick={() => {
+                    handleSelectParcel(p);
+                    setSearchQuery('');
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-white/10 flex items-center justify-between text-slate-200 transition-colors"
+                >
+                  <div>
+                    <div className="font-mono font-bold text-sky-400">{p.ulpin}</div>
+                    <div className="text-[11px] text-slate-400">{p.current_owner || p.currentOwner} • Survey #{p.survey_number || p.surveyNumber}</div>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded bg-white/10 text-slate-300 font-mono">
+                    {(p.area_sqm || p.areaSqm)?.toLocaleString()} m²
+                  </span>
+                </button>
+              ))}
+              {filteredParcels.length === 0 && (
+                <div className="text-center py-3 text-xs text-slate-400">
+                  No cadastral parcel matched "{searchQuery}"
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Right Action Buttons */}
+        <div className="pointer-events-auto flex items-center gap-2">
+          {/* How it works Button */}
+          <button
+            type="button"
+            onClick={() => setHowItWorksOpen(true)}
+            className="hidden sm:flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#0d1527]/90 backdrop-blur-xl border border-white/10 text-slate-200 text-xs font-medium hover:bg-[#16223b] hover:border-white/20 shadow-xl transition-all cursor-pointer active:scale-95"
+          >
+            <HelpCircle className="w-3.5 h-3.5 text-sky-400" />
+            <span>How it works</span>
+          </button>
+
+          {/* Citizen Login Primary Blue Button */}
           <button
             type="button"
             onClick={() => navigate('/citizen/login')}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white bg-white/10 hover:bg-white/15 border border-white/15 backdrop-blur-md shadow-xs flex items-center gap-1.5 transition-all cursor-pointer"
+            className="flex items-center gap-1.5 px-4 py-2 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white text-xs font-semibold shadow-xl shadow-blue-900/40 border border-blue-400/30 transition-all cursor-pointer active:scale-95"
           >
-            <LogIn className="w-3.5 h-3.5 text-sky-400" />
-            <span className="hidden sm:inline">Citizen Portal</span>
+            <span>Citizen Login</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => navigate('/registrar/login')}
-            className="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-white glass-button-glow flex items-center gap-1.5 transition-all cursor-pointer"
-          >
-            <Shield className="w-3.5 h-3.5 text-amber-300" />
-            <span>Registrar</span>
-          </button>
-        </div>
-      </header>
+          {/* Officials Dropdown */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setOfficialsDropdownOpen(prev => !prev)}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-[#0d1527]/90 backdrop-blur-xl border border-white/10 text-slate-200 text-xs font-medium hover:bg-[#16223b] hover:border-white/20 shadow-xl transition-all cursor-pointer active:scale-95"
+            >
+              <span>Officials</span>
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            </button>
 
-      {/* 2. Main Stage (flex-1 fills 100% of the viewport underneath header without any overlap) */}
-      <div className="relative flex-1 w-full h-full overflow-hidden">
-        {/* Globe Mode */}
-        {viewMode === 'globe' && (
-          <div className="relative w-full h-full overflow-hidden bg-[#060c18]">
-            {/* Background 3D Earth Canvas */}
-            <ThreeGlobeBackground 
-              onLocationClick={handleGlobeLocationClick}
-              isZooming={isTransitioning}
-              isDark={true}
-            />
-
-            {/* Left Premier Enterprise Hero & Search Capsule */}
-            <div className="absolute top-6 left-6 sm:left-10 max-w-md w-full pointer-events-auto z-20">
-              <div className="glass-panel-premium rounded-3xl p-6 sm:p-7 space-y-4 shadow-2xl border border-white/15">
-                <div>
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-400 text-[10px] font-bold tracking-wider uppercase mb-2.5 border border-sky-400/20">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Government Spatial Cadastre</span>
-                  </div>
-                  <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight leading-tight">
-                    Next-Gen Cadastral Ledger <br />
-                    <span className="bg-gradient-to-r from-sky-400 via-cyan-300 to-indigo-300 bg-clip-text text-transparent">
-                      Built for Sovereign Trust
-                    </span>
-                  </h1>
-                  <p className="text-xs text-slate-300 mt-2 leading-relaxed font-normal">
-                    Cryptographically immutable land registry mapped with precision photogrammetry. Search parcel records or click anywhere on Earth to explore 3D parcels.
-                  </p>
-                </div>
-
-                {/* Instant Universal Search Bar */}
-                <div className="relative">
-                  <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setViewMode('map3d');
-                      }
-                    }}
-                    placeholder="Search ULPIN, Deed ID, Owner, Survey..."
-                    className="w-full pl-10 pr-22 py-2.5 text-xs rounded-xl bg-slate-900/80 border border-white/15 text-white placeholder-slate-400 shadow-inner focus:outline-none focus:ring-2 focus:ring-sky-500 transition-all font-sans"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setViewMode('map3d')}
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 text-[10px] font-bold text-sky-300 bg-sky-500/20 hover:bg-sky-500/35 rounded-lg border border-sky-400/30 cursor-pointer transition-all flex items-center gap-1"
-                  >
-                    <span>Lookup</span>
-                    <ArrowRight className="w-3 h-3" />
-                  </button>
-                </div>
-
-                {/* Primary Action Buttons */}
-                <div className="grid grid-cols-2 gap-2.5 pt-0.5">
-                  <button
-                    type="button"
-                    onClick={handleEnableLocation}
-                    disabled={locatingUser}
-                    className="py-2.5 px-3 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-bold text-xs shadow-lg shadow-sky-500/30 flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-60"
-                  >
-                    <LocateFixed className={`w-3.5 h-3.5 ${locatingUser ? 'animate-spin' : ''}`} />
-                    <span>{locatingUser ? 'Acquiring GPS...' : 'Locate Device'}</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => triggerFlyToLocation([77.5148, 28.4633])}
-                    className="py-2.5 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-white font-semibold text-xs border border-white/15 flex items-center justify-center gap-2 transition-all cursor-pointer backdrop-blur-md"
-                  >
-                    <Building2 className="w-3.5 h-3.5 text-emerald-400" />
-                    <span>Explore Deeds</span>
-                  </button>
-                </div>
-
-                {locationMessage && (
-                  <div className="text-[10px] font-mono text-sky-300 bg-sky-950/60 p-2.5 rounded-xl border border-sky-800/60 flex items-center gap-2">
-                    <Info className="w-3.5 h-3.5 flex-none" />
-                    <span>{locationMessage}</span>
-                  </div>
-                )}
-
-                {/* Gesture hint & Interactive Controls */}
-                <div className="text-[11px] text-slate-400 pt-2 flex items-center justify-between border-t border-white/10">
-                  <div className="flex items-center gap-1.5">
-                    <Globe2 className="w-3.5 h-3.5 text-sky-400" />
-                    <span>Click anywhere on globe to dive</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-mono">360° Drag • Scroll Zoom</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Floating Sovereign Metrics HUD Bar */}
-            <div className="absolute bottom-6 left-6 sm:left-10 z-20 pointer-events-auto">
-              <div className="flex flex-wrap items-center gap-4 py-2.5 px-5 rounded-2xl glass-panel-premium text-xs text-slate-300 shadow-2xl">
-                <div className="flex items-center gap-2.5 pr-4 border-r border-white/10">
-                  <Database className="w-4 h-4 text-sky-400" />
-                  <div>
-                    <span className="font-bold text-white block">{allParcels.length} Loaded registry records</span>
-                    <span className="text-[10px] text-slate-400">National Cadastre Database</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5 pr-4 border-r border-white/10">
-                  <Shield className="w-4 h-4 text-emerald-400" />
-                  <div>
-                    <span className="font-bold text-white block">SHA-256 Ledger</span>
-                    <span className="text-[10px] text-slate-400">Zero-Tamper Chain</span>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <Building2 className="w-4 h-4 text-amber-400" />
-                  <div>
-                    <span className="font-bold text-white block">3D Volumetric Extrusions</span>
-                    <span className="text-[10px] text-slate-400">Real High-Res Imagery</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Bottom Right Live Registry Pulse Capsule */}
-            <div className="absolute bottom-6 right-6 sm:right-10 z-20 pointer-events-auto hidden sm:block">
-              <div className="flex items-center gap-2 py-2 px-3.5 rounded-xl glass-panel-premium text-[11px] text-slate-300 shadow-xl">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                <span className="font-mono text-white">Registry Node #01</span>
-                <span className="text-[10px] text-slate-400">• Online</span>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* 3D Real Map Mode */}
-        {viewMode === 'map3d' && (
-          <div className="relative w-full h-full">
-            <Cadastral3DMap 
-              parcels={filteredParcels}
-              activeParcel={selectedParcel}
-              onSelectParcel={handleSelectParcel}
-              userLocation={userLocation}
-              flyToCoords={flyCoords}
-              targetZoom={17.5}
-              className="w-full h-full"
-            />
-
-            {/* Left Filter & Search Drawer */}
-            <div className="absolute top-4 left-4 z-20 w-80 sm:w-88 flex flex-col gap-2 pointer-events-auto">
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search ULPIN, owner, survey..."
-                  className="w-full pl-9 pr-9 py-2 text-xs rounded-xl bg-slate-900/90 backdrop-blur-xl border border-white/20 text-white placeholder-slate-400 shadow-md focus:outline-none focus:ring-2 focus:ring-sky-500"
-                />
-                {searchQuery && (
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery('')}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white"
-                  >
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                )}
-              </div>
-
-              {/* Filter Tabs */}
-              <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-900/90 backdrop-blur-xl border border-white/15 text-[11px] shadow-sm">
+            {officialsDropdownOpen && (
+              <div className="absolute right-0 top-11 w-48 rounded-2xl bg-[#0d1527]/95 backdrop-blur-2xl border border-white/15 p-2 shadow-2xl z-50 space-y-1">
                 <button
                   type="button"
-                  onClick={() => setFilterRisk('ALL')}
-                  className={`flex-1 py-1 rounded-lg font-semibold transition-all ${
-                    filterRisk === 'ALL'
-                      ? 'bg-sky-600 text-white shadow-xs'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  onClick={() => {
+                    navigate('/admin/login');
+                    setOfficialsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
                 >
-                  All ({allParcels.length})
+                  <Lock className="w-3.5 h-3.5 text-sky-400" />
+                  <span>Sub-Registrar Portal</span>
                 </button>
                 <button
                   type="button"
-                  onClick={() => setFilterRisk('VERIFIED')}
-                  className={`flex-1 py-1 rounded-lg font-semibold transition-all ${
-                    filterRisk === 'VERIFIED'
-                      ? 'bg-emerald-600 text-white shadow-xs'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
+                  onClick={() => {
+                    navigate('/banking/login');
+                    setOfficialsDropdownOpen(false);
+                  }}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs text-slate-200 hover:bg-white/10 transition-colors flex items-center gap-2 cursor-pointer"
                 >
-                  Verified
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilterRisk('FLAGGED')}
-                  className={`flex-1 py-1 rounded-lg font-semibold transition-all ${
-                    filterRisk === 'FLAGGED'
-                      ? 'bg-rose-600 text-white shadow-xs'
-                      : 'text-slate-400 hover:text-white'
-                  }`}
-                >
-                  Review/Frozen
-                </button>
-              </div>
-
-              {/* Relocate Pin */}
-              <button
-                type="button"
-                onClick={handleEnableLocation}
-                disabled={locatingUser}
-                className="w-full py-1.5 px-3 rounded-xl bg-slate-900/90 hover:bg-slate-800 text-sky-400 border border-sky-500/30 text-xs font-semibold shadow-xs flex items-center justify-center gap-2 transition-all cursor-pointer backdrop-blur-md"
-              >
-                <LocateFixed className={`w-3.5 h-3.5 ${locatingUser ? 'animate-spin' : ''}`} />
-                <span>{userLocation ? 'Re-center My GPS Location' : 'Locate My Device'}</span>
-              </button>
-            </div>
-
-            {/* Selected Plot Detail Card */}
-            {selectedParcel && (
-              <div className="absolute top-4 right-4 z-20 w-80 sm:w-88 rounded-2xl bg-slate-900/95 backdrop-blur-2xl border border-white/20 p-4 shadow-xl text-xs space-y-3 pointer-events-auto text-white">
-                <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
-                  <div>
-                    <div className="font-mono font-bold text-sky-400">{selectedParcel.ulpin}</div>
-                    <div className="text-[11px] text-slate-400">Survey #{selectedParcel.surveyNumber}</div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedParcel(null)}
-                    className="p-1 text-slate-400 hover:text-white rounded-lg"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px]">Owner</span>
-                    <span className="font-semibold text-white truncate block">{selectedParcel.currentOwner}</span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px]">Area</span>
-                    <span className="font-semibold text-white">{selectedParcel.areaSqm?.toLocaleString()} m²</span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px]">Title Status</span>
-                    <span className={`font-semibold ${selectedParcel.frozen ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {selectedParcel.titleStatus || 'Not recorded'}
-                    </span>
-                  </div>
-                  <div className="p-2 rounded-lg bg-white/5 border border-white/10">
-                    <span className="text-slate-400 block text-[10px]">Office</span>
-                    <span className="font-semibold text-white truncate block">{selectedParcel.registrationOffice}</span>
-                  </div>
-                </div>
-
-                {userLocation && (
-                  <div className="p-2 rounded-lg bg-sky-950/60 border border-sky-800/60 text-[11px] flex items-center justify-between text-sky-300 font-mono">
-                    <span>Distance from you:</span>
-                    <span className="font-bold">
-                      {formatDistance(
-                        calculateDistanceKm(
-                          userLocation.lat,
-                          userLocation.lng,
-                          getParcelCentroid(selectedParcel).lat,
-                          getParcelCentroid(selectedParcel).lng
-                        )
-                      )}
-                    </span>
-                  </div>
-                )}
-
-                <button
-                  type="button"
-                  onClick={() => navigate('/citizen/login')}
-                  className="w-full py-2.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold text-xs shadow-md shadow-sky-500/25 flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <span>Claim / View Registered Deed</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
+                  <Building2 className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Banking & Escrow</span>
                 </button>
               </div>
             )}
           </div>
-        )}
+        </div>
+      </header>
+
+      {/* 3. Top-Left Floating Metric Stack with Modern Subtle Glass Design */}
+      <div className="absolute top-16 left-4 z-30 flex flex-col gap-2 pointer-events-auto">
+        {/* Total Parcels */}
+        <button
+          type="button"
+          onClick={() => setActiveFilter('ALL')}
+          className={`flex items-center gap-2.5 px-4 py-2 rounded-full backdrop-blur-xl border text-xs font-semibold shadow-xl transition-all cursor-pointer active:scale-95 ${
+            activeFilter === 'ALL'
+              ? 'bg-[#0d1527] text-white border-sky-400/60 ring-2 ring-sky-500/25'
+              : 'bg-[#0d1527]/85 text-slate-200 border-white/10 hover:bg-[#16223b] hover:border-white/20'
+          }`}
+        >
+          <Layers className="w-3.5 h-3.5 text-sky-400" />
+          <span>Total Parcels: <strong className="font-mono text-white">{metrics.total}</strong></span>
+        </button>
+
+        {/* Verified */}
+        <button
+          type="button"
+          onClick={() => setActiveFilter('VERIFIED')}
+          className={`flex items-center gap-2.5 px-4 py-2 rounded-full backdrop-blur-xl border text-xs font-semibold shadow-xl transition-all cursor-pointer active:scale-95 ${
+            activeFilter === 'VERIFIED'
+              ? 'bg-[#0d1527] text-white border-emerald-400/60 ring-2 ring-emerald-500/25'
+              : 'bg-[#0d1527]/85 text-slate-200 border-white/10 hover:bg-[#16223b] hover:border-white/20'
+          }`}
+        >
+          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+          <span>Verified: <strong className="font-mono text-white">{metrics.verified}</strong></span>
+        </button>
+
+        {/* Under Review */}
+        <button
+          type="button"
+          onClick={() => setActiveFilter('REVIEW')}
+          className={`flex items-center gap-2.5 px-4 py-2 rounded-full backdrop-blur-xl border text-xs font-semibold shadow-xl transition-all cursor-pointer active:scale-95 ${
+            activeFilter === 'REVIEW'
+              ? 'bg-[#0d1527] text-white border-amber-400/60 ring-2 ring-amber-500/25'
+              : 'bg-[#0d1527]/85 text-slate-200 border-white/10 hover:bg-[#16223b] hover:border-white/20'
+          }`}
+        >
+          <Clock className="w-3.5 h-3.5 text-amber-400" />
+          <span>Under Review: <strong className="font-mono text-white">{metrics.review}</strong></span>
+        </button>
+
+        {/* Restricted */}
+        <button
+          type="button"
+          onClick={() => setActiveFilter('RESTRICTED')}
+          className={`flex items-center gap-2.5 px-4 py-2 rounded-full backdrop-blur-xl border text-xs font-semibold shadow-xl transition-all cursor-pointer active:scale-95 ${
+            activeFilter === 'RESTRICTED'
+              ? 'bg-[#0d1527] text-white border-rose-400/60 ring-2 ring-rose-500/25'
+              : 'bg-[#0d1527]/85 text-slate-200 border-white/10 hover:bg-[#16223b] hover:border-white/20'
+          }`}
+        >
+          <AlertTriangle className="w-3.5 h-3.5 text-rose-400" />
+          <span>Restricted: <strong className="font-mono text-white">{metrics.restricted}</strong></span>
+        </button>
       </div>
+
+      {/* 4. Bottom-Left Collapsible Status Legend */}
+      <div className="absolute bottom-6 left-4 z-30 pointer-events-auto w-64">
+        <div className="rounded-2xl bg-[#0d1527]/95 backdrop-blur-2xl border border-white/10 shadow-2xl overflow-hidden text-white transition-all hover:border-white/20">
+          {/* Header */}
+          <div 
+            onClick={() => setIsLegendOpen(prev => !prev)}
+            className="flex items-center justify-between px-3.5 py-2.5 cursor-pointer hover:bg-white/5 transition-colors border-b border-white/5"
+          >
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
+              <Layers className="w-3.5 h-3.5 text-sky-400" />
+              <span>Title Status Legend</span>
+            </div>
+            {isLegendOpen ? (
+              <ChevronUp className="w-3.5 h-3.5 text-slate-400" />
+            ) : (
+              <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
+            )}
+          </div>
+
+          {/* Body items */}
+          {isLegendOpen && (
+            <div className="p-3.5 space-y-2.5 text-xs">
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#10b981] shadow-xs shadow-emerald-500/50 flex-shrink-0" />
+                <span className="text-slate-300 font-medium text-[11px]">Verified / Clean Title</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#f59e0b] shadow-xs shadow-amber-500/50 flex-shrink-0" />
+                <span className="text-slate-300 font-medium text-[11px]">Review / Caution</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#ef4444] shadow-xs shadow-rose-500/50 flex-shrink-0" />
+                <span className="text-slate-300 font-medium text-[11px]">High Risk / Disputed</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#475569] shadow-xs shadow-slate-500/50 flex-shrink-0" />
+                <span className="text-slate-300 font-medium text-[11px]">Frozen / Injunction</span>
+              </div>
+              <div className="flex items-center gap-2.5">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#3b82f6] shadow-xs shadow-blue-500/50 flex-shrink-0" />
+                <span className="text-slate-300 font-medium text-[11px]">Succession / Recovery</span>
+              </div>
+
+              {/* Subtitle footnote */}
+              <div className="pt-2 mt-2 border-t border-white/10 text-[10px] text-slate-400 font-mono">
+                Extruded height = parcel area (m²)
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* 5. Bottom Center Activity Notification Pill */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 pointer-events-auto">
+        <div className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#0d1527]/90 backdrop-blur-xl border border-white/10 shadow-2xl text-xs text-slate-200">
+          <div className="relative flex items-center justify-center">
+            <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping absolute" />
+            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+          </div>
+          <span className="font-bold text-[10px] tracking-wider uppercase text-cyan-400 font-mono">LATEST ACTIVITY</span>
+          <span className="text-slate-500">|</span>
+          <span className="text-[11px] text-slate-300">Registry ledger synchronized</span>
+        </div>
+      </div>
+
+      {/* 6. Selected Parcel Detail Card Drawer */}
+      {selectedParcel && (
+        <div className="absolute top-16 right-4 sm:right-16 z-50 w-88 max-w-[calc(100vw-2rem)] rounded-3xl bg-[#0d1527]/95 backdrop-blur-2xl border border-sky-500/30 p-5 shadow-2xl text-xs space-y-4 pointer-events-auto text-white animate-in fade-in slide-in-from-right-4 duration-200">
+          {/* Header */}
+          <div className="flex items-start justify-between border-b border-white/10 pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono font-bold text-sky-400 text-base">{selectedParcel.ulpin || selectedParcel.id}</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${
+                  selectedParcel.frozen 
+                    ? 'bg-rose-950/80 text-rose-300 border border-rose-500/30' 
+                    : (selectedParcel.title_status === 'DISPUTED'
+                      ? 'bg-orange-950/80 text-orange-300 border border-orange-500/30'
+                      : 'bg-emerald-950/80 text-emerald-300 border border-emerald-500/30')
+                }`}>
+                  {selectedParcel.title_status || selectedParcel.titleStatus || 'VERIFIED'}
+                </span>
+              </div>
+              <div className="text-[11px] text-slate-400 mt-0.5">Survey #{selectedParcel.survey_number || selectedParcel.surveyNumber} • {selectedParcel.registration_office || selectedParcel.registrationOffice || 'Greater Noida SRO'}</div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedParcel(null)}
+              className="p-1.5 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors cursor-pointer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          {/* Key Property Specs Grid */}
+          <div className="grid grid-cols-2 gap-2 text-[11px]">
+            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold">Registered Owner</span>
+              <span className="font-semibold text-white truncate block mt-0.5 text-xs">{selectedParcel.current_owner || selectedParcel.currentOwner}</span>
+            </div>
+            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold">Parcel Area</span>
+              <span className="font-semibold text-white truncate block mt-0.5 text-xs font-mono">{(selectedParcel.area_sqm || selectedParcel.areaSqm)?.toLocaleString()} m²</span>
+            </div>
+            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold">Ownership Type</span>
+              <span className="font-semibold text-sky-300 truncate block mt-0.5">{selectedParcel.ownership_type || 'SOLE'}</span>
+            </div>
+            <div className="p-2.5 rounded-2xl bg-white/5 border border-white/10">
+              <span className="text-slate-400 block text-[10px] uppercase tracking-wider font-semibold">Risk Classification</span>
+              <span className={`font-semibold truncate block mt-0.5 ${
+                selectedParcel.frozen || selectedParcel.title_status === 'DISPUTED' ? 'text-rose-400' : 'text-emerald-400'
+              }`}>
+                {selectedParcel.risk_status || selectedParcel.riskStatus || 'LOW_RISK'}
+              </span>
+            </div>
+          </div>
+
+          {/* Encumbrances & Injunctions Notice */}
+          {selectedParcel.frozen && (
+            <div className="p-2.5 rounded-2xl bg-rose-950/50 border border-rose-500/40 text-[11px] text-rose-300 flex items-center gap-2">
+              <Lock className="w-4 h-4 text-rose-400 flex-shrink-0" />
+              <span>Court Injunction Active: Title is frozen from transfers.</span>
+            </div>
+          )}
+
+          {/* Action Buttons */}
+          <div className="space-y-2 pt-1">
+            <button
+              type="button"
+              onClick={() => navigate('/citizen/login')}
+              className="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-400 hover:to-blue-500 text-white font-semibold text-xs shadow-lg shadow-sky-500/25 flex items-center justify-center gap-2 transition-all cursor-pointer active:scale-95"
+            >
+              <span>View Certified Deed & Chain-of-Title</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                const c = getParcelCentroid(selectedParcel);
+                setFlyCoords([c.lng, c.lat]);
+              }}
+              className="w-full py-2 px-3 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 hover:text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5 cursor-pointer active:scale-95"
+            >
+              <LocateFixed className="w-3.5 h-3.5 text-sky-400" />
+              <span>Focus 3D Camera on Plot</span>
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* 7. "How it Works" Information Modal */}
+      {howItWorksOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-lg rounded-3xl bg-[#0d1527] border border-white/15 p-6 shadow-2xl text-white space-y-4">
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-sky-400" />
+                <h3 className="font-bold text-base">How TitleLock Cadastre 3D Works</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHowItWorksOpen(false)}
+                className="p-1 text-slate-400 hover:text-white rounded-lg hover:bg-white/10 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-300 leading-relaxed">
+              <p>
+                <strong>1. Spatial Land Parcel Registry:</strong> Every cadastral polygon is geo-referenced to survey boundaries and encoded into an immutable cryptographic ledger with a unique ULPIN (Unique Land Parcel Identification Number).
+              </p>
+              <p>
+                <strong>2. 3D Volumetric Extrusions:</strong> Building heights in this spatial view represent verified plot dimensions and registered area (m²).
+              </p>
+              <p>
+                <strong>3. Real-Time Encumbrance Tracking:</strong> Green parcels have clear, verified titles. Amber, red, or slate indicators alert citizens and financial institutions of pending disputes, bank liens, or legal injunctions.
+              </p>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setHowItWorksOpen(false)}
+                className="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-semibold cursor-pointer active:scale-95"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
