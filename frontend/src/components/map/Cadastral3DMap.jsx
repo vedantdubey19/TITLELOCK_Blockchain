@@ -21,42 +21,48 @@ import {
 import { getParcelCentroid } from '../../utils/cadastreUtils';
 
 /**
- * 100% Free, Keyless Tile Providers
+ * 100% Free, Keyless, Reliable Tile Providers
+ * Primary: High-Detail Cadastre Streets (Native zoom up to 20 without pixelation or blurriness).
+ * Satellite: Esri World Imagery (High-Res 3D aerial, native zoom 19).
  */
 const BASE_MAP_STYLES = {
-  osmStandard: {
-    id: 'osmStandard',
-    name: 'OpenStreetMap Streets (Free)',
-    sublabel: 'Official OpenStreetMap vector roads',
+  osmStreets: {
+    id: 'osmStreets',
+    name: 'Cadastre Streets & Parks (Ultra HD)',
+    sublabel: 'Crisp High-Zoom Roads, Parks & Infrastructure',
     style: {
       version: 8,
       sources: {
         'osm-tiles': {
           type: 'raster',
           tiles: [
-            'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            'https://b.tile.openstreetmap.org/{z}/{x}/{y}.png',
-            'https://c.tile.openstreetmap.org/{z}/{x}/{y}.png'
+            'https://a.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+            'https://b.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png',
+            'https://c.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png'
           ],
           tileSize: 256,
-          maxzoom: 19,
-          attribution: '&copy; OpenStreetMap contributors'
+          maxzoom: 20,
+          attribution: '&copy; OpenStreetMap contributors, CyclOSM'
         }
       },
       layers: [
         {
-          id: 'osm-layer',
+          id: 'osm-base-layer',
           type: 'raster',
           source: 'osm-tiles',
           minzoom: 0,
-          maxzoom: 24
+          maxzoom: 22,
+          paint: {
+            'raster-resampling': 'linear',
+            'raster-fade-duration': 0
+          }
         }
       ]
     }
   },
   esriSatellite: {
     id: 'esriSatellite',
-    name: 'Esri World Satellite (Free)',
+    name: 'Real Aerial Satellite',
     sublabel: 'High-Res Aerial Satellite Imagery',
     style: {
       version: 8,
@@ -77,35 +83,45 @@ const BASE_MAP_STYLES = {
           type: 'raster',
           source: 'esri-sat-tiles',
           minzoom: 0,
-          maxzoom: 24
+          maxzoom: 22,
+          paint: {
+            'raster-resampling': 'linear',
+            'raster-fade-duration': 0
+          }
         }
       ]
     }
   },
-  esriTopo: {
-    id: 'esriTopo',
-    name: 'Esri Topographic (Free)',
-    sublabel: 'Clean Cadastral Topo Map',
+  osmStandard: {
+    id: 'osmStandard',
+    name: 'OpenStreetMap Standard',
+    sublabel: 'Classic OSM Street Grid',
     style: {
       version: 8,
       sources: {
-        'esri-topo-tiles': {
+        'osm-std-tiles': {
           type: 'raster',
           tiles: [
-            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}'
+            'https://a.tile.openstreetmap.de/{z}/{x}/{y}.png',
+            'https://b.tile.openstreetmap.de/{z}/{x}/{y}.png',
+            'https://c.tile.openstreetmap.de/{z}/{x}/{y}.png'
           ],
           tileSize: 256,
-          maxzoom: 19,
-          attribution: '&copy; Esri Topo'
+          maxzoom: 18,
+          attribution: '&copy; OpenStreetMap contributors'
         }
       },
       layers: [
         {
-          id: 'esri-topo-layer',
+          id: 'osm-std-layer',
           type: 'raster',
-          source: 'esri-topo-tiles',
+          source: 'osm-std-tiles',
           minzoom: 0,
-          maxzoom: 24
+          maxzoom: 22,
+          paint: {
+            'raster-resampling': 'linear',
+            'raster-fade-duration': 0
+          }
         }
       ]
     }
@@ -267,7 +283,7 @@ export function Cadastral3DMap({
 
   // States
   const [is3DMode, setIs3DMode] = useState(is3DTilt);
-  const [activeStyleKey, setActiveStyleKey] = useState('osmStandard');
+  const [activeStyleKey, setActiveStyleKey] = useState('osmStreets');
   const [showLayerMenu, setShowLayerMenu] = useState(false);
   const [currentBearing, setCurrentBearing] = useState(-15);
   const [geoLocating, setGeoLocating] = useState(false);
@@ -464,7 +480,7 @@ export function Cadastral3DMap({
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    const initialStyleConfig = BASE_MAP_STYLES[activeStyleKey]?.style || BASE_MAP_STYLES.osmStandard.style;
+    const initialStyleConfig = BASE_MAP_STYLES[activeStyleKey]?.style || BASE_MAP_STYLES.osmStreets.style;
 
     const map = new maplibregl.Map({
       container: containerRef.current,
@@ -472,12 +488,15 @@ export function Cadastral3DMap({
       center: [77.5148, 28.4633], // Greater Noida Cadastre Center
       zoom: targetZoom || 15.5,
       minZoom: 1,
-      maxZoom: 22,
-      maxTileCacheSize: 100,
+      maxZoom: 20,
+      maxTileCacheSize: 300,
       pitch: is3DMode ? 52 : 0,
       bearing: -15,
       antialias: true,
-      attributionControl: false
+      attributionControl: false,
+      renderWorldCopies: false,
+      trackResize: true,
+      fadeDuration: 0
     });
 
     mapRef.current = map;
@@ -628,7 +647,8 @@ export function Cadastral3DMap({
     map.fitBounds(bounds, {
       padding: { top: 80, bottom: 80, left: 80, right: 80 },
       pitch: is3DMode ? 52 : 0,
-      duration: 1000
+      duration: 700,
+      essential: true
     });
   };
 
@@ -638,7 +658,8 @@ export function Cadastral3DMap({
     map.easeTo({
       bearing: 0,
       pitch: is3DMode ? 52 : 0,
-      duration: 500
+      duration: 400,
+      essential: true
     });
   };
 
@@ -660,7 +681,9 @@ export function Cadastral3DMap({
         center: [userLocation.lng, userLocation.lat],
         zoom: 17,
         pitch: is3DMode ? 52 : 0,
-        speed: 1.4
+        speed: 1.8,
+        curve: 1.1,
+        essential: true
       });
       return;
     }
@@ -685,7 +708,9 @@ export function Cadastral3DMap({
           center: [longitude, latitude],
           zoom: 17,
           pitch: is3DMode ? 52 : 0,
-          speed: 1.4
+          speed: 1.8,
+          curve: 1.1,
+          essential: true
         });
       },
       (err) => {
@@ -696,7 +721,8 @@ export function Cadastral3DMap({
           center: [77.5148, 28.4633],
           zoom: 16.5,
           pitch: is3DMode ? 52 : 0,
-          speed: 1.2
+          speed: 1.4,
+          essential: true
         });
       },
       { enableHighAccuracy: true, timeout: 8000, maximumAge: 0 }
